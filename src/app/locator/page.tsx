@@ -3,18 +3,26 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+
 import { useJourney } from "@/context/JourneyContext";
 import { DISTRICT_COORDS, LOCATIONS } from "@/lib/locations";
-import type { PartnerType, PartnerWithMeta, SchemeId } from "@/lib/types";
+import type {
+  PartnerType,
+  PartnerWithMeta,
+  SchemeId,
+} from "@/lib/types";
 
-const MapClient = dynamic(() => import("@/components/MapClient"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center bg-[#F8FAFC] text-sm font-bold text-[#0F5FC5]">
-      Loading interactive map...
-    </div>
-  ),
-});
+const MapClient = dynamic(
+  () => import("@/components/MapClient"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center bg-[#F8FAFC] text-sm font-bold text-[#0F5FC5]">
+        Loading interactive map...
+      </div>
+    ),
+  }
+);
 
 const SCHEME_LABELS: Record<SchemeId, string> = {
   "micro-finance": "Micro Finance",
@@ -34,9 +42,12 @@ const HEALTH_STYLES: Record<
   PartnerWithMeta["healthStatus"],
   string
 > = {
-  green: "border-[#B7D8C0] bg-[#F0FDF4] text-[#166534]",
-  yellow: "border-[#F1D39B] bg-[#FFFBEB] text-[#92400E]",
-  red: "border-[#E5B7B7] bg-[#FEF2F2] text-[#991B1B]",
+  green:
+    "border-[#B7D8C0] bg-[#F0FDF4] text-[#166534]",
+  yellow:
+    "border-[#F1D39B] bg-[#FFFBEB] text-[#92400E]",
+  red:
+    "border-[#E5B7B7] bg-[#FEF2F2] text-[#991B1B]",
 };
 
 function LocatorDropdown({
@@ -52,11 +63,16 @@ function LocatorDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const ref = useRef<HTMLElement>(null);
+
+  const ref = useRef<HTMLDivElement>(null);
 
   const filteredItems = useMemo(() => {
     const sorted = [...items].sort((a, b) => {
-      const special = ["All", "All Schemes", "All Types"];
+      const special = [
+        "All",
+        "All Schemes",
+        "All Types",
+      ];
 
       if (special.includes(a)) return -1;
       if (special.includes(b)) return 1;
@@ -64,7 +80,9 @@ function LocatorDropdown({
       return a.localeCompare(b);
     });
 
-    if (!search.trim()) return sorted;
+    if (!search.trim()) {
+      return sorted;
+    }
 
     const query = search.trim().toLowerCase();
 
@@ -83,25 +101,40 @@ function LocatorDropdown({
       }
     };
 
-    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener(
+      "mousedown",
+      handleOutside
+    );
 
     return () => {
-      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener(
+        "mousedown",
+        handleOutside
+      );
     };
   }, []);
 
   return (
-    <div ref={ref} className="relative z-30">
+    <div
+      ref={ref}
+      className="relative z-30"
+    >
       <button
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() =>
+          setOpen((current) => !current)
+        }
         className="flex min-h-10 items-center gap-2 border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-bold text-[#111827] transition-colors hover:border-[#0F5FC5] focus:border-[#0F5FC5] focus:outline-none"
         aria-expanded={open}
       >
-        <span className="text-[#0F5FC5]">{label}</span>
+        <span className="text-[#0F5FC5]">
+          {label}
+        </span>
+
         <span className="max-w-[150px] truncate text-[#334155]">
           {value}
         </span>
+
         <span className="ml-1 text-[#E87512]">
           {open ? "▲" : "▼"}
         </span>
@@ -113,7 +146,9 @@ function LocatorDropdown({
             <input
               type="text"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
               placeholder="Search..."
               className="w-full bg-transparent px-3 py-2 text-xs font-medium text-[#111827] outline-none placeholder:text-[#94A3B8]"
             />
@@ -126,7 +161,8 @@ function LocatorDropdown({
               </div>
             ) : (
               filteredItems.map((item) => {
-                const selected = item === value;
+                const selected =
+                  item === value;
 
                 return (
                   <button
@@ -144,8 +180,11 @@ function LocatorDropdown({
                     }`}
                   >
                     <span>{item}</span>
+
                     {selected && (
-                      <span className="text-[#E87512]">✓</span>
+                      <span className="text-[#E87512]">
+                        ✓
+                      </span>
                     )}
                   </button>
                 );
@@ -159,41 +198,65 @@ function LocatorDropdown({
 }
 
 export default function LocatorPage() {
-  const { profile, recommendation } = useJourney();
+  const {
+    profile,
+    recommendation,
+  } = useJourney();
 
-  const [partners, setPartners] = useState<PartnerWithMeta[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [partners, setPartners] = useState<
+    PartnerWithMeta[]
+  >([]);
 
-  const [schemeFilter, setSchemeFilter] = useState<
-    SchemeId | "all"
-  >(recommendation?.schemeId ?? "all");
+  const [loading, setLoading] =
+    useState(true);
 
-  const [typeFilter, setTypeFilter] = useState<
-    PartnerType | "all"
-  >("all");
+  const [schemeFilter, setSchemeFilter] =
+    useState<SchemeId | "all">(
+      recommendation?.schemeId ?? "all"
+    );
 
-  const [districtFilter, setDistrictFilter] = useState(
+  const [typeFilter, setTypeFilter] =
+    useState<PartnerType | "all">("all");
+
+  const [
+    districtFilter,
+    setDistrictFilter,
+  ] = useState(
     profile?.district || "Nandurbar"
   );
 
-  const [includeHighNpa, setIncludeHighNpa] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [
+    includeHighNpa,
+    setIncludeHighNpa,
+  ] = useState(false);
 
-  const [geoLocating, setGeoLocating] = useState(false);
+  const [selectedId, setSelectedId] =
+    useState<string | null>(null);
 
-  const [userLocation, setUserLocation] = useState<{
+  const [
+    geoLocating,
+    setGeoLocating,
+  ] = useState(false);
+
+  const [
+    userLocation,
+    setUserLocation,
+  ] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
 
   const cardRefs = useRef<
-    Record<string, HTMLDivElement | null>
+    Record<string, HTMLElement | null>
   >({});
 
   const allDistricts = useMemo(() => {
-    const locations = Object.values(LOCATIONS).flat();
+    const locations =
+      Object.values(LOCATIONS).flat();
 
-    return Array.from(new Set(locations)).sort((a, b) =>
+    return Array.from(
+      new Set(locations)
+    ).sort((a, b) =>
       a.localeCompare(b)
     );
   }, []);
@@ -215,7 +278,9 @@ export default function LocatorPage() {
   ];
 
   const requestLocation = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      return;
+    }
 
     setGeoLocating(true);
 
@@ -245,39 +310,70 @@ export default function LocatorPage() {
       setLoading(true);
 
       try {
-        const query = new URLSearchParams();
+        const query =
+          new URLSearchParams();
 
         if (schemeFilter !== "all") {
-          query.set("scheme", schemeFilter);
+          query.set(
+            "scheme",
+            schemeFilter
+          );
         }
 
         if (typeFilter !== "all") {
-          query.set("type", typeFilter);
+          query.set(
+            "type",
+            typeFilter
+          );
         }
 
         if (
           districtFilter &&
           districtFilter !== "All"
         ) {
-          query.set("district", districtFilter);
+          query.set(
+            "district",
+            districtFilter
+          );
         }
 
         if (includeHighNpa) {
-          query.set("includeHighNpa", "true");
+          query.set(
+            "includeHighNpa",
+            "true"
+          );
         }
 
         if (userLocation) {
-          query.set("userLat", String(userLocation.lat));
-          query.set("userLng", String(userLocation.lng));
+          query.set(
+            "userLat",
+            String(userLocation.lat)
+          );
+
+          query.set(
+            "userLng",
+            String(userLocation.lng)
+          );
         } else if (
           districtFilter &&
-          DISTRICT_COORDS[districtFilter]
+          DISTRICT_COORDS[
+            districtFilter
+          ]
         ) {
           const coordinates =
-            DISTRICT_COORDS[districtFilter];
+            DISTRICT_COORDS[
+              districtFilter
+            ];
 
-          query.set("userLat", String(coordinates.lat));
-          query.set("userLng", String(coordinates.lng));
+          query.set(
+            "userLat",
+            String(coordinates.lat)
+          );
+
+          query.set(
+            "userLng",
+            String(coordinates.lng)
+          );
         }
 
         const response = await fetch(
@@ -285,40 +381,63 @@ export default function LocatorPage() {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to load partners");
+          throw new Error(
+            "Failed to load partners"
+          );
         }
 
-        const json = await response.json();
+        const json =
+          await response.json();
 
-        const list = (json.partners || []) as PartnerWithMeta[];
+        const list = (
+          json.partners || []
+        ) as PartnerWithMeta[];
 
         list.sort((a, b) => {
           if (
             a.distanceKm >= 0 &&
             b.distanceKm >= 0
           ) {
-            return a.distanceKm - b.distanceKm;
+            return (
+              a.distanceKm -
+              b.distanceKm
+            );
           }
 
-          if (a.distanceKm >= 0) return -1;
-          if (b.distanceKm >= 0) return 1;
+          if (a.distanceKm >= 0) {
+            return -1;
+          }
 
-          return a.npaPercent - b.npaPercent;
+          if (b.distanceKm >= 0) {
+            return 1;
+          }
+
+          return (
+            a.npaPercent -
+            b.npaPercent
+          );
         });
 
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         setPartners(list);
 
         setSelectedId((current) => {
           if (
             current &&
-            list.some((partner) => partner.id === current)
+            list.some(
+              (partner) =>
+                partner.id === current
+            )
           ) {
             return current;
           }
 
-          return list.length > 0 ? list[0].id : null;
+          return list.length > 0
+            ? list[0].id
+            : null;
         });
       } catch {
         if (!cancelled) {
@@ -356,15 +475,21 @@ export default function LocatorPage() {
       if (
         selectedId &&
         !nearby.some(
-          (partner) => partner.id === selectedId
+          (partner) =>
+            partner.id === selectedId
         )
       ) {
-        const selected = partners.find(
-          (partner) => partner.id === selectedId
-        );
+        const selected =
+          partners.find(
+            (partner) =>
+              partner.id === selectedId
+          );
 
         if (selected) {
-          return [selected, ...nearby];
+          return [
+            selected,
+            ...nearby,
+          ];
         }
       }
 
@@ -373,21 +498,7 @@ export default function LocatorPage() {
 
     return partners.slice(0, 30);
   }, [partners, selectedId]);
-
-  const mapCenter = useMemo(() => {
-    if (selectedId) {
-      const selected = partners.find(
-        (partner) => partner.id === selectedId
-      );
-
-      if (selected) {
-        return [
-          selected.lat,
-          selected.lng,
-        ] as [number, number];
-      }
-    }
-
+    const mapCenter = useMemo(() => {
     if (userLocation) {
       return [
         userLocation.lat,
@@ -408,313 +519,399 @@ export default function LocatorPage() {
       ] as [number, number];
     }
 
-    return [20.5937, 78.9629] as [number, number];
-  }, [
-    selectedId,
-    userLocation,
-    districtFilter,
-    partners,
-  ]);
+    return [20.5937, 78.9629] as [
+      number,
+      number
+    ];
+  }, [districtFilter, userLocation]);
 
-  const handleSelectPartner = (id: string | null) => {
+  const handleSelectPartner = (
+    id: string
+  ) => {
     setSelectedId(id);
 
-    if (id && cardRefs.current[id]) {
+    window.setTimeout(() => {
       cardRefs.current[id]?.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
       });
+    }, 50);
+  };
+
+  const selectedPartner = useMemo(
+    () =>
+      partners.find(
+        (partner) =>
+          partner.id === selectedId
+      ) ?? null,
+    [partners, selectedId]
+  );
+
+  const selectedSchemeLabel =
+    schemeFilter === "all"
+      ? "All Schemes"
+      : SCHEME_LABELS[schemeFilter];
+
+  const selectedTypeLabel =
+    typeFilter === "all"
+      ? "All Types"
+      : TYPE_LABELS[typeFilter];
+
+  const handleSchemeSelect = (
+    value: string
+  ) => {
+    if (value === "All Schemes") {
+      setSchemeFilter("all");
+      return;
+    }
+
+    const scheme = (
+      Object.keys(
+        SCHEME_LABELS
+      ) as SchemeId[]
+    ).find(
+      (id) =>
+        SCHEME_LABELS[id] === value
+    );
+
+    if (scheme) {
+      setSchemeFilter(scheme);
     }
   };
 
-  const getHealthLabel = (
-    status: PartnerWithMeta["healthStatus"]
+  const handleTypeSelect = (
+    value: string
   ) => {
-    if (status === "green") return "Healthy";
-    if (status === "yellow") return "Watchlist";
-    return "High NPA";
-  };   return (
-    <div className="min-h-screen bg-white px-4 py-8 text-[#111827] sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-7xl">
-        {/* Page Header */}
-        <header className="border-b border-[#D7DEE8] pb-7">
-          <div className="border-l-4 border-[#0F5FC5] pl-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0F5FC5]">
-              NIRVAAN
-            </p>
+    if (value === "All Types") {
+      setTypeFilter("all");
+      return;
+    }
 
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#111827] sm:text-4xl">
-              Partner Locator
-            </h1>
+    const type = (
+      Object.keys(
+        TYPE_LABELS
+      ) as PartnerType[]
+    ).find(
+      (id) =>
+        TYPE_LABELS[id] === value
+    );
 
-            <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-[#64748B]">
-              Find eligible channel partners, banks and agencies
-              supporting government scheme applications.
-            </p>
+    if (type) {
+      setTypeFilter(type);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="border-b border-[#D7DEE8] bg-[#F8FAFC]">
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="mb-2 inline-flex items-center border border-[#CBD5E1] bg-white px-2 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0F5FC5]">
+                NIRVAAN • Partner Locator
+              </div>
+
+              <h1 className="text-2xl font-extrabold tracking-tight text-[#111827] sm:text-3xl">
+                Find a nearby partner
+              </h1>
+
+              <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-[#64748B]">
+                Locate participating banks and
+                financial institutions that can
+                help you apply for eligible
+                government-backed schemes.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={requestLocation}
+              disabled={geoLocating}
+              className="border border-[#0F5FC5] bg-white px-4 py-2.5 text-sm font-bold text-[#0F5FC5] transition-colors hover:bg-[#EFF6FF] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {geoLocating
+                ? "Finding location..."
+                : "Use my location"}
+            </button>
           </div>
-        </header>
+        </div>
+      </div>
 
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* Filters */}
-        <section className="relative z-40 mt-6 border border-[#D7DEE8] bg-[#F8FAFC] p-4 sm:p-5">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-wrap gap-2">
-              <LocatorDropdown
-                label="Scheme"
-                value={
-                  schemeFilter === "all"
-                    ? "All Schemes"
-                    : SCHEME_LABELS[schemeFilter]
-                }
-                items={schemeOptions}
-                onSelect={(value) => {
-                  if (value === "Micro Finance") {
-                    setSchemeFilter("micro-finance");
-                  } else if (value === "Term Loan") {
-                    setSchemeFilter("term-loan");
-                  } else if (value === "Education Loan") {
-                    setSchemeFilter("education-loan");
-                  } else {
-                    setSchemeFilter("all");
-                  }
-                }}
-              />
+        <section className="border border-[#CBD5E1] bg-white">
+          <div className="border-b border-[#D7DEE8] bg-[#F8FAFC] px-4 py-3">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="text-sm font-extrabold text-[#111827]">
+                Search filters
+              </h2>
 
-              <LocatorDropdown
-                label="Type"
-                value={
-                  typeFilter === "all"
-                    ? "All Types"
-                    : TYPE_LABELS[typeFilter]
-                }
-                items={typeOptions}
-                onSelect={(value) => {
-                  if (value === "PSU Bank") {
-                    setTypeFilter("public-sector-bank");
-                  } else if (value === "Private Bank") {
-                    setTypeFilter("private-bank");
-                  } else if (value === "NBFC") {
-                    setTypeFilter("nbfc");
-                  } else if (value === "Govt. Agency") {
-                    setTypeFilter("regional-agency");
-                  } else if (value === "Co-op Bank") {
-                    setTypeFilter("cooperative");
-                  } else {
-                    setTypeFilter("all");
-                  }
-                }}
-              />
+              <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
+                {displayList.length} partners shown
+              </span>
+            </div>
+          </div>
 
-              <LocatorDropdown
-                label="District"
-                value={districtFilter || "All"}
-                items={["All", ...allDistricts]}
-                onSelect={(value) =>
-                  setDistrictFilter(
-                    value === "All" ? "" : value
+          <div className="flex flex-wrap items-center gap-2 p-3">
+            <LocatorDropdown
+              label="Scheme"
+              value={selectedSchemeLabel}
+              items={schemeOptions}
+              onSelect={handleSchemeSelect}
+            />
+
+            <LocatorDropdown
+              label="Type"
+              value={selectedTypeLabel}
+              items={typeOptions}
+              onSelect={handleTypeSelect}
+            />
+
+            <LocatorDropdown
+              label="District"
+              value={districtFilter}
+              items={[
+                "All",
+                ...allDistricts,
+              ]}
+              onSelect={(value) =>
+                setDistrictFilter(value)
+              }
+            />
+
+            <label className="flex min-h-10 cursor-pointer items-center gap-2 border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-bold text-[#334155]">
+              <input
+                type="checkbox"
+                checked={includeHighNpa}
+                onChange={(event) =>
+                  setIncludeHighNpa(
+                    event.target.checked
                   )
                 }
+                className="h-4 w-4 accent-[#0F5FC5]"
               />
-            </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+              Include high-NPA partners
+            </label>
+
+            {(schemeFilter !== "all" ||
+              typeFilter !== "all" ||
+              districtFilter !==
+                "Nandurbar" ||
+              includeHighNpa) && (
               <button
                 type="button"
-                onClick={requestLocation}
-                disabled={geoLocating}
-                className="border border-[#E87512] bg-[#E87512] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#C95F08] disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={() => {
+                  setSchemeFilter(
+                    recommendation?.schemeId ??
+                      "all"
+                  );
+                  setTypeFilter("all");
+                  setDistrictFilter(
+                    profile?.district ||
+                      "Nandurbar"
+                  );
+                  setIncludeHighNpa(false);
+                }}
+                className="min-h-10 border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-bold text-[#64748B] transition-colors hover:border-[#0F5FC5] hover:text-[#0F5FC5]"
               >
-                {geoLocating
-                  ? "Locating..."
-                  : "Use My Location"}
+                Reset filters
               </button>
-
-              <label className="flex cursor-pointer items-center gap-2 border border-[#CBD5E1] bg-white px-3 py-2.5 text-xs font-bold text-[#334155]">
-                <input
-                  type="checkbox"
-                  checked={includeHighNpa}
-                  onChange={(event) =>
-                    setIncludeHighNpa(event.target.checked)
-                  }
-                  className="h-4 w-4 cursor-pointer accent-[#0F5FC5]"
-                />
-                <span>Show high NPA</span>
-              </label>
-            </div>
+            )}
           </div>
         </section>
 
-        {/* Results Summary */}
-        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="border-l-4 border-[#0F5FC5] bg-[#F8FAFC] px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#64748B]">
-              Nearby branches
-            </p>
-            <p className="mt-1 text-xl font-extrabold text-[#111827]">
-              {displayList.length}
-            </p>
-            <p className="text-xs font-medium text-[#64748B]">
-              Within 500 km
-            </p>
-          </div>
+        {selectedPartner && (
+          <div className="mt-4 border border-[#BFD3EA] bg-[#EFF6FF] px-4 py-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0F5FC5]">
+                  Selected partner
+                </p>
 
-          <div className="border-l-4 border-[#E87512] bg-[#FFF7ED] px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#9A5B20]">
-              India network
-            </p>
-            <p className="mt-1 text-xl font-extrabold text-[#111827]">
-              {partners.length}
-            </p>
-            <p className="text-xs font-medium text-[#64748B]">
-              Offices shown on map
-            </p>
-          </div>
-        </div>
+                <p className="mt-1 text-sm font-extrabold text-[#111827]">
+                  {selectedPartner.name}
+                </p>
+              </div>
 
-        {/* Main Content */}
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedId(null)
+                }
+                className="self-start border border-[#CBD5E1] bg-white px-3 py-1.5 text-xs font-bold text-[#334155] hover:bg-[#F8FAFC] sm:self-auto"
+              >
+                Clear selection
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6 grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(320px,0.85fr)_minmax(0,1.35fr)]">
           {/* Partner List */}
           <section className="min-w-0">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-extrabold text-[#111827]">
-                Nearby Partners
+                Partner offices
               </h2>
 
-              <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
-                Nearest first
+              <span className="text-xs font-bold text-[#64748B]">
+                {displayList.length} results
               </span>
             </div>
 
-            <div className="max-h-[620px] space-y-3 overflow-y-auto pr-1">
-              {loading ? (
-                <div className="flex h-64 items-center justify-center border border-[#D7DEE8] bg-[#F8FAFC]">
-                  <div className="text-center">
-                    <div className="mx-auto mb-4 h-8 w-8 animate-spin border-4 border-[#D7DEE8] border-t-[#0F5FC5]" />
-                    <p className="text-sm font-bold text-[#0F5FC5]">
-                      Finding partner branches...
-                    </p>
-                  </div>
+            {loading ? (
+              <div className="border border-[#CBD5E1] bg-[#F8FAFC] px-5 py-10 text-center">
+                <div className="text-sm font-bold text-[#0F5FC5]">
+                  Loading partner network...
                 </div>
-              ) : displayList.length === 0 ? (
-                <div className="border border-[#D7DEE8] bg-[#F8FAFC] p-8 text-center">
-                  <p className="text-base font-extrabold text-[#111827]">
-                    No matching partner branches found.
-                  </p>
 
-                  <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                    Try changing the district, scheme or partner
-                    type filter.
-                  </p>
+                <div className="mt-2 text-xs font-medium text-[#64748B]">
+                  Finding suitable offices near
+                  your selected location.
                 </div>
-              ) : (
-                displayList.map((partner, index) => {
+              </div>
+            ) : displayList.length === 0 ? (
+              <div className="border border-[#CBD5E1] bg-[#F8FAFC] px-5 py-10 text-center">
+                <div className="text-sm font-extrabold text-[#111827]">
+                  No partner offices found
+                </div>
+
+                <p className="mx-auto mt-2 max-w-sm text-xs font-medium leading-5 text-[#64748B]">
+                  Try changing the district,
+                  scheme, or partner type filters
+                  to see more offices.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {displayList.map((partner) => {
                   const selected =
-                    selectedId === partner.id;
+                    partner.id === selectedId;
+
+                  const healthStyle =
+                    HEALTH_STYLES[
+                      partner.healthStatus
+                    ];
 
                   return (
                     <article
                       key={partner.id}
                       ref={(element) => {
-                        cardRefs.current[partner.id] = element;
+                        cardRefs.current[
+                          partner.id
+                        ] = element;
                       }}
-                      onClick={() =>
-                        handleSelectPartner(partner.id)
-                      }
-                      className={`cursor-pointer border bg-white p-5 transition-colors ${
+                      className={`border bg-white transition-colors ${
                         selected
-                          ? "border-[#0F5FC5] border-l-4 bg-[#F8FBFF]"
-                          : "border-[#D7DEE8] hover:border-[#94A3B8]"
+                          ? "border-[#0F5FC5] shadow-sm"
+                          : "border-[#CBD5E1] hover:border-[#94A3B8]"
                       }`}
                     >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            {index === 0 && (
-                              <span className="border border-[#0F5FC5] bg-[#EFF6FF] px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.08em] text-[#0F5FC5]">
-                                Nearest
-                              </span>
-                            )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleSelectPartner(
+                            partner.id
+                          )
+                        }
+                        className="block w-full text-left"
+                      >
+                        <div className="border-b border-[#E2E8F0] px-4 py-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <h3 className="truncate text-sm font-extrabold text-[#111827]">
+                                {partner.name}
+                              </h3>
 
-                            <h3 className="text-base font-extrabold leading-5 text-[#111827]">
-                              {partner.name}
-                            </h3>
+                              <p className="mt-1 text-[11px] font-bold text-[#64748B]">
+                                {TYPE_LABELS[
+                                  partner.type
+                                ]}
+                              </p>
+                            </div>
+
+                            <span
+                              className={`shrink-0 border px-2 py-1 text-[10px] font-extrabold uppercase tracking-[0.08em] ${healthStyle}`}
+                            >
+                              {partner.healthStatus ===
+                              "green"
+                                ? "Healthy"
+                                : partner.healthStatus ===
+                                    "yellow"
+                                  ? "Watch"
+                                  : "High NPA"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-px bg-[#E2E8F0]">
+                          <div className="bg-white px-4 py-3">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#94A3B8]">
+                              Distance
+                            </p>
+
+                            <p className="mt-1 text-sm font-extrabold text-[#111827]">
+                              {partner.distanceKm >=
+                              0
+                                ? `${partner.distanceKm.toFixed(
+                                    1
+                                  )} km`
+                                : "N/A"}
+                            </p>
                           </div>
 
-                          <p className="mt-2 text-xs font-medium text-[#64748B]">
-                            {partner.city} ·{" "}
-                            <span className="font-bold text-[#334155]">
-                              {partner.district},{" "}
-                              {partner.state}
-                            </span>
+                          <div className="bg-white px-4 py-3">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#94A3B8]">
+                              NPA
+                            </p>
+
+                            <p className="mt-1 text-sm font-extrabold text-[#111827]">
+                              {partner.npaPercent.toFixed(
+                                1
+                              )}
+                              %
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="px-4 py-3">
+                          <p className="text-[11px] font-medium leading-5 text-[#475569]">
+                            {partner.address}
                           </p>
-                        </div>
 
-                        <span
-                          className={`shrink-0 border px-2.5 py-1 text-[10px] font-extrabold uppercase ${HEALTH_STYLES[partner.healthStatus]}`}
-                        >
-                          {getHealthLabel(
-                            partner.healthStatus
-                          )}{" "}
-                          ({partner.npaPercent}% NPA)
-                        </span>
-                      </div>
-
-                      <p className="mt-3 text-xs font-medium leading-5 text-[#475569]">
-                        {partner.address}
-                        {partner.pincode
-                          ? ` - ${partner.pincode}`
-                          : ""}
-                      </p>
-
-                      <div className="mt-4 flex flex-col gap-3 border-t border-[#E5E7EB] pt-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="border border-[#CBD5E1] bg-[#F8FAFC] px-2.5 py-1 text-[10px] font-bold text-[#475569]">
-                            {TYPE_LABELS[partner.type]}
-                          </span>
-
-                          {typeof partner.distanceKm ===
-                            "number" &&
-                            partner.distanceKm >= 0 && (
-                              <span className="text-[11px] font-bold text-[#0F5FC5]">
-                                {partner.distanceKm.toFixed(1)} km
-                                away
-                              </span>
-                            )}
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          {partner.phone && (
-                            <a
-                              href={`tel:${partner.phone}`}
-                              onClick={(event) =>
-                                event.stopPropagation()
-                              }
-                              className="border border-[#0F5FC5] bg-white px-3 py-1.5 text-[11px] font-bold text-[#0F5FC5] transition-colors hover:bg-[#EFF6FF]"
-                            >
-                              Call
-                            </a>
+                          {partner.district && (
+                            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#94A3B8]">
+                              {partner.district}
+                            </p>
                           )}
-
-                          <a
-                            href={`https://www.google.com/maps/dir/?api=1&destination=${partner.lat},${partner.lng}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(event) =>
-                              event.stopPropagation()
-                            }
-                            className="border border-[#E87512] bg-[#E87512] px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-[#C95F08]"
-                          >
-                            Directions
-                          </a>
                         </div>
+                      </button>
+
+                      <div className="grid grid-cols-2 border-t border-[#E2E8F0]">
+                        <a
+                          href={`tel:${partner.phone}`}
+                          className="border-r border-[#E2E8F0] px-3 py-2.5 text-center text-xs font-extrabold text-[#0F5FC5] transition-colors hover:bg-[#EFF6FF]"
+                        >
+                          Call
+                        </a>
+
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${partner.lat},${partner.lng}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-2.5 text-center text-xs font-extrabold text-[#E87512] transition-colors hover:bg-[#FFF7ED]"
+                        >
+                          Directions
+                        </a>
                       </div>
                     </article>
                   );
-                })
-              )}
-            </div>
+                })}
+              </div>
+            )}
           </section>
-
-          {/* Map */}
+                    {/* Map */}
           <section className="min-w-0">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-extrabold text-[#111827]">
@@ -736,12 +933,68 @@ export default function LocatorPage() {
                 onSelect={handleSelectPartner}
               />
             </div>
+
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="border border-[#CBD5E1] bg-white px-3 py-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#94A3B8]">
+                  Partners
+                </p>
+
+                <p className="mt-1 text-lg font-extrabold text-[#111827]">
+                  {partners.length}
+                </p>
+              </div>
+
+              <div className="border border-[#CBD5E1] bg-white px-3 py-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#94A3B8]">
+                  Showing
+                </p>
+
+                <p className="mt-1 text-lg font-extrabold text-[#111827]">
+                  {displayList.length}
+                </p>
+              </div>
+
+              <div className="border border-[#CBD5E1] bg-white px-3 py-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#94A3B8]">
+                  Area
+                </p>
+
+                <p className="mt-1 truncate text-sm font-extrabold text-[#111827]">
+                  {districtFilter === "All"
+                    ? "India"
+                    : districtFilter}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 border border-[#CBD5E1] bg-[#F8FAFC] px-4 py-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-extrabold text-[#111827]">
+                    Map guidance
+                  </p>
+
+                  <p className="mt-1 text-[11px] font-medium leading-5 text-[#64748B]">
+                    Select a partner card or map
+                    marker to view the office
+                    location and get directions.
+                  </p>
+                </div>
+
+                {userLocation && (
+                  <span className="border border-[#B7D8C0] bg-[#F0FDF4] px-2.5 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#166534]">
+                    Location enabled
+                  </span>
+                )}
+              </div>
+            </div>
           </section>
         </div>
 
         {/* Bottom navigation */}
         <div className="mt-8 grid grid-cols-1 gap-3 border-t border-[#D7DEE8] pt-6 sm:grid-cols-2">
-          <Link
+                    <Link
             href="/checklist"
             className="border border-[#CBD5E1] bg-white px-5 py-3 text-center text-sm font-bold text-[#334155] transition-colors hover:bg-[#F8FAFC]"
           >
@@ -758,4 +1011,4 @@ export default function LocatorPage() {
       </div>
     </div>
   );
-                          }
+}
