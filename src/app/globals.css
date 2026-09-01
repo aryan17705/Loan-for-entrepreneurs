@@ -2,373 +2,308 @@
 @tailwind components;
 @tailwind utilities;
 
-/* =========================================================
-   NIRVAAN GLOBAL DESIGN SYSTEM
-   Font: Raleway
-   ========================================================= */
-
 :root {
+  --color-base: #ffffff;
+  --color-surface: #f8fafc;
+  --color-primary: #0f5fc5;
+  --color-secondary: #1e3a5f;
+  --color-accent-orange: #e87512;
+
+  --color-accent-green: #16a34a;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+
   --background: #ffffff;
   --foreground: #111827;
-
-  --nirvaan-blue: #0f5fc5;
-  --nirvaan-blue-dark: #0b4fa7;
-  --nirvaan-orange: #e87512;
-
-  --nirvaan-black: #111827;
-  --nirvaan-text: #374151;
-  --nirvaan-muted: #5b6676;
-
-  --nirvaan-border: #d7dee8;
-  --nirvaan-border-dark: #b9c4d1;
 }
-
-/* =========================================================
-   GLOBAL FOUNDATION
-   ========================================================= */
 
 html,
 body {
   margin: 0;
   padding: 0;
-
   width: 100%;
   max-width: 100vw;
   min-height: 100%;
-
-  background: #ffffff;
-  color: #111827;
-
-  font-family: var(--font-raleway), "Raleway", sans-serif;
-
   overflow-x: hidden;
 
-  text-rendering: optimizeLegibility;
+  background: var(--background);
+  color: var(--foreground);
 
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  -webkit-tap-highlight-color: transparent;
 }
 
-/*
- * Force Raleway throughout the application.
- */
-
-*,
-*::before,
-*::after {
+* {
   box-sizing: border-box;
-
-  font-family: var(--font-raleway), "Raleway", sans-serif;
-
   border-radius: 0 !important;
 }
-
-/* =========================================================
-   TYPOGRAPHY
-   ========================================================= */
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-raleway), "Raleway", sans-serif;
-  color: #111827;
-}
-
-h1 {
-  font-weight: 800;
-  letter-spacing: -0.025em;
-}
-
-h2 {
-  font-weight: 700;
-  letter-spacing: -0.018em;
-}
-
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 600;
-}
-
-p {
-  font-family: var(--font-raleway), "Raleway", sans-serif;
-  font-weight: 400;
-}
-
-/* =========================================================
-   NIRVAAN WORDMARK
-   ========================================================= */
-
-.nirvaan-wordmark {
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.06em;
-}
-
-/* =========================================================
-   NAVIGATION
-   ========================================================= */
-
-nav,
-nav a,
-nav button {
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-  font-weight: 500;
-}
-
-/* =========================================================
-   BUTTONS
-   ========================================================= */
-
-button {
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-  font-weight: 600;
-}
-
-/* =========================================================
-   FORMS
-   ========================================================= */
-
-label {
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-  font-weight: 500;
-}
-
-input,
-select,
-textarea {
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-  font-weight: 400;
-
-  border-radius: 0 !important;
-}
-
-input::placeholder,
-textarea::placeholder {
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-  font-weight: 400;
-}
-
-/* =========================================================
-   LINKS
-   ========================================================= */
-
-a {
-  font-family: var(--font-raleway), "Raleway", sans-serif;
-}
-
-/* =========================================================
-   STRICT SHARP RECTANGLE SYSTEM
-   ========================================================= */
 
 button,
 input,
 select,
-textarea,
-a,
-div,
-section,
-article,
-aside,
-header,
-footer,
-nav,
-main,
-form {
-  border-radius: 0 !important;
-}
-
-/* =========================================================
-   REMOVE LEGACY ROUNDED CLASSES
-   ========================================================= */
-
-.rounded,
-.rounded-sm,
-.rounded-md,
-.rounded-lg,
-.rounded-xl,
-.rounded-2xl,
-.rounded-3xl,
-.rounded-full {
-  border-radius: 0 !important;
-}
-
-/* =========================================================
-   REMOVE LEGACY GLASSMORPHISM
-   ========================================================= */
-
-.liquid-glass,
-.liquid-glass-inner,
-.liquid-glass-active {
-  background: #ffffff !important;
-
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-
-  border: 1px solid #d7dee8 !important;
-
-  box-shadow:
-    0 2px 8px rgba(17, 24, 39, 0.06) !important;
-
-  transform: none !important;
-
-  border-radius: 0 !important;
-}
-
-.liquid-glass-active {
-  border-color: #0f5fc5 !important;
-
-  box-shadow:
-    inset 4px 0 0 #0f5fc5,
-    0 2px 8px rgba(17, 24, 39, 0.06) !important;
-}
-
-/* =========================================================
-   REMOVE LEGACY DARK BACKGROUNDS
-   ========================================================= */
-
-[class*="bg-[#0B0F19]"],
-[class*="bg-[#131B2E]"],
-[class*="bg-[#1E3A5F]"],
-[class*="bg-[#0B0F19]/"],
-[class*="bg-[#131B2E]/"],
-[class*="bg-[#1E3A5F]/"] {
-  background-color: #ffffff !important;
-}
-
-/* =========================================================
-   REMOVE LEGACY GRADIENTS
-   ========================================================= */
-
-[class*="bg-gradient-"] {
-  background-image: none !important;
-}
-
-/* =========================================================
-   WHITE TEXT NORMALIZATION
-   ========================================================= */
-
-[class*="text-white"] {
-  color: #111827;
-}
-
-/*
- * Preserve white text on blue/orange action surfaces.
- */
-
-[class*="bg-[#0F5FC5]"],
-[class*="bg-[#0F5FC5"] *,
-[class*="bg-[#F97316]"],
-[class*="bg-[#F97316"] *,
-[class*="bg-[#EA580C]"],
-[class*="bg-[#EA580C"] * {
-  color: #ffffff !important;
-}
-
-/* =========================================================
-   BLUE
-   ========================================================= */
-
-[class*="text-[#0F5FC5]"] {
-  color: #0f5fc5 !important;
-}
-
-[class*="border-[#0F5FC5]"] {
-  border-color: #0f5fc5 !important;
-}
-
-[class*="bg-[#0F5FC5]"] {
-  background-color: #0f5fc5 !important;
-}
-
-/* =========================================================
-   ORANGE
-   ========================================================= */
-
-[class*="text-[#F97316]"],
-[class*="text-[#EA580C]"],
-[class*="text-[#FED7AA]"],
-[class*="text-orange-"] {
-  color: #c65d08 !important;
-}
-
-[class*="bg-[#F97316]"],
-[class*="bg-[#EA580C]"] {
-  background-color: #e87512 !important;
-}
-
-[class*="border-[#F97316]"],
-[class*="border-[#EA580C]"] {
-  border-color: #e87512 !important;
-}
-
-/* =========================================================
-   FORM ELEMENTS
-   ========================================================= */
-
-input:not([type="range"]),
-select,
 textarea {
-  background: #ffffff;
-  color: #111827;
-
-  border: 1px solid #b9c4d1;
-
-  border-radius: 0 !important;
+  font: inherit;
 }
 
-input:not([type="range"]):focus,
-select:focus,
-textarea:focus {
-  outline: 2px solid rgba(15, 95, 197, 0.18);
-  outline-offset: 0;
-
-  border-color: #0f5fc5;
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
-input::placeholder,
-textarea::placeholder {
-  color: #687587;
-}
-
-/* =========================================================
-   RANGE INPUT
-   ========================================================= */
-
-input[type="range"] {
-  width: 100%;
-
-  accent-color: #0f5fc5;
-
+button {
   cursor: pointer;
-
-  touch-action: pan-y;
 }
 
-/* =========================================================
-   CHECKBOX
-   ========================================================= */
-
-input[type="checkbox"] {
-  accent-color: #0f5fc5;
+button:disabled {
+  cursor: not-allowed;
 }
 
-/* =========================================================
-   SELECTION
-   ========================================================= */
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
 ::selection {
   background: #0f5fc5;
   color: #ffffff;
 }
 
-/* =========================================================
-   FOCUS
-   ========================================================= */
+/* ---------------------------------------------
+   Global scrollbars
+--------------------------------------------- */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ---------------------------------------------
+   Legacy glass classes
+   Kept for compatibility with existing pages,
+   but converted to the new white rectangular
+   visual system.
+--------------------------------------------- */
+
+.liquid-glass {
+  background: #ffffff !important;
+  border: 1px solid #d7dee8 !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+}
+
+.liquid-glass-inner {
+  background: #f8fafc !important;
+  border: 1px solid #d7dee8 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+}
+
+.liquid-glass-active {
+  background: #eff6ff !important;
+  border: 1px solid #0f5fc5 !important;
+  box-shadow: 0 8px 24px rgba(15, 95, 197, 0.1) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+}
+
+/* ---------------------------------------------
+   Range inputs
+--------------------------------------------- */
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #0f5fc5;
+  touch-action: pan-y;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------
+   Touch scrolling
+--------------------------------------------- */
+
+.scrollable-touch {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ---------------------------------------------
+   Recharts
+--------------------------------------------- */
+
+.recharts-tooltip-wrapper {
+  z-index: 1000 !important;
+  pointer-events: none !important;
+}
+
+.recharts-default-tooltip {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12) !important;
+  color: #111827 !important;
+  padding: 8px 12px !important;
+}
+
+.recharts-default-tooltip * {
+  color: #111827 !important;
+  font-weight: 600 !important;
+}
+
+.recharts-tooltip-item {
+  color: #334155 !important;
+}
+
+.recharts-tooltip-item-name {
+  color: #0f5fc5 !important;
+  font-weight: 600 !important;
+}
+
+.recharts-tooltip-item-value {
+  color: #111827 !important;
+  font-weight: 800 !important;
+  font-size: 15px !important;
+}
+
+.recharts-tooltip-label {
+  color: #475569 !important;
+  font-weight: 700 !important;
+}
+
+/* ---------------------------------------------
+   Mapbox
+--------------------------------------------- */
+
+.mapboxgl-map {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    system-ui,
+    sans-serif;
+}
+
+.mapboxgl-canvas {
+  outline: none !important;
+}
+
+.mapboxgl-ctrl-group {
+  overflow: hidden !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16) !important;
+}
+
+.mapboxgl-ctrl-group button {
+  width: 32px !important;
+  height: 32px !important;
+  background-color: #ffffff !important;
+}
+
+.mapboxgl-ctrl-group button:hover {
+  background-color: #eff6ff !important;
+}
+
+.mapboxgl-ctrl-icon {
+  filter: none !important;
+}
+
+.mapboxgl-ctrl-attrib {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #475569 !important;
+  font-size: 9px !important;
+}
+
+.mapboxgl-ctrl-attrib a {
+  color: #0f5fc5 !important;
+}
+
+.mapboxgl-popup {
+  max-width: 320px !important;
+}
+
+.mapboxgl-popup-content {
+  padding: 14px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2) !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: #ffffff !important;
+}
+
+.mapboxgl-popup-close-button {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  color: #64748b !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+}
+
+.mapboxgl-popup-close-button:hover {
+  background: #f1f5f9 !important;
+  color: #111827 !important;
+}
+.mapboxgl-ctrl-logo {
+  opacity: 0.9;
+}
+
+/* ---------------------------------------------
+   Map isolation
+--------------------------------------------- */
+
+.map-isolate-box {
+  isolation: isolate !important;
+  position: relative !important;
+  z-index: 0 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* ---------------------------------------------
+   Focus states
+--------------------------------------------- */
 
 button:focus-visible,
 a:focus-visible,
@@ -379,181 +314,67 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* =========================================================
-   SCROLLING
-   ========================================================= */
+/* ---------------------------------------------
+   Form controls
+--------------------------------------------- */
 
-.scrollable-touch {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* =========================================================
-   RECHARTS
-   ========================================================= */
-
-.recharts-tooltip-wrapper {
-  z-index: 1000 !important;
-  pointer-events: none !important;
-}
-
-.recharts-default-tooltip {
-  background: #ffffff !important;
-
-  border: 1px solid #b9c4d1 !important;
-
-  border-radius: 0 !important;
-
-  color: #111827 !important;
-
-  padding: 8px 12px !important;
-
-  box-shadow:
-    0 8px 24px rgba(17, 24, 39, 0.12) !important;
-
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-}
-
-.recharts-default-tooltip * {
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-  color: #111827 !important;
-}
-
-/* =========================================================
-   LEAFLET
-   ========================================================= */
-
-.map-isolate-box {
-  isolation: isolate !important;
-  position: relative !important;
-  z-index: 0 !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-.leaflet-container,
-.leaflet-pane,
-.leaflet-map-pane,
-.leaflet-tile-pane,
-.leaflet-overlay-pane,
-.leaflet-shadow-pane,
-.leaflet-marker-pane,
-.leaflet-tooltip-pane,
-.leaflet-popup-pane {
-  z-index: 1 !important;
-}
-
-.leaflet-top,
-.leaflet-bottom,
-.leaflet-control {
-  z-index: 2 !important;
-}
-
-.leaflet-container {
-  background: #eef2f7 !important;
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-}
-
-.leaflet-bar {
-  border: 1px solid #b9c4d1 !important;
-  overflow: hidden;
-
-  box-shadow:
-    0 4px 12px rgba(17, 24, 39, 0.12) !important;
-}
-
-.leaflet-bar a {
-  background: #ffffff !important;
-  color: #111827 !important;
-
-  border-bottom: 1px solid #d7dee8 !important;
-
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-
-  font-weight: 600;
-}
-
-.leaflet-bar a:hover {
-  background: #0f5fc5 !important;
-  color: #ffffff !important;
-}
-
-.leaflet-popup-content-wrapper {
-  background: #ffffff !important;
-
-  border: 1px solid #b9c4d1 !important;
-
-  border-radius: 0 !important;
-
-  color: #111827 !important;
-
-  padding: 4px !important;
-
-  box-shadow:
-    0 12px 28px rgba(17, 24, 39, 0.16) !important;
-
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
-}
-
-.leaflet-popup-tip {
-  background: #ffffff !important;
+input,
+select,
+textarea {
   border-radius: 0 !important;
 }
 
-.leaflet-popup-close-button {
-  color: #5b6676 !important;
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
 }
 
-.leaflet-popup-close-button:hover {
-  color: #0f5fc5 !important;
+/* ---------------------------------------------
+   Utility helpers
+--------------------------------------------- */
+
+.text-balance {
+  text-wrap: balance;
 }
 
-.leaflet-tooltip {
-  background: #ffffff !important;
-
-  border: 1px solid #b9c4d1 !important;
-
-  border-radius: 0 !important;
-
-  color: #111827 !important;
-
-  box-shadow:
-    0 6px 16px rgba(17, 24, 39, 0.12) !important;
-
-  font-family: var(--font-raleway), "Raleway", sans-serif !important;
+.text-pretty {
+  text-wrap: pretty;
 }
 
-/* =========================================================
-   MOTION ACCESSIBILITY
-   ========================================================= */
+/* ---------------------------------------------
+   Reduced motion
+--------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-
     animation-iteration-count: 1 !important;
-
     transition-duration: 0.01ms !important;
-
     scroll-behavior: auto !important;
   }
 }
 
-/* =========================================================
-   PRINT
-   ========================================================= */
+/* ---------------------------------------------
+   Mobile adjustments
+--------------------------------------------- */
 
-@media print {
-  html,
-  body {
-    background: #ffffff !important;
+@media (max-width: 640px) {
+  .mapboxgl-ctrl-group button {
+    width: 34px !important;
+    height: 34px !important;
+  }
 
-    color: #111827 !important;
+  .mapboxgl-ctrl-attrib {
+    font-size: 8px !important;
+  }
 
-    font-family:
-      var(--font-raleway),
-      "Raleway",
-      sans-serif !important;
+  .mapboxgl-popup {
+    max-width: 280px !important;
+  }
+
+  .mapboxgl-popup-content {
+    padding: 12px !important;
   }
 }
