@@ -3,129 +3,109 @@
 @tailwind utilities;
 
 /* =========================================================
-   NIRVAAN DESIGN SYSTEM
-   Typography: Inter only
+   NIRVAAN GLOBAL DESIGN SYSTEM
+   Font: Inclusive Sans
    ========================================================= */
 
 :root {
   --background: #ffffff;
   --foreground: #111827;
 
-  --color-base: #ffffff;
-  --color-surface: #ffffff;
+  --nirvaan-blue: #0f5fc5;
+  --nirvaan-blue-dark: #0b4fa7;
+  --nirvaan-orange: #e87512;
 
-  --color-primary: #0f5fc5;
-  --color-primary-dark: #0b4fa7;
+  --nirvaan-black: #111827;
+  --nirvaan-text: #374151;
+  --nirvaan-muted: #5b6676;
 
-  --color-secondary: #111827;
-  --color-orange: #e87512;
-
-  --color-border: #d7dee8;
-  --color-border-dark: #b9c4d1;
-
-  --color-text-primary: #111827;
-  --color-text-secondary: #374151;
-  --color-text-muted: #5b6676;
-  --color-text-light: #687587;
-
-  --font-inter: "Inter";
+  --nirvaan-border: #d7dee8;
+  --nirvaan-border-dark: #b9c4d1;
 }
 
 /* =========================================================
-   GLOBAL FOUNDATION
+   GLOBAL FONT
    ========================================================= */
 
 html,
 body {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100%;
+
   background: #ffffff;
   color: #111827;
 
-  /*
-   * Inter is the sole intended typeface.
-   * layout.tsx loads the actual Inter font through next/font.
-   */
-  font-family: var(--font-inter), sans-serif;
+  font-family:
+    "Inclusive Sans",
+    sans-serif;
 
   overflow-x: hidden;
-  max-width: 100vw;
-  width: 100%;
-
-  -webkit-tap-highlight-color: transparent;
 
   text-rendering: optimizeLegibility;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /*
- * Force Inter on every element.
- *
- * This prevents an individual component, browser default,
- * or inherited font declaration from introducing another
- * typeface into the NIRVAAN interface.
+ * Force Inclusive Sans across the entire application.
  */
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  font-family: var(--font-inter), sans-serif;
-}
 
-/* =========================================================
-   STRICT NIRVAAN GEOMETRY
-   ========================================================= */
+  font-family:
+    "Inclusive Sans",
+    sans-serif;
 
-*,
-*::before,
-*::after {
   border-radius: 0 !important;
-}
-
-button,
-a,
-input,
-select,
-textarea {
-  border-radius: 0 !important;
-  font-family: var(--font-inter), sans-serif;
 }
 
 /* =========================================================
    TYPOGRAPHY
    ========================================================= */
 
-/*
- * Major page titles
- * Weight: 700–800
- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family:
+    "Inclusive Sans",
+    sans-serif;
+
+  color: #111827;
+}
 
 h1 {
-  font-family: var(--font-inter), sans-serif;
   font-weight: 800;
   letter-spacing: -0.025em;
 }
 
 h2 {
-  font-family: var(--font-inter), sans-serif;
   font-weight: 700;
   letter-spacing: -0.018em;
 }
 
-h3 {
-  font-family: var(--font-inter), sans-serif;
-  font-weight: 600;
-}
-
+h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-inter), sans-serif;
   font-weight: 600;
 }
 
 p {
-  font-family: var(--font-inter), sans-serif;
+  font-family:
+    "Inclusive Sans",
+    sans-serif;
+
   font-weight: 400;
 }
 
@@ -134,8 +114,12 @@ p {
    ========================================================= */
 
 .nirvaan-wordmark {
-  font-family: var(--font-inter), sans-serif !important;
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
+
   font-weight: 800 !important;
+
   letter-spacing: 0.06em;
 }
 
@@ -146,7 +130,10 @@ p {
 nav,
 nav a,
 nav button {
-  font-family: var(--font-inter), sans-serif;
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
+
   font-weight: 500;
 }
 
@@ -155,29 +142,43 @@ nav button {
    ========================================================= */
 
 button {
-  font-family: var(--font-inter), sans-serif;
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
+
   font-weight: 600;
 }
 
 /* =========================================================
-   FORM LABELS
+   FORMS
    ========================================================= */
 
 label {
-  font-family: var(--font-inter), sans-serif;
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
+
   font-weight: 500;
 }
 
 input,
 select,
 textarea {
-  font-family: var(--font-inter), sans-serif;
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
+
   font-weight: 400;
+
+  border-radius: 0 !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-  font-family: var(--font-inter), sans-serif;
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
+
   font-weight: 400;
 }
 
@@ -186,20 +187,49 @@ textarea::placeholder {
    ========================================================= */
 
 a {
-  font-family: var(--font-inter), sans-serif;
+  font-family:
+    "Inclusive Sans",
+    sans-serif;
 }
 
 /* =========================================================
-   SELECTION
+   STRICT SHARP RECTANGLE SYSTEM
    ========================================================= */
 
-::selection {
-  background: #0f5fc5;
-  color: #ffffff;
+button,
+input,
+select,
+textarea,
+a,
+div,
+section,
+article,
+aside,
+header,
+footer,
+nav,
+main,
+form {
+  border-radius: 0 !important;
 }
 
 /* =========================================================
-   NIRVAAN SURFACE SYSTEM
+   REMOVE LEGACY ROUNDED CLASSES
+   ========================================================= */
+
+.rounded,
+.rounded-sm,
+.rounded-md,
+.rounded-lg,
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl,
+.rounded-full {
+  border-radius: 0 !important;
+}
+
+/* =========================================================
+   REMOVE LEGACY GLASSMORPHISM
    ========================================================= */
 
 .liquid-glass,
@@ -216,6 +246,8 @@ a {
     0 2px 8px rgba(17, 24, 39, 0.06) !important;
 
   transform: none !important;
+
+  border-radius: 0 !important;
 }
 
 .liquid-glass-active {
@@ -227,7 +259,7 @@ a {
 }
 
 /* =========================================================
-   REMOVE OLD DARK SURFACES
+   REMOVE LEGACY DARK BACKGROUNDS
    ========================================================= */
 
 [class*="bg-[#0B0F19]"],
@@ -240,6 +272,14 @@ a {
 }
 
 /* =========================================================
+   REMOVE LEGACY GRADIENTS
+   ========================================================= */
+
+[class*="bg-gradient-"] {
+  background-image: none !important;
+}
+
+/* =========================================================
    WHITE TEXT NORMALIZATION
    ========================================================= */
 
@@ -248,21 +288,20 @@ a {
 }
 
 /*
- * White text is retained when it is inside an actual
- * blue/orange action surface.
+ * Preserve white text on blue/orange action surfaces.
  */
 
 [class*="bg-[#0F5FC5]"],
-[class*="bg-[#F97316]"],
-[class*="bg-[#EA580C]"],
 [class*="bg-[#0F5FC5"] *,
+[class*="bg-[#F97316]"],
 [class*="bg-[#F97316"] *,
+[class*="bg-[#EA580C]"],
 [class*="bg-[#EA580C"] * {
   color: #ffffff !important;
 }
 
 /* =========================================================
-   APPROVED BLUE
+   BLUE
    ========================================================= */
 
 [class*="text-[#0F5FC5]"] {
@@ -278,7 +317,7 @@ a {
 }
 
 /* =========================================================
-   APPROVED ORANGE
+   ORANGE
    ========================================================= */
 
 [class*="text-[#F97316]"],
@@ -299,27 +338,22 @@ a {
 }
 
 /* =========================================================
-   REMOVE LEGACY GRADIENTS
-   ========================================================= */
-
-[class*="bg-gradient-"] {
-  background-image: none !important;
-  background-color: #ffffff !important;
-}
-
-/* =========================================================
    FORM ELEMENTS
    ========================================================= */
 
 input:not([type="range"]),
 select,
 textarea {
-  border: 1px solid #b9c4d1;
   background: #ffffff;
+
   color: #111827;
+
+  border: 1px solid #b9c4d1;
+
+  border-radius: 0 !important;
 }
 
-input:focus,
+input:not([type="range"]):focus,
 select:focus,
 textarea:focus {
   outline: 2px solid rgba(15, 95, 197, 0.18);
@@ -328,21 +362,44 @@ textarea:focus {
   border-color: #0f5fc5;
 }
 
-input[type="range"] {
-  accent-color: #0f5fc5;
+input::placeholder,
+textarea::placeholder {
+  color: #687587;
+}
 
+/* =========================================================
+   RANGE INPUT
+   ========================================================= */
+
+input[type="range"] {
   width: 100%;
 
-  touch-action: pan-y;
+  accent-color: #0f5fc5;
+
   cursor: pointer;
+
+  touch-action: pan-y;
 }
+
+/* =========================================================
+   CHECKBOX
+   ========================================================= */
 
 input[type="checkbox"] {
   accent-color: #0f5fc5;
 }
 
 /* =========================================================
-   ACCESSIBILITY
+   SELECTION
+   ========================================================= */
+
+::selection {
+  background: #0f5fc5;
+  color: #ffffff;
+}
+
+/* =========================================================
+   FOCUS
    ========================================================= */
 
 button:focus-visible,
@@ -369,6 +426,7 @@ textarea:focus-visible {
 
 .recharts-tooltip-wrapper {
   z-index: 1000 !important;
+
   pointer-events: none !important;
 }
 
@@ -381,27 +439,22 @@ textarea:focus-visible {
 
   color: #111827 !important;
 
+  padding: 8px 12px !important;
+
   box-shadow:
     0 8px 24px rgba(17, 24, 39, 0.12) !important;
 
-  padding: 8px 12px !important;
-
-  font-family: var(--font-inter), sans-serif !important;
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
 }
 
 .recharts-default-tooltip * {
-  font-family: var(--font-inter), sans-serif !important;
-  color: #111827 !important;
-  font-weight: 500 !important;
-}
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
 
-.recharts-tooltip-item-name {
-  color: #0f5fc5 !important;
-}
-
-.recharts-tooltip-item-value {
   color: #111827 !important;
-  font-weight: 700 !important;
 }
 
 /* =========================================================
@@ -410,8 +463,11 @@ textarea:focus-visible {
 
 .map-isolate-box {
   isolation: isolate !important;
+
   position: relative !important;
+
   z-index: 0 !important;
+
   transform: translate3d(0, 0, 0) !important;
 }
 
@@ -435,11 +491,15 @@ textarea:focus-visible {
 
 .leaflet-container {
   background: #eef2f7 !important;
-  font-family: var(--font-inter), sans-serif !important;
+
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
 }
 
 .leaflet-bar {
   border: 1px solid #b9c4d1 !important;
+
   overflow: hidden;
 
   box-shadow:
@@ -448,16 +508,21 @@ textarea:focus-visible {
 
 .leaflet-bar a {
   background: #ffffff !important;
+
   color: #111827 !important;
 
   border-bottom: 1px solid #d7dee8 !important;
 
-  font-family: var(--font-inter), sans-serif !important;
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
+
   font-weight: 600;
 }
 
 .leaflet-bar a:hover {
   background: #0f5fc5 !important;
+
   color: #ffffff !important;
 }
 
@@ -466,19 +531,24 @@ textarea:focus-visible {
 
   border: 1px solid #b9c4d1 !important;
 
-  box-shadow:
-    0 12px 28px rgba(17, 24, 39, 0.16) !important;
-
-  padding: 4px !important;
+  border-radius: 0 !important;
 
   color: #111827 !important;
 
-  font-family: var(--font-inter), sans-serif !important;
+  padding: 4px !important;
+
+  box-shadow:
+    0 12px 28px rgba(17, 24, 39, 0.16) !important;
+
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
 }
 
 .leaflet-popup-tip {
   background: #ffffff !important;
-  border: 1px solid #b9c4d1 !important;
+
+  border-radius: 0 !important;
 }
 
 .leaflet-popup-close-button {
@@ -494,16 +564,20 @@ textarea:focus-visible {
 
   border: 1px solid #b9c4d1 !important;
 
+  border-radius: 0 !important;
+
   color: #111827 !important;
 
   box-shadow:
     0 6px 16px rgba(17, 24, 39, 0.12) !important;
 
-  font-family: var(--font-inter), sans-serif !important;
+  font-family:
+    "Inclusive Sans",
+    sans-serif !important;
 }
 
 /* =========================================================
-   REDUCE MOTION
+   MOTION ACCESSIBILITY
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
@@ -511,8 +585,11 @@ textarea:focus-visible {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+
     animation-iteration-count: 1 !important;
+
     transition-duration: 0.01ms !important;
+
     scroll-behavior: auto !important;
   }
 }
@@ -525,8 +602,11 @@ textarea:focus-visible {
   html,
   body {
     background: #ffffff !important;
+
     color: #111827 !important;
 
-    font-family: var(--font-inter), sans-serif !important;
+    font-family:
+      "Inclusive Sans",
+      sans-serif !important;
   }
 }
