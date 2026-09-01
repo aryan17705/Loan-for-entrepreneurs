@@ -740,6 +740,5 @@ function CalculatorForm({ rec }: { rec?: Recommendation }) {
       </div>
 
     </div>
-  );)
-}
+  );
 }
