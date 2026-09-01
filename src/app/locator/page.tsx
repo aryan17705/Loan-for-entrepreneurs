@@ -2,32 +2,19 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useRef } from "react";
-
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useJourney } from "@/context/JourneyContext";
-import { useTranslation } from "@/context/LanguageContext";
-import {
-  DISTRICT_COORDS,
-  LOCATIONS,
-} from "@/lib/locations";
+import { DISTRICT_COORDS, LOCATIONS } from "@/lib/locations";
+import type { PartnerType, PartnerWithMeta, SchemeId } from "@/lib/types";
 
-import type {
-  PartnerType,
-  PartnerWithMeta,
-  SchemeId,
-} from "@/lib/types";
-
-const MapClient = dynamic(
-  () => import("@/components/MapClient"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center bg-[#F8FAFC] text-xs font-semibold text-[#687587]">
-        Loading interactive map...
-      </div>
-    ),
-  }
-);
+const MapClient = dynamic(() => import("@/components/MapClient"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center bg-[#F8FAFC] text-sm font-bold text-[#0F5FC5]">
+      Loading interactive map...
+    </div>
+  ),
+});
 
 const SCHEME_LABELS: Record<SchemeId, string> = {
   "micro-finance": "Micro Finance",
@@ -43,6 +30,15 @@ const TYPE_LABELS: Record<PartnerType, string> = {
   cooperative: "Co-op Bank",
 };
 
+const HEALTH_STYLES: Record<
+  PartnerWithMeta["healthStatus"],
+  string
+> = {
+  green: "border-[#B7D8C0] bg-[#F0FDF4] text-[#166534]",
+  yellow: "border-[#F1D39B] bg-[#FFFBEB] text-[#92400E]",
+  red: "border-[#E5B7B7] bg-[#FEF2F2] text-[#991B1B]",
+};
+
 function LocatorDropdown({
   label,
   value,
@@ -52,320 +48,109 @@ function LocatorDropdown({
   label: string;
   value: string;
   items: string[];
-  onSelect: (val: string) => void;
+  onSelect: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [highlightedIndex, setHighlightedIndex] =
-    useState(0);
-
   const ref = useRef<HTMLDivElement>(null);
-  const searchInputRef =
-    useRef<HTMLInputElement>(null);
-  const listRef =
-    useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        ref.current &&
-        !ref.current.contains(
-          e.target as Node
-        )
-      ) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
-
-    return () =>
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-  }, []);
 
   const filteredItems = useMemo(() => {
     const sorted = [...items].sort((a, b) => {
-      if (
-        a === "All" ||
-        a === "All Schemes" ||
-        a === "All Types"
-      ) {
-        return -1;
-      }
+      const special = ["All", "All Schemes", "All Types"];
 
-      if (
-        b === "All" ||
-        b === "All Schemes" ||
-        b === "All Types"
-      ) {
-        return 1;
-      }
+      if (special.includes(a)) return -1;
+      if (special.includes(b)) return 1;
 
       return a.localeCompare(b);
     });
 
-    if (!search.trim()) {
-      return sorted;
-    }
+    if (!search.trim()) return sorted;
 
-    const query =
-      search.trim().toLowerCase();
+    const query = search.trim().toLowerCase();
 
-    const startsWith =
-      sorted.filter((item) =>
-        item
-          .toLowerCase()
-          .startsWith(query)
-      );
-
-    const contains =
-      sorted.filter(
-        (item) =>
-          !item
-            .toLowerCase()
-            .startsWith(query) &&
-          item
-            .toLowerCase()
-            .includes(query)
-      );
-
-    return [
-      ...startsWith,
-      ...contains,
-    ];
+    return sorted.filter((item) =>
+      item.toLowerCase().includes(query)
+    );
   }, [items, search]);
 
   useEffect(() => {
-    if (!open) return;
-
-    setSearch("");
-
-    const initialIndex =
-      filteredItems.indexOf(value);
-
-    setHighlightedIndex(
-      initialIndex !== -1
-        ? initialIndex
-        : 0
-    );
-
-    setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, 40);
-  }, [open]);
-
-  useEffect(() => {
-    setHighlightedIndex(0);
-  }, [search]);
-
-  useEffect(() => {
-    if (
-      !open ||
-      !listRef.current
-    ) {
-      return;
-    }
-
-    const element =
-      listRef.current.querySelector(
-        `[data-locator-item-index="${highlightedIndex}"]`
-      ) as HTMLElement | null;
-
-    element?.scrollIntoView({
-      block: "nearest",
-    });
-  }, [
-    highlightedIndex,
-    open,
-  ]);
-
-  const selectItem = (
-    item: string
-  ) => {
-    onSelect(item);
-    setOpen(false);
-  };
-
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-
-      setHighlightedIndex(
-        (prev) =>
-          prev <
-          filteredItems.length - 1
-            ? prev + 1
-            : 0
-      );
-    }
-
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-
-      setHighlightedIndex(
-        (prev) =>
-          prev > 0
-            ? prev - 1
-            : filteredItems.length - 1
-      );
-    }
-
-    if (e.key === "Enter") {
-      e.preventDefault();
-
-      const item =
-        filteredItems[
-          highlightedIndex
-        ];
-
-      if (item) {
-        selectItem(item);
+    const handleOutside = (event: MouseEvent) => {
+      if (
+        ref.current &&
+        !ref.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
       }
-    }
+    };
 
-    if (e.key === "Escape") {
-      e.preventDefault();
-      setOpen(false);
-    }
-  };
+    document.addEventListener("mousedown", handleOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+    };
+  }, []);
 
   return (
-    <div
-      ref={ref}
-      className={`relative ${
-        open
-          ? "z-[99999]"
-          : "z-20"
-      }`}
-    >
+    <div ref={ref} className="relative z-30">
       <button
         type="button"
-        onClick={() =>
-          setOpen((current) => !current)
-        }
-        className="flex min-h-11 items-center gap-2 border border-[#B9C4D1] bg-white px-3.5 text-xs font-semibold text-[#111827] outline-none transition-colors hover:border-[#0F5FC5] focus:border-[#0F5FC5] focus:ring-2 focus:ring-[#0F5FC5]/15 sm:text-sm"
+        onClick={() => setOpen((current) => !current)}
+        className="flex min-h-10 items-center gap-2 border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-bold text-[#111827] transition-colors hover:border-[#0F5FC5] focus:border-[#0F5FC5] focus:outline-none"
+        aria-expanded={open}
       >
-        <span className="font-bold text-[#0F5FC5]">
-          {label}:
-        </span>
-
-        <span className="max-w-[150px] truncate">
+        <span className="text-[#0F5FC5]">{label}</span>
+        <span className="max-w-[150px] truncate text-[#334155]">
           {value}
         </span>
-
-        <span
-          className={`text-[9px] text-[#0F5FC5] transition-transform ${
-            open
-              ? "rotate-180"
-              : ""
-          }`}
-        >
-          ▼
+        <span className="ml-1 text-[#E87512]">
+          {open ? "▲" : "▼"}
         </span>
       </button>
 
       {open && (
-        <div
-          className="absolute left-0 top-full z-[99999] mt-1 w-[260px] border border-[#B9C4D1] bg-white p-2 shadow-[0_18px_45px_rgba(17,24,39,0.16)]"
-        >
-          <div className="mb-2 flex items-center border border-[#D7DEE8] bg-[#F8FAFC] px-3 py-2">
-
-            <span className="mr-2 text-[10px] font-bold text-[#0F5FC5]">
-              SEARCH
-            </span>
-
+        <div className="absolute left-0 top-full mt-1 min-w-[240px] border border-[#CBD5E1] bg-white p-2 shadow-xl">
+          <div className="mb-2 border border-[#D7DEE8] bg-[#F8FAFC]">
             <input
-              ref={searchInputRef}
               type="text"
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-              onKeyDown={handleKeyDown}
-              placeholder="Type to search..."
-              className="min-w-0 flex-1 bg-transparent text-xs font-medium text-[#111827] outline-none placeholder:text-[#8A96A6]"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search..."
+              className="w-full bg-transparent px-3 py-2 text-xs font-medium text-[#111827] outline-none placeholder:text-[#94A3B8]"
             />
-
-            {search && (
-              <button
-                type="button"
-                onClick={() =>
-                  setSearch("")
-                }
-                className="px-1 text-xs font-bold text-[#687587] hover:text-[#0F5FC5]"
-              >
-                ×
-              </button>
-            )}
-
           </div>
 
-          <div
-            ref={listRef}
-            className="max-h-60 overflow-y-auto"
-          >
-
-            {filteredItems.length ===
-            0 ? (
-              <div className="p-4 text-center text-xs font-medium text-[#687587]">
-                No matching results
+          <div className="max-h-56 overflow-y-auto">
+            {filteredItems.length === 0 ? (
+              <div className="px-3 py-4 text-center text-xs font-medium text-[#64748B]">
+                No results found.
               </div>
             ) : (
-              filteredItems.map(
-                (item, index) => {
-                  const selected =
-                    value === item;
+              filteredItems.map((item) => {
+                const selected = item === value;
 
-                  const highlighted =
-                    highlightedIndex ===
-                    index;
-
-                  return (
-                    <button
-                      key={item}
-                      type="button"
-                      data-locator-item-index={
-                        index
-                      }
-                      onMouseEnter={() =>
-                        setHighlightedIndex(
-                          index
-                        )
-                      }
-                      onClick={() =>
-                        selectItem(item)
-                      }
-                      className={`flex w-full items-center justify-between border-b border-[#E9EDF2] px-3 py-3 text-left text-xs font-semibold last:border-b-0 sm:text-sm ${
-                        highlighted
-                          ? "bg-[#EFF6FF] text-[#0F5FC5]"
-                          : selected
-                          ? "bg-[#F8FAFC] text-[#111827]"
-                          : "bg-white text-[#374151] hover:bg-[#F8FAFC]"
-                      }`}
-                    >
-                      <span className="truncate">
-                        {item}
-                      </span>
-
-                      {selected && (
-                        <span className="ml-2 text-[#0F5FC5]">
-                          ✓
-                        </span>
-                      )}
-                    </button>
-                  );
-                }
-              )
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => {
+                      onSelect(item);
+                      setOpen(false);
+                      setSearch("");
+                    }}
+                    className={`flex w-full items-center justify-between border-b border-[#F1F5F9] px-3 py-2 text-left text-xs font-bold last:border-b-0 ${
+                      selected
+                        ? "bg-[#EFF6FF] text-[#0F5FC5]"
+                        : "text-[#334155] hover:bg-[#F8FAFC]"
+                    }`}
+                  >
+                    <span>{item}</span>
+                    {selected && (
+                      <span className="text-[#E87512]">✓</span>
+                    )}
+                  </button>
+                );
+              })
             )}
-
           </div>
         </div>
       )}
@@ -374,88 +159,44 @@ function LocatorDropdown({
 }
 
 export default function LocatorPage() {
-  const {
-    profile,
-    recommendation,
-  } = useJourney();
+  const { profile, recommendation } = useJourney();
 
-  const { t } =
-    useTranslation();
+  const [partners, setPartners] = useState<PartnerWithMeta[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [partners, setPartners] =
-    useState<PartnerWithMeta[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [
-    schemeFilter,
-    setSchemeFilter,
-  ] = useState<
+  const [schemeFilter, setSchemeFilter] = useState<
     SchemeId | "all"
-  >(
-    recommendation?.schemeId ??
-      "all"
-  );
+  >(recommendation?.schemeId ?? "all");
 
-  const [
-    typeFilter,
-    setTypeFilter,
-  ] = useState<
+  const [typeFilter, setTypeFilter] = useState<
     PartnerType | "all"
   >("all");
 
-  const [
-    districtFilter,
-    setDistrictFilter,
-  ] = useState<string>(
-    profile?.district ||
-      "Nandurbar"
+  const [districtFilter, setDistrictFilter] = useState(
+    profile?.district || "Nandurbar"
   );
 
-  const [
-    includeHighNpa,
-    setIncludeHighNpa,
-  ] = useState(false);
+  const [includeHighNpa, setIncludeHighNpa] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const [
-    selectedId,
-    setSelectedId,
-  ] = useState<string | null>(
-    null
-  );
+  const [geoLocating, setGeoLocating] = useState(false);
 
-  const [
-    geoLocating,
-    setGeoLocating,
-  ] = useState(false);
-
-  const [
-    userLocation,
-    setUserLocation,
-  ] = useState<{
+  const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
 
   const cardRefs = useRef<
-    Record<
-      string,
-      HTMLDivElement | null
-    >
+    Record<string, HTMLDivElement | null>
   >({});
 
-  const allDistricts =
-    useMemo(() => {
-      const list =
-        Object.values(
-          LOCATIONS
-        ).flat();
+  const allDistricts = useMemo(() => {
+    const locations = Object.values(LOCATIONS).flat();
 
-      return Array.from(
-        new Set(list)
-      );
-    }, []);
+    return Array.from(new Set(locations)).sort((a, b) =>
+      a.localeCompare(b)
+    );
+  }, []);
 
   const schemeOptions = [
     "All Schemes",
@@ -474,23 +215,15 @@ export default function LocatorPage() {
   ];
 
   const requestLocation = () => {
-    if (
-      !navigator.geolocation
-    ) {
-      return;
-    }
+    if (!navigator.geolocation) return;
 
     setGeoLocating(true);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setUserLocation({
-          lat:
-            position.coords
-              .latitude,
-          lng:
-            position.coords
-              .longitude,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
         });
 
         setGeoLocating(false);
@@ -506,223 +239,152 @@ export default function LocatorPage() {
   };
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadPartners() {
       setLoading(true);
 
       try {
-        const query =
-          new URLSearchParams();
+        const query = new URLSearchParams();
 
-        if (
-          schemeFilter !== "all"
-        ) {
-          query.set(
-            "scheme",
-            schemeFilter
-          );
+        if (schemeFilter !== "all") {
+          query.set("scheme", schemeFilter);
         }
 
-        if (
-          typeFilter !== "all"
-        ) {
-          query.set(
-            "type",
-            typeFilter
-          );
+        if (typeFilter !== "all") {
+          query.set("type", typeFilter);
         }
 
         if (
           districtFilter &&
           districtFilter !== "All"
         ) {
-          query.set(
-            "district",
-            districtFilter
-          );
+          query.set("district", districtFilter);
         }
 
         if (includeHighNpa) {
-          query.set(
-            "includeHighNpa",
-            "true"
-          );
+          query.set("includeHighNpa", "true");
         }
 
         if (userLocation) {
-          query.set(
-            "userLat",
-            String(
-              userLocation.lat
-            )
-          );
-
-          query.set(
-            "userLng",
-            String(
-              userLocation.lng
-            )
-          );
+          query.set("userLat", String(userLocation.lat));
+          query.set("userLng", String(userLocation.lng));
         } else if (
           districtFilter &&
-          DISTRICT_COORDS[
-            districtFilter
-          ]
+          DISTRICT_COORDS[districtFilter]
         ) {
-          const coords =
-            DISTRICT_COORDS[
-              districtFilter
-            ];
+          const coordinates =
+            DISTRICT_COORDS[districtFilter];
 
-          query.set(
-            "userLat",
-            String(coords.lat)
-          );
-
-          query.set(
-            "userLng",
-            String(coords.lng)
-          );
+          query.set("userLat", String(coordinates.lat));
+          query.set("userLng", String(coordinates.lng));
         }
 
-        const response =
-          await fetch(
-            `/api/partners?${query.toString()}`
-          );
+        const response = await fetch(
+          `/api/partners?${query.toString()}`
+        );
 
         if (!response.ok) {
-          throw new Error(
-            "Failed to load partners"
-          );
+          throw new Error("Failed to load partners");
         }
 
-        const json =
-          await response.json();
+        const json = await response.json();
 
-        const list =
-          (json.partners ||
-            []) as PartnerWithMeta[];
+        const list = (json.partners || []) as PartnerWithMeta[];
 
-        list.sort(
-          (a, b) => {
-            if (
-              a.distanceKm >= 0 &&
-              b.distanceKm >= 0
-            ) {
-              return (
-                a.distanceKm -
-                b.distanceKm
-              );
-            }
-
-            if (
-              a.distanceKm >= 0
-            ) {
-              return -1;
-            }
-
-            if (
-              b.distanceKm >= 0
-            ) {
-              return 1;
-            }
-
-            return (
-              a.npaPercent -
-              b.npaPercent
-            );
+        list.sort((a, b) => {
+          if (
+            a.distanceKm >= 0 &&
+            b.distanceKm >= 0
+          ) {
+            return a.distanceKm - b.distanceKm;
           }
-        );
+
+          if (a.distanceKm >= 0) return -1;
+          if (b.distanceKm >= 0) return 1;
+
+          return a.npaPercent - b.npaPercent;
+        });
+
+        if (cancelled) return;
 
         setPartners(list);
 
-        setSelectedId(
-          (current) =>
+        setSelectedId((current) => {
+          if (
             current &&
-            list.some(
-              (partner) =>
-                partner.id ===
-                current
-            )
-              ? current
-              : list[0]?.id ??
-                null
-        );
+            list.some((partner) => partner.id === current)
+          ) {
+            return current;
+          }
+
+          return list.length > 0 ? list[0].id : null;
+        });
       } catch {
-        setPartners([]);
-        setSelectedId(null);
+        if (!cancelled) {
+          setPartners([]);
+          setSelectedId(null);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadPartners();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     schemeFilter,
     typeFilter,
     districtFilter,
     includeHighNpa,
     userLocation,
-  ]);const nearbyPartners =
-          partners.filter(
-            (partner) =>
-              partner.distanceKm >= 0 &&
-              partner.distanceKm <= 500
-          );
+  ]);
 
-        if (
-          nearbyPartners.length > 0
-        ) {
-          if (
-            selectedId &&
-            !nearbyPartners.some(
-              (partner) =>
-                partner.id ===
-                selectedId
-            )
-          ) {
-            const selected =
-              partners.find(
-                (partner) =>
-                  partner.id ===
-                  selectedId
-              );
-
-            if (selected) {
-              return [
-                selected,
-                ...nearbyPartners,
-              ];
-            }
-          }
-
-          return nearbyPartners;
-        }
-
-        return partners.slice(0, 30);
-      },
-      [
-        partners,
-        selectedId,
-      ]
+  const displayList = useMemo(() => {
+    const nearby = partners.filter(
+      (partner) =>
+        partner.distanceKm >= 0 &&
+        partner.distanceKm <= 500
     );
+
+    if (nearby.length > 0) {
+      if (
+        selectedId &&
+        !nearby.some(
+          (partner) => partner.id === selectedId
+        )
+      ) {
+        const selected = partners.find(
+          (partner) => partner.id === selectedId
+        );
+
+        if (selected) {
+          return [selected, ...nearby];
+        }
+      }
+
+      return nearby;
+    }
+
+    return partners.slice(0, 30);
+  }, [partners, selectedId]);
 
   const mapCenter = useMemo(() => {
     if (selectedId) {
-      const selected =
-        partners.find(
-          (partner) =>
-            partner.id ===
-            selectedId
-        );
+      const selected = partners.find(
+        (partner) => partner.id === selectedId
+      );
 
       if (selected) {
         return [
           selected.lat,
           selected.lng,
-        ] as [
-          number,
-          number
-        ];
+        ] as [number, number];
       }
     }
 
@@ -730,39 +392,23 @@ export default function LocatorPage() {
       return [
         userLocation.lat,
         userLocation.lng,
-      ] as [
-        number,
-        number
-      ];
+      ] as [number, number];
     }
 
     if (
       districtFilter &&
-      DISTRICT_COORDS[
-        districtFilter
-      ]
+      DISTRICT_COORDS[districtFilter]
     ) {
-      const coords =
-        DISTRICT_COORDS[
-          districtFilter
-        ];
+      const coordinates =
+        DISTRICT_COORDS[districtFilter];
 
       return [
-        coords.lat,
-        coords.lng,
-      ] as [
-        number,
-        number
-      ];
+        coordinates.lat,
+        coordinates.lng,
+      ] as [number, number];
     }
 
-    return [
-      20.5937,
-      78.9629,
-    ] as [
-      number,
-      number
-    ];
+    return [20.5937, 78.9629] as [number, number];
   }, [
     selectedId,
     userLocation,
@@ -770,571 +416,346 @@ export default function LocatorPage() {
     partners,
   ]);
 
-  const handleSelectPartner = (
-    id: string | null
-  ) => {
+  const handleSelectPartner = (id: string | null) => {
     setSelectedId(id);
 
-    if (
-      id &&
-      cardRefs.current[id]
-    ) {
-      cardRefs.current[
-        id
-      ]?.scrollIntoView({
+    if (id && cardRefs.current[id]) {
+      cardRefs.current[id]?.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
       });
     }
   };
 
-  return (
-    <main className="min-h-screen overflow-x-hidden bg-[#F7F9FC] text-[#111827]">
-
-      <section className="border-b border-[#D7DEE8] bg-white">
-
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0F5FC5]">
-            NIRVAAN
-          </p>
-
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#111827] sm:text-3xl md:text-4xl">
-            {t("loc_title")}
-          </h1>
-
-          <p className="mt-2 max-w-3xl text-xs font-normal leading-5 text-[#687587] sm:text-sm">
-            {t("loc_sub")}
-          </p>
-
-        </div>
-
-      </section>
-
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-
-        <section className="relative z-40 border border-[#CBD5E1] bg-white">
-
-          <div className="border-b border-[#D7DEE8] bg-[#F8FAFC] px-4 py-4 sm:px-5">
-
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
-              Search & filters
+  const getHealthLabel = (
+    status: PartnerWithMeta["healthStatus"]
+  ) => {
+    if (status === "green") return "Healthy";
+    if (status === "yellow") return "Watchlist";
+    return "High NPA";
+  };   return (
+    <div className="min-h-screen bg-white px-4 py-8 text-[#111827] sm:px-6 sm:py-12">
+      <div className="mx-auto max-w-7xl">
+        {/* Page Header */}
+        <header className="border-b border-[#D7DEE8] pb-7">
+          <div className="border-l-4 border-[#0F5FC5] pl-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0F5FC5]">
+              NIRVAAN
             </p>
 
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#111827] sm:text-4xl">
+              Partner Locator
+            </h1>
+
+            <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-[#64748B]">
+              Find eligible channel partners, banks and agencies
+              supporting government scheme applications.
+            </p>
           </div>
+        </header>
 
-          <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-
+        {/* Filters */}
+        <section className="relative z-40 mt-6 border border-[#D7DEE8] bg-[#F8FAFC] p-4 sm:p-5">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex flex-wrap gap-2">
-
               <LocatorDropdown
                 label="Scheme"
                 value={
-                  schemeFilter ===
-                  "all"
+                  schemeFilter === "all"
                     ? "All Schemes"
-                    : SCHEME_LABELS[
-                        schemeFilter
-                      ]
+                    : SCHEME_LABELS[schemeFilter]
                 }
-                items={
-                  schemeOptions
-                }
-                onSelect={(
-                  value
-                ) => {
-                  if (
-                    value ===
-                    "Micro Finance"
-                  ) {
-                    setSchemeFilter(
-                      "micro-finance"
-                    );
-                  } else if (
-                    value ===
-                    "Term Loan"
-                  ) {
-                    setSchemeFilter(
-                      "term-loan"
-                    );
-                  } else if (
-                    value ===
-                    "Education Loan"
-                  ) {
-                    setSchemeFilter(
-                      "education-loan"
-                    );
+                items={schemeOptions}
+                onSelect={(value) => {
+                  if (value === "Micro Finance") {
+                    setSchemeFilter("micro-finance");
+                  } else if (value === "Term Loan") {
+                    setSchemeFilter("term-loan");
+                  } else if (value === "Education Loan") {
+                    setSchemeFilter("education-loan");
                   } else {
-                    setSchemeFilter(
-                      "all"
-                    );
+                    setSchemeFilter("all");
                   }
                 }}
               />
 
               <LocatorDropdown
-                label={t(
-                  "loc_type_lbl"
-                )}
+                label="Type"
                 value={
-                  typeFilter ===
-                  "all"
+                  typeFilter === "all"
                     ? "All Types"
-                    : TYPE_LABELS[
-                        typeFilter
-                      ]
+                    : TYPE_LABELS[typeFilter]
                 }
-                items={
-                  typeOptions
-                }
-                onSelect={(
-                  value
-                ) => {
-                  if (
-                    value ===
-                    "PSU Bank"
-                  ) {
-                    setTypeFilter(
-                      "public-sector-bank"
-                    );
-                  } else if (
-                    value ===
-                    "Private Bank"
-                  ) {
-                    setTypeFilter(
-                      "private-bank"
-                    );
-                  } else if (
-                    value ===
-                    "NBFC"
-                  ) {
-                    setTypeFilter(
-                      "nbfc"
-                    );
-                  } else if (
-                    value ===
-                    "Govt. Agency"
-                  ) {
-                    setTypeFilter(
-                      "regional-agency"
-                    );
-                  } else if (
-                    value ===
-                    "Co-op Bank"
-                  ) {
-                    setTypeFilter(
-                      "cooperative"
-                    );
+                items={typeOptions}
+                onSelect={(value) => {
+                  if (value === "PSU Bank") {
+                    setTypeFilter("public-sector-bank");
+                  } else if (value === "Private Bank") {
+                    setTypeFilter("private-bank");
+                  } else if (value === "NBFC") {
+                    setTypeFilter("nbfc");
+                  } else if (value === "Govt. Agency") {
+                    setTypeFilter("regional-agency");
+                  } else if (value === "Co-op Bank") {
+                    setTypeFilter("cooperative");
                   } else {
-                    setTypeFilter(
-                      "all"
-                    );
+                    setTypeFilter("all");
                   }
                 }}
               />
 
               <LocatorDropdown
-                label={t(
-                  "loc_dist_lbl"
-                )}
-                value={
-                  districtFilter ||
-                  "All"
-                }
-                items={[
-                  "All",
-                  ...allDistricts,
-                ]}
-                onSelect={(
-                  value
-                ) =>
+                label="District"
+                value={districtFilter || "All"}
+                items={["All", ...allDistricts]}
+                onSelect={(value) =>
                   setDistrictFilter(
-                    value === "All"
-                      ? ""
-                      : value
+                    value === "All" ? "" : value
                   )
                 }
               />
-
             </div>
 
-            <div className="flex flex-wrap gap-2">
-
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={
-                  requestLocation
-                }
-                disabled={
-                  geoLocating
-                }
-                className="min-h-11 border border-[#E87512] bg-[#E87512] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#C95F0A] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                onClick={requestLocation}
+                disabled={geoLocating}
+                className="border border-[#E87512] bg-[#E87512] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#C95F08] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {geoLocating
                   ? "Locating..."
-                  : t(
-                      "loc_near_me"
-                    )}
+                  : "Use My Location"}
               </button>
 
-              <label className="flex min-h-11 cursor-pointer items-center gap-2 border border-[#B9C4D1] bg-white px-4 text-xs font-semibold text-[#374151]">
-
+              <label className="flex cursor-pointer items-center gap-2 border border-[#CBD5E1] bg-white px-3 py-2.5 text-xs font-bold text-[#334155]">
                 <input
                   type="checkbox"
-                  checked={
-                    includeHighNpa
+                  checked={includeHighNpa}
+                  onChange={(event) =>
+                    setIncludeHighNpa(event.target.checked)
                   }
-                  onChange={(
-                    event
-                  ) =>
-                    setIncludeHighNpa(
-                      event.target
-                        .checked
-                    )
-                  }
-                  className="h-4 w-4 accent-[#0F5FC5]"
+                  className="h-4 w-4 cursor-pointer accent-[#0F5FC5]"
                 />
-
-                <span>
-                  {t(
-                    "loc_show_npa"
-                  )}
-                </span>
-
+                <span>Show high NPA</span>
               </label>
-
             </div>
-
           </div>
-
         </section>
 
-        <div className="flex flex-col gap-2 border-x border-b border-[#CBD5E1] bg-white px-4 py-4 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        {/* Results Summary */}
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="border-l-4 border-[#0F5FC5] bg-[#F8FAFC] px-4 py-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#64748B]">
+              Nearby branches
+            </p>
+            <p className="mt-1 text-xl font-extrabold text-[#111827]">
+              {displayList.length}
+            </p>
+            <p className="text-xs font-medium text-[#64748B]">
+              Within 500 km
+            </p>
+          </div>
 
-          <p className="font-semibold text-[#526071]">
-            <span className="font-bold text-[#0F5FC5]">
-              {
-                displayList.length
-              }
-            </span>{" "}
-            nearby branches within
-            500 km
-          </p>
-
-          <p className="font-normal text-[#687587]">
-            <span className="font-semibold text-[#111827]">
+          <div className="border-l-4 border-[#E87512] bg-[#FFF7ED] px-4 py-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#9A5B20]">
+              India network
+            </p>
+            <p className="mt-1 text-xl font-extrabold text-[#111827]">
               {partners.length}
-            </span>{" "}
-            offices available
-            across India
-          </p>
-
+            </p>
+            <p className="text-xs font-medium text-[#64748B]">
+              Offices shown on map
+            </p>
+          </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.15fr]">
-
-          <section className="border border-[#CBD5E1] bg-white">
-
-            <div className="border-b border-[#D7DEE8] bg-[#F8FAFC] px-5 py-4">
-
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
-                Partner network
-              </p>
-
-              <h2 className="mt-1 text-base font-semibold text-[#111827] sm:text-lg">
-                Nearby application
-                offices
+        {/* Main Content */}
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+          {/* Partner List */}
+          <section className="min-w-0">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-base font-extrabold text-[#111827]">
+                Nearby Partners
               </h2>
 
+              <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
+                Nearest first
+              </span>
             </div>
 
-            <div className="max-h-[620px] overflow-y-auto p-3">
-
+            <div className="max-h-[620px] space-y-3 overflow-y-auto pr-1">
               {loading ? (
-
-                <div className="flex h-64 items-center justify-center border border-[#E5EAF0] bg-[#F8FAFC]">
-
+                <div className="flex h-64 items-center justify-center border border-[#D7DEE8] bg-[#F8FAFC]">
                   <div className="text-center">
-
-                    <div className="mx-auto h-7 w-7 animate-spin border-2 border-[#D7DEE8] border-t-[#0F5FC5]" />
-
-                    <p className="mt-4 text-xs font-semibold text-[#687587]">
-                      Finding partner
-                      branches...
+                    <div className="mx-auto mb-4 h-8 w-8 animate-spin border-4 border-[#D7DEE8] border-t-[#0F5FC5]" />
+                    <p className="text-sm font-bold text-[#0F5FC5]">
+                      Finding partner branches...
                     </p>
-
                   </div>
-
                 </div>
-
-              ) : displayList.length ===
-                0 ? (
-
-                <div className="flex h-64 flex-col items-center justify-center border border-[#E5EAF0] bg-[#F8FAFC] p-6 text-center">
-
-                  <p className="text-sm font-semibold text-[#111827]">
-                    No partner
-                    branches found.
+              ) : displayList.length === 0 ? (
+                <div className="border border-[#D7DEE8] bg-[#F8FAFC] p-8 text-center">
+                  <p className="text-base font-extrabold text-[#111827]">
+                    No matching partner branches found.
                   </p>
 
-                  <p className="mt-2 text-xs font-normal leading-5 text-[#687587]">
-                    Try changing
-                    the scheme,
-                    partner type,
-                    or district
-                    filter.
+                  <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+                    Try changing the district, scheme or partner
+                    type filter.
                   </p>
-
                 </div>
-
               ) : (
+                displayList.map((partner, index) => {
+                  const selected =
+                    selectedId === partner.id;
 
-                <div className="space-y-3">
-
-                  {displayList.map(
-                    (
-                      partner,
-                      index
-                    ) => {
-
-                      const selected =
-                        selectedId ===
-                        partner.id;
-
-                      return (
-                        <article
-                          key={
-                            partner.id
-                          }
-                          ref={(
-                            element
-                          ) => {
-                            cardRefs.current[
-                              partner.id
-                            ] =
-                              element;
-                          }}
-                          onClick={() =>
-                            handleSelectPartner(
-                              partner.id
-                            )
-                          }
-                          className={`cursor-pointer border p-4 transition-colors ${
-                            selected
-                              ? "border-[#E87512] bg-[#FFF7ED]"
-                              : "border-[#D7DEE8] bg-white hover:border-[#0F5FC5] hover:bg-[#F8FAFC]"
-                          }`}
-                        >
-
-                          <div className="flex items-start justify-between gap-3">
-
-                            <div className="min-w-0">
-
-                              <div className="flex flex-wrap items-center gap-2">
-
-                                {index ===
-                                  0 && (
-                                  <span className="border border-[#0F5FC5] bg-[#EFF6FF] px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-[#0F5FC5]">
-                                    {
-                                      t(
-                                        "loc_nearest_badge"
-                                      )
-                                    }
-                                  </span>
-                                )}
-
-                                <h3 className="text-sm font-extrabold leading-tight text-[#111827] sm:text-base">
-                                  {
-                                    partner.name
-                                  }
-                                </h3>
-
-                              </div>
-
-                              <p className="mt-1 text-xs font-normal text-[#687587]">
-                                {
-                                  partner.city
-                                }{" "}
-                                ·{" "}
-                                <span className="font-semibold text-[#374151]">
-                                  {
-                                    partner.district
-                                  }
-                                  ,{" "}
-                                  {
-                                    partner.state
-                                  }
-                                </span>
-                              </p>
-
-                            </div>
-
-                            <span
-                              className={`flex-none border px-2 py-1 text-[9px] font-bold uppercase ${
-                                partner.healthStatus ===
-                                "green"
-                                  ? "border-[#86BFA0] bg-[#EEF8F2] text-[#287548]"
-                                  : partner.healthStatus ===
-                                    "yellow"
-                                  ? "border-[#D6B66A] bg-[#FFF8E7] text-[#8A6200]"
-                                  : "border-[#D99A9A] bg-[#FEF2F2] text-[#A52A2A]"
-                              }`}
-                            >
-                              {partner.healthStatus ===
-                              "green"
-                                ? "Healthy"
-                                : partner.healthStatus ===
-                                  "yellow"
-                                ? "Watchlist"
-                                : "High NPA"}
-                            </span>
-
-                          </div>
-
-                          <p className="mt-3 text-xs font-normal leading-5 text-[#526071]">
-                            {
-                              partner.address
-                            }
-
-                            {partner.pincode &&
-                              ` — ${partner.pincode}`}
-                          </p>
-
-                          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#E5EAF0] pt-3">
-
-                            <div className="flex flex-wrap items-center gap-2">
-
-                              <span className="border border-[#D7DEE8] bg-[#F8FAFC] px-2.5 py-1 text-[10px] font-semibold text-[#526071]">
-                                {
-                                  TYPE_LABELS[
-                                    partner
-                                      .type
-                                  ]
-                                }
+                  return (
+                    <article
+                      key={partner.id}
+                      ref={(element) => {
+                        cardRefs.current[partner.id] = element;
+                      }}
+                      onClick={() =>
+                        handleSelectPartner(partner.id)
+                      }
+                      className={`cursor-pointer border bg-white p-5 transition-colors ${
+                        selected
+                          ? "border-[#0F5FC5] border-l-4 bg-[#F8FBFF]"
+                          : "border-[#D7DEE8] hover:border-[#94A3B8]"
+                      }`}
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {index === 0 && (
+                              <span className="border border-[#0F5FC5] bg-[#EFF6FF] px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.08em] text-[#0F5FC5]">
+                                Nearest
                               </span>
+                            )}
 
-                              {typeof partner.distanceKm ===
-                                "number" &&
-                                partner.distanceKm >=
-                                  0 && (
-                                  <span className="text-[10px] font-semibold text-[#0F5FC5]">
-                                    {
-                                      partner.distanceKm.toFixed(
-                                        1
-                                      )
-                                    }{" "}
-                                    km away
-                                  </span>
-                                )}
-
-                            </div>
-
-                            <div className="flex gap-2">
-
-                              {partner.phone && (
-                                <a
-                                  href={`tel:${partner.phone}`}
-                                  onClick={(
-                                    event
-                                  ) =>
-                                    event.stopPropagation()
-                                  }
-                                  className="border border-[#B9C4D1] bg-white px-3 py-1.5 text-[10px] font-semibold text-[#0F5FC5] transition-colors hover:bg-[#EFF6FF]"
-                                >
-                                  {t(
-                                    "loc_call"
-                                  )}
-                                </a>
-                              )}
-
-                              <a
-                                href={`https://www.google.com/maps/dir/?api=1&destination=${partner.lat},${partner.lng}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                onClick={(
-                                  event
-                                ) =>
-                                  event.stopPropagation()
-                                }
-                                className="border border-[#0F5FC5] bg-[#0F5FC5] px-3 py-1.5 text-[10px] font-semibold text-white transition-colors hover:bg-[#0B4FA7]"
-                              >
-                                {t(
-                                  "loc_directions"
-                                )}
-                              </a>
-
-                            </div>
-
+                            <h3 className="text-base font-extrabold leading-5 text-[#111827]">
+                              {partner.name}
+                            </h3>
                           </div>
 
-                        </article>
-                      );
-                    }
-                  )}
+                          <p className="mt-2 text-xs font-medium text-[#64748B]">
+                            {partner.city} ·{" "}
+                            <span className="font-bold text-[#334155]">
+                              {partner.district},{" "}
+                              {partner.state}
+                            </span>
+                          </p>
+                        </div>
 
-                </div>
+                        <span
+                          className={`shrink-0 border px-2.5 py-1 text-[10px] font-extrabold uppercase ${HEALTH_STYLES[partner.healthStatus]}`}
+                        >
+                          {getHealthLabel(
+                            partner.healthStatus
+                          )}{" "}
+                          ({partner.npaPercent}% NPA)
+                        </span>
+                      </div>
 
+                      <p className="mt-3 text-xs font-medium leading-5 text-[#475569]">
+                        {partner.address}
+                        {partner.pincode
+                          ? ` - ${partner.pincode}`
+                          : ""}
+                      </p>
+
+                      <div className="mt-4 flex flex-col gap-3 border-t border-[#E5E7EB] pt-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="border border-[#CBD5E1] bg-[#F8FAFC] px-2.5 py-1 text-[10px] font-bold text-[#475569]">
+                            {TYPE_LABELS[partner.type]}
+                          </span>
+
+                          {typeof partner.distanceKm ===
+                            "number" &&
+                            partner.distanceKm >= 0 && (
+                              <span className="text-[11px] font-bold text-[#0F5FC5]">
+                                {partner.distanceKm.toFixed(1)} km
+                                away
+                              </span>
+                            )}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          {partner.phone && (
+                            <a
+                              href={`tel:${partner.phone}`}
+                              onClick={(event) =>
+                                event.stopPropagation()
+                              }
+                              className="border border-[#0F5FC5] bg-white px-3 py-1.5 text-[11px] font-bold text-[#0F5FC5] transition-colors hover:bg-[#EFF6FF]"
+                            >
+                              Call
+                            </a>
+                          )}
+
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${partner.lat},${partner.lng}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(event) =>
+                              event.stopPropagation()
+                            }
+                            className="border border-[#E87512] bg-[#E87512] px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-[#C95F08]"
+                          >
+                            Directions
+                          </a>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })
               )}
-
             </div>
+          </section>
 
-          </section><section className="border border-[#CBD5E1] bg-white">
-
-            <div className="border-b border-[#D7DEE8] bg-[#F8FAFC] px-5 py-4">
-
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
-                Location map
-              </p>
-
-              <h2 className="mt-1 text-base font-semibold text-[#111827] sm:text-lg">
-                Partner network across India
+          {/* Map */}
+          <section className="min-w-0">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-base font-extrabold text-[#111827]">
+                Partner Network Map
               </h2>
 
+              <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
+                India
+              </span>
             </div>
 
-            <div className="h-[480px] overflow-hidden sm:h-[620px]">
-
+            <div className="relative h-[480px] overflow-hidden border border-[#CBD5E1] bg-[#F8FAFC] lg:h-[620px]">
               <MapClient
                 partners={partners}
                 center={mapCenter}
-                zoom={
-                  selectedId ? 14 : 7
-                }
+                zoom={selectedId ? 14 : 7}
                 selectedId={selectedId}
-                userLocation={
-                  userLocation
-                }
-                onSelect={
-                  handleSelectPartner
-                }
+                userLocation={userLocation}
+                onSelect={handleSelectPartner}
               />
-
             </div>
-
           </section>
-
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-
-          <Link
-            href="/wizard"
-            className="inline-flex min-h-11 items-center justify-center border border-[#B9C4D1] bg-white px-6 text-xs font-semibold text-[#374151] transition-colors hover:border-[#0F5FC5] hover:bg-[#F8FAFC] hover:text-[#0F5FC5] sm:text-sm"
-          >
-            ← Reassess eligibility
-          </Link>
-
+        {/* Bottom navigation */}
+        <div className="mt-8 grid grid-cols-1 gap-3 border-t border-[#D7DEE8] pt-6 sm:grid-cols-2">
           <Link
             href="/checklist"
-            className="inline-flex min-h-11 items-center justify-center border border-[#0F5FC5] bg-[#0F5FC5] px-6 text-xs font-semibold text-white transition-colors hover:bg-[#0B4FA7] sm:text-sm"
+            className="border border-[#CBD5E1] bg-white px-5 py-3 text-center text-sm font-bold text-[#334155] transition-colors hover:bg-[#F8FAFC]"
           >
-            View document checklist →
+            ← Document Checklist
           </Link>
 
+          <Link
+            href="/calculator"
+            className="border border-[#0F5FC5] bg-[#0F5FC5] px-5 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-[#0B4FA7]"
+          >
+            Loan Calculator →
+          </Link>
         </div>
-
       </div>
-
-    </main>
+    </div>
   );
-}
+                          }
