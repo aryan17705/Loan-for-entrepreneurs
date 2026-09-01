@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
+
 import PrintButton from "@/components/PrintButton";
 import { SCHEMES } from "@/lib/schemes";
 import type { SchemeId } from "@/lib/types";
-import SiteBackground from "@/components/SiteBackground";
 import { useTranslation } from "@/context/LanguageContext";
+
+/* =========================================================
+   COMMON DOCUMENTS
+   ========================================================= */
 
 const COMMON_DOCS = [
   "Aadhaar card (linked with mobile number)",
@@ -16,9 +20,21 @@ const COMMON_DOCS = [
   "Recent passport-size photographs (4–6)",
 ];
 
-const SCHEME_DOCS: Record<SchemeId, { title: string; docs: string[] }> = {
+/* =========================================================
+   SCHEME-SPECIFIC DOCUMENTS
+   ========================================================= */
+
+const SCHEME_DOCS: Record<
+  SchemeId,
+  {
+    title: string;
+    docs: string[];
+  }
+> = {
   "micro-finance": {
-    title: "Micro Finance Scheme & Mahila Samriddhi — Additional Requirements",
+    title:
+      "Micro Finance Scheme & Mahila Samriddhi - Additional Requirements",
+
     docs: [
       "Proof of Self-Help Group (SHG) / Joint Liability Group (JLG) membership",
       "Group resolution copy recommending the beneficiary",
@@ -26,8 +42,11 @@ const SCHEME_DOCS: Record<SchemeId, { title: string; docs: string[] }> = {
       "2 valid quotations for milch cattle / tools / stock purchase",
     ],
   },
+
   "term-loan": {
-    title: "Term Loan Scheme (TLS) — Additional Requirements",
+    title:
+      "Term Loan Scheme (TLS) - Additional Requirements",
+
     docs: [
       "Detailed Project Report (DPR) with cashflow projections",
       "Udyam MSME Registration certificate (if applicable)",
@@ -37,8 +56,11 @@ const SCHEME_DOCS: Record<SchemeId, { title: string; docs: string[] }> = {
       "Technical skill certificate or prior experience proof in the trade",
     ],
   },
+
   "education-loan": {
-    title: "Educational Loan Scheme (ELS) — Additional Requirements",
+    title:
+      "Educational Loan Scheme (ELS) - Additional Requirements",
+
     docs: [
       "Confirmed Admission Letter from recognized University / College",
       "Institutional breakdown of total tuition, hostel & exam fees",
@@ -50,112 +72,242 @@ const SCHEME_DOCS: Record<SchemeId, { title: string; docs: string[] }> = {
   },
 };
 
+/* =========================================================
+   DOCUMENT CHECKBOX
+   ========================================================= */
+
+function DocumentItem({
+  id,
+  text,
+}: {
+  id: string;
+  text: string;
+}) {
+  return (
+    <label
+      htmlFor={id}
+      className="flex cursor-pointer items-start gap-3 border-b border-[#E9EDF2] bg-white px-4 py-3 transition-colors last:border-b-0 hover:bg-[#F8FAFC]"
+    >
+      <input
+        id={id}
+        type="checkbox"
+        className="mt-0.5 h-4 w-4 flex-none accent-[#0F5FC5]"
+      />
+
+      <span className="text-xs font-medium leading-5 text-[#374151] sm:text-sm">
+        {text}
+      </span>
+    </label>
+  );
+}
+
+/* =========================================================
+   CHECKLIST PAGE
+   ========================================================= */
+
 export default function ChecklistPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="relative min-h-screen text-white overflow-x-hidden py-8 sm:py-12 bg-[#0B0F19]" style={{ color: "#FFFFFF" }}>
-      {/* Dark Ambient Background with DotGrid Texture */}
-      <SiteBackground interactive={false} />
+    <main className="min-h-screen overflow-x-hidden bg-[#F7F9FC] text-[#111827]">
 
-      {/* Foreground Content */}
-      <div className="relative z-10 mx-auto max-w-3xl px-3.5 sm:px-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 print:block">
-          <div>
-            <span className="inline-block rounded-full liquid-glass-active px-3.5 py-1 text-xs font-bold tracking-wide text-[#FED7AA] uppercase shadow-lg shadow-orange-950/30" style={{ color: "#FED7AA" }}>
-              {t("chk_tag")}
-            </span>
-            <h1 className="mt-2.5 text-2xl sm:text-3xl font-extrabold text-white tracking-tight md:text-4xl" style={{ color: "#FFFFFF" }}>
-              {t("chk_title")}
-            </h1>
-            <p className="mt-1 text-xs sm:text-sm text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
-              {t("chk_sub")}
+      {/* ===================================================
+          HEADER
+          =================================================== */}
+
+      <section className="border-b border-[#D7DEE8] bg-white">
+
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+
+            <div>
+
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#0F5FC5]">
+                NIRVAAN
+              </p>
+
+              <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#111827] sm:text-3xl md:text-4xl">
+                {t("chk_title")}
+              </h1>
+
+              <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#687587] sm:text-sm">
+                {t("chk_sub")}
+              </p>
+
+            </div>
+
+            {/* PRINT BUTTON */}
+
+            <div className="print:hidden">
+              <PrintButton />
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ===================================================
+          MAIN CONTENT
+          =================================================== */}
+
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
+
+        {/* =================================================
+            COMMON DOCUMENTS
+            ================================================= */}
+
+        <section className="border border-[#CBD5E1] bg-white">
+
+          <div className="border-b border-[#D7DEE8] bg-[#F8FAFC] px-5 py-5 sm:px-7">
+
+            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
+              Required for most applications
             </p>
-          </div>
-          <div className="print:hidden">
-            <PrintButton />
-          </div>
-        </div>
 
-        {/* Common Documents with Liquid Glass */}
-        <div className="mt-8 rounded-3xl liquid-glass p-5 sm:p-7 md:p-8 shadow-2xl">
-          <h2 className="text-base sm:text-lg font-bold text-white mb-4 flex items-center gap-2" style={{ color: "#FFFFFF" }}>
-            <span>🏛️</span>
-            <span>{t("chk_mandatory")}</span>
-          </h2>
-          <ul className="space-y-3">
-            {COMMON_DOCS.map((d, i) => (
-              <li key={i} className="flex items-start gap-3 text-xs sm:text-sm">
-                <input
-                  type="checkbox"
-                  id={`common-${i}`}
-                  className="mt-0.5 h-4 w-4 rounded accent-[#F97316] flex-none cursor-pointer"
+            <h2 className="mt-1 text-base font-bold text-[#111827] sm:text-lg">
+              {t("chk_mandatory")}
+            </h2>
+
+          </div>
+
+          <div>
+
+            {COMMON_DOCS.map(
+              (doc, index) => (
+                <DocumentItem
+                  key={index}
+                  id={`common-${index}`}
+                  text={doc}
                 />
-                <label htmlFor={`common-${i}`} className="text-slate-100 font-medium cursor-pointer leading-relaxed" style={{ color: "#F1F5F9" }}>
-                  {d}
-                </label>
-              </li>
-            ))}
-          </ul>
-        </div>
+              )
+            )}
 
-        {/* Scheme-Specific Documents */}
-        <div className="mt-6 space-y-6">
-          {(Object.keys(SCHEME_DOCS) as SchemeId[]).map((sid) => {
-            const spec = SCHEME_DOCS[sid];
-            const s = SCHEMES[sid];
+          </div>
+
+        </section>
+
+        {/* =================================================
+            SCHEME-SPECIFIC DOCUMENTS
+            ================================================= */}
+
+        <div className="mt-6 space-y-5">
+
+          {(
+            Object.keys(
+              SCHEME_DOCS
+            ) as SchemeId[]
+          ).map((sid) => {
+
+            const spec =
+              SCHEME_DOCS[sid];
+
+            const scheme =
+              SCHEMES[sid];
+
             return (
-              <div key={sid} className="rounded-3xl liquid-glass p-5 sm:p-7 md:p-8 shadow-2xl">
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-                  <h3 className="text-base sm:text-lg font-bold text-white" style={{ color: "#FFFFFF" }}>
-                    {spec.title}
-                  </h3>
-                  <span className="rounded-full liquid-glass-inner px-3 py-1 text-xs font-bold text-[#FED7AA]" style={{ color: "#FED7AA" }}>
-                    {s.rate}% p.a.
+              <section
+                key={sid}
+                className="border border-[#CBD5E1] bg-white"
+              >
+
+                <div className="flex flex-col gap-3 border-b border-[#D7DEE8] bg-[#F8FAFC] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+
+                  <div>
+
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#E87512]">
+                      Scheme-specific documents
+                    </p>
+
+                    <h2 className="mt-1 text-base font-bold leading-6 text-[#111827] sm:text-lg">
+                      {spec.title}
+                    </h2>
+
+                  </div>
+
+                  <span className="w-fit border border-[#E87512] bg-[#FFF7ED] px-3 py-1.5 text-xs font-bold text-[#B45309]">
+                    {scheme.rate}% p.a.
                   </span>
+
                 </div>
-                <ul className="space-y-3">
-                  {spec.docs.map((d, i) => (
-                    <li key={i} className="flex items-start gap-3 text-xs sm:text-sm">
-                      <input
-                        type="checkbox"
-                        id={`${sid}-${i}`}
-                        className="mt-0.5 h-4 w-4 rounded accent-[#F97316] flex-none cursor-pointer"
+
+                <div>
+
+                  {spec.docs.map(
+                    (doc, index) => (
+                      <DocumentItem
+                        key={index}
+                        id={`${sid}-${index}`}
+                        text={doc}
                       />
-                      <label htmlFor={`${sid}-${i}`} className="text-slate-100 font-medium cursor-pointer leading-relaxed" style={{ color: "#F1F5F9" }}>
-                        {d}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                    )
+                  )}
+
+                </div>
+
+              </section>
             );
           })}
-        </div>
 
-        {/* Next step footer */}
-        <div className="mt-8 rounded-3xl liquid-glass p-6 text-center print:hidden shadow-xl">
-          <p className="text-xs sm:text-sm text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
+        </div>
+        {/* =================================================
+            INFORMATION PANEL
+            ================================================= */}
+
+        <section className="mt-6 border-l-4 border-[#E87512] bg-[#FFF7ED] px-5 py-5">
+
+          <p className="text-xs font-bold text-[#7C4A18]">
+            Keep your documents ready
+          </p>
+
+          <p className="mt-1 text-xs font-medium leading-5 text-[#8A5A22]">
+            Requirements may vary depending on the
+            scheme, applicant profile and authorised
+            institution. Check the final requirements
+            before submitting your application.
+          </p>
+
+        </section>
+
+        {/* =================================================
+            NEXT STEP
+            ================================================= */}
+
+        <section className="mt-6 border border-[#CBD5E1] bg-white p-5 text-center sm:p-7 print:hidden">
+
+          <p className="text-sm font-bold text-[#111827]">
             Have all your documents gathered?
           </p>
-          <div className="mt-4 flex flex-wrap justify-center gap-3">
+
+          <p className="mt-1 text-xs font-medium text-[#687587]">
+            Continue to calculate your repayment or
+            locate a nearby partner office.
+          </p>
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center">
+
             <Link
               href="/calculator"
-              className="rounded-xl liquid-glass-inner px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-white/20 transition"
-              style={{ color: "#FFFFFF" }}
+              className="inline-flex min-h-11 items-center justify-center border border-[#B9C4D1] bg-white px-6 text-xs font-semibold text-[#374151] transition-colors hover:border-[#0F5FC5] hover:bg-[#F8FAFC] hover:text-[#0F5FC5] sm:text-sm"
             >
               {t("nav_calculator")} →
             </Link>
+
             <Link
               href="/locator"
-              className="rounded-xl bg-[#F97316] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-orange-500/25 hover:bg-[#EA580C] transition"
-              style={{ color: "#FFFFFF" }}
+              className="inline-flex min-h-11 items-center justify-center border border-[#0F5FC5] bg-[#0F5FC5] px-6 text-xs font-bold text-white transition-colors hover:bg-[#0B4FA7] sm:text-sm"
             >
               {t("nav_locator")} →
             </Link>
+
           </div>
-        </div>
+
+        </section>
+
       </div>
-    </div>
+
+    </main>
   );
 }
