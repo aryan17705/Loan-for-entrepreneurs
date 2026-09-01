@@ -52,7 +52,7 @@ function LocatorDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
 
   const filteredItems = useMemo(() => {
     const sorted = [...items].sort((a, b) => {
