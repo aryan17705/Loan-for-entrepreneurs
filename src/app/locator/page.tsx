@@ -526,17 +526,21 @@ export default function LocatorPage() {
   }, [districtFilter, userLocation]);
 
   const handleSelectPartner = (
-    id: string
-  ) => {
-    setSelectedId(id);
+  id: string | null
+) => {
+  setSelectedId(id);
 
-    window.setTimeout(() => {
-      cardRefs.current[id]?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }, 50);
-  };
+  if (!id) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    cardRefs.current[id]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }, 50);
+};
 
   const selectedPartner = useMemo(
     () =>
