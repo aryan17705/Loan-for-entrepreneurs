@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { Raleway } from "next/font/google";
+
 import "./globals.css";
 
 import Header from "@/components/Header";
@@ -7,6 +9,12 @@ import ChatAssistant from "@/components/ChatAssistant";
 
 import { JourneyProvider } from "@/context/JourneyContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+
+const raleway = Raleway({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-raleway",
+});
 
 export const metadata: Metadata = {
   title: "NIRVAAN - Government Scheme Assistance Portal",
@@ -30,10 +38,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full overflow-x-hidden antialiased"
+      className={`${raleway.variable} h-full overflow-x-hidden antialiased`}
     >
-      <body className="min-h-full w-full max-w-[100vw] overflow-x-hidden bg-white text-[#111827]">
-
+      <body
+        className={`${raleway.className} min-h-full w-full max-w-[100vw] overflow-x-hidden bg-white text-[#111827]`}
+      >
         <div
           aria-hidden="true"
           className="fixed left-0 right-0 top-0 z-[100] h-[3px] bg-[#0F5FC5] print:hidden"
@@ -41,7 +50,6 @@ export default function RootLayout({
 
         <LanguageProvider>
           <JourneyProvider>
-
             <Header />
 
             <main className="min-h-0 w-full flex-1 overflow-x-hidden">
@@ -51,10 +59,8 @@ export default function RootLayout({
             <Footer />
 
             <ChatAssistant />
-
           </JourneyProvider>
         </LanguageProvider>
-
       </body>
     </html>
   );
