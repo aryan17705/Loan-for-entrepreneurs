@@ -2,19 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useMemo } from "react";
+
 import { useJourney } from "@/context/JourneyContext";
 import { useTranslation } from "@/context/LanguageContext";
+
 import {
   AGRICULTURE_ACTIVITIES,
   BUSINESS_ACTIVITIES,
   LOCATIONS,
 } from "@/lib/locations";
+
 import type { Profile } from "@/lib/types";
 import { formatINR } from "@/lib/format";
-import SiteBackground from "@/components/SiteBackground";
-import AnimatedList from "@/components/AnimatedList";
 
-type Data = Omit<Profile, never> & { courseLocation: "india" | "abroad" };
+type Data = Omit<Profile, never> & {
+  courseLocation: "india" | "abroad";
+};
 
 const INITIAL: Data = {
   state: "",
@@ -40,23 +43,42 @@ const EDUCATION_ACTIVITIES = [
   "Vocational / Skill Training",
 ];
 
-const EDUCATION_LEVELS: { id: Profile["educationLevel"]; label: string }[] = [
+const EDUCATION_LEVELS: {
+  id: Profile["educationLevel"];
+  label: string;
+}[] = [
   { id: "below-10th", label: "Below 10th" },
   { id: "10th-12th", label: "10th – 12th" },
   { id: "graduate", label: "Graduate" },
   { id: "post-graduate", label: "Post-graduate" },
 ];
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+/* =========================================================
+   SHARED FIELD
+   ========================================================= */
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs sm:text-sm font-bold text-white" style={{ color: "#FFFFFF" }}>{label}</span>
+      <span className="mb-2 block text-xs font-semibold text-[#374151] sm:text-sm">
+        {label}
+      </span>
+
       {children}
     </label>
   );
 }
 
-/** Animated Dropdown with Search, Arrow Keys Navigation & Instant Selection */
+/* =========================================================
+   SHARP RECTANGULAR SEARCH SELECT
+   ========================================================= */
+
 function AnimatedSelect({
   label,
   placeholder,
@@ -75,19 +97,30 @@ function AnimatedSelect({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Sort alphabetically and filter by search query / first letters
   const sortedAndFilteredItems = useMemo(() => {
-    const sorted = [...items].sort((a, b) => a.localeCompare(b));
-    if (!search.trim()) return sorted;
+    const sorted = [...items].sort((a, b) =>
+      a.localeCompare(b)
+    );
+
+    if (!search.trim()) {
+      return sorted;
+    }
 
     const q = search.trim().toLowerCase();
-    const exactStart = sorted.filter((item) => item.toLowerCase().startsWith(q));
+
+    const exactStart = sorted.filter((item) =>
+      item.toLowerCase().startsWith(q)
+    );
+
     const contains = sorted.filter(
-      (item) => !item.toLowerCase().startsWith(q) && item.toLowerCase().includes(q)
+      (item) =>
+        !item.toLowerCase().startsWith(q) &&
+        item.toLowerCase().includes(q)
     );
 
     return [...exactStart, ...contains];
@@ -95,36 +128,60 @@ function AnimatedSelect({
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(
+          e.target as Node
+        )
+      ) {
         setOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
   }, []);
 
   useEffect(() => {
-    if (open) {
-      setSearch("");
-      const initialIdx = sortedAndFilteredItems.indexOf(value);
-      setHighlightedIndex(initialIdx !== -1 ? initialIdx : 0);
-      setTimeout(() => searchInputRef.current?.focus(), 40);
-    }
+    if (!open) return;
+
+    setSearch("");
+
+    const initialIdx =
+      sortedAndFilteredItems.indexOf(value);
+
+    setHighlightedIndex(
+      initialIdx !== -1 ? initialIdx : 0
+    );
+
+    setTimeout(
+      () => searchInputRef.current?.focus(),
+      40
+    );
   }, [open]);
 
   useEffect(() => {
     setHighlightedIndex(0);
   }, [search]);
 
-  // Auto-scroll highlighted item into view
   useEffect(() => {
     if (!open || !listRef.current) return;
+
     const el = listRef.current.querySelector(
       `[data-item-index="${highlightedIndex}"]`
     ) as HTMLElement | null;
-    if (el) {
-      el.scrollIntoView({ block: "nearest" });
-    }
+
+    el?.scrollIntoView({
+      block: "nearest",
+    });
   }, [highlightedIndex, open]);
 
   const selectItem = (item: string) => {
@@ -132,21 +189,34 @@ function AnimatedSelect({
     setOpen(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
+
       setHighlightedIndex((prev) =>
-        prev < sortedAndFilteredItems.length - 1 ? prev + 1 : 0
+        prev < sortedAndFilteredItems.length - 1
+          ? prev + 1
+          : 0
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
+
       setHighlightedIndex((prev) =>
-        prev > 0 ? prev - 1 : sortedAndFilteredItems.length - 1
+        prev > 0
+          ? prev - 1
+          : sortedAndFilteredItems.length - 1
       );
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (sortedAndFilteredItems[highlightedIndex]) {
-        selectItem(sortedAndFilteredItems[highlightedIndex]);
+
+      if (
+        sortedAndFilteredItems[highlightedIndex]
+      ) {
+        selectItem(
+          sortedAndFilteredItems[highlightedIndex]
+        );
       }
     } else if (e.key === "Escape") {
       e.preventDefault();
@@ -155,10 +225,16 @@ function AnimatedSelect({
   };
 
   return (
-    <div ref={dropdownRef} className={`relative ${open ? "z-[99999]" : "z-20"}`}>
-      <span className="mb-1.5 block text-xs sm:text-sm font-bold text-white" style={{ color: "#FFFFFF" }}>
+    <div
+      ref={dropdownRef}
+      className={`relative ${
+        open ? "z-[99999]" : "z-20"
+      }`}
+    >
+      <span className="mb-2 block text-xs font-semibold text-[#374151] sm:text-sm">
         {label}
       </span>
+
       <button
         type="button"
         disabled={disabled}
@@ -166,102 +242,111 @@ function AnimatedSelect({
           e.stopPropagation();
           setOpen((o) => !o);
         }}
-        className="w-full flex items-center justify-between rounded-xl liquid-glass-inner px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-left text-white outline-none hover:border-[#F97316]/50 focus:border-[#F97316] focus:ring-2 focus:ring-[#F97316]/30 transition disabled:opacity-40 shadow-lg shadow-black/20"
-        style={{ color: "#FFFFFF" }}
+        className="flex min-h-12 w-full items-center justify-between border border-[#B9C4D1] bg-white px-4 py-3 text-left text-xs font-medium text-[#111827] outline-none transition-colors hover:border-[#0F5FC5] focus:border-[#0F5FC5] focus:ring-2 focus:ring-[#0F5FC5]/15 disabled:cursor-not-allowed disabled:bg-[#F3F5F8] disabled:text-[#9AA4B2] sm:text-sm"
       >
         <span
-          className="font-bold truncate text-white"
-          style={{ color: value ? "#FFFFFF" : "#CBD5E1" }}
+          className={`truncate ${
+            value
+              ? "font-semibold text-[#111827]"
+              : "text-[#687587]"
+          }`}
         >
           {value || placeholder}
         </span>
+
         <span
-          className={`text-xs text-[#F97316] transition-transform duration-200 flex-none ml-2 ${
+          className={`ml-3 flex-none text-xs font-bold text-[#0F5FC5] transition-transform duration-200 ${
             open ? "rotate-180" : ""
           }`}
-          style={{ color: "#F97316" }}
         >
-          ▲
+          ▼
         </span>
       </button>
 
       {open && !disabled && (
         <div
-          className="absolute left-0 right-0 top-full mt-2 z-[99999] rounded-2xl bg-[#0B0F19]/95 backdrop-blur-2xl p-2.5 shadow-[0_25px_60px_rgba(0,0,0,0.95)] border border-[#F97316]/50 ring-1 ring-white/20 animate-in fade-in zoom-in-95 duration-150"
+          className="absolute left-0 right-0 top-full z-[99999] mt-1 border border-[#B9C4D1] bg-white p-2 shadow-[0_16px_40px_rgba(17,24,39,0.16)]"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Quick Letter Search Bar */}
-          <div className="mb-2 flex items-center gap-1.5 rounded-xl border border-white/20 liquid-glass-inner px-2.5 py-2">
-            <span className="text-xs text-[#FED7AA]">🔍</span>
+          <div className="mb-2 flex items-center gap-2 border border-[#D7DEE8] bg-[#F8FAFC] px-3 py-2">
+            <span className="text-xs font-bold text-[#0F5FC5]">
+              Search
+            </span>
+
             <input
               ref={searchInputRef}
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
               onKeyDown={handleKeyDown}
-              placeholder="Type letter or name..."
-              className="flex-1 bg-transparent text-xs text-white placeholder:text-slate-400 outline-none font-medium"
-              style={{ color: "#FFFFFF" }}
+              placeholder="Type a name..."
+              className="min-w-0 flex-1 bg-transparent text-xs font-medium text-[#111827] outline-none placeholder:text-[#8A96A6]"
             />
+
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="text-[11px] text-slate-300 hover:text-white px-1"
+                className="px-1 text-xs font-bold text-[#687587] hover:text-[#0F5FC5]"
+                aria-label="Clear search"
               >
-                ✕
+                ×
               </button>
             )}
           </div>
 
-          {/* Results List */}
           <div
             ref={listRef}
-            className="w-full max-h-56 overflow-y-auto space-y-1 pr-1 scrollable-touch"
+            className="max-h-60 overflow-y-auto scrollable-touch"
           >
             {sortedAndFilteredItems.length === 0 ? (
-              <div className="p-3 text-center text-xs text-slate-300 font-medium">
+              <div className="p-4 text-center text-xs font-medium text-[#687587]">
                 No results for &ldquo;{search}&rdquo;
               </div>
             ) : (
-              sortedAndFilteredItems.map((item, idx) => {
-                const isSelected = value === item;
-                const isHighlighted = highlightedIndex === idx;
-                return (
-                  <div
-                    key={item}
-                    data-item-index={idx}
-                    onMouseEnter={() => setHighlightedIndex(idx)}
-                    onPointerDown={(e) => {
-                      e.preventDefault();
-                      selectItem(item);
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      selectItem(item);
-                    }}
-                    className={`flex items-center justify-between rounded-xl px-3 py-2 text-xs sm:text-sm font-bold cursor-pointer transition select-none ${
-                      isHighlighted
-                        ? "liquid-glass-active border-[#F97316] text-[#FED7AA] shadow-md shadow-orange-500/20"
-                        : isSelected
-                        ? "liquid-glass-inner border-white/30 text-white"
-                        : "text-slate-200 hover:bg-white/10"
-                    }`}
-                    style={{
-                      color: isHighlighted
-                        ? "#FED7AA"
-                        : isSelected
-                        ? "#FFFFFF"
-                        : "#F1F5F9",
-                    }}
-                  >
-                    <span className="truncate">{item}</span>
-                    {isSelected && (
-                      <span className="text-xs text-[#22C55E] font-black">✓</span>
-                    )}
-                  </div>
-                );
-              })
+              sortedAndFilteredItems.map(
+                (item, idx) => {
+                  const isSelected =
+                    value === item;
+
+                  const isHighlighted =
+                    highlightedIndex === idx;
+
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      data-item-index={idx}
+                      onMouseEnter={() =>
+                        setHighlightedIndex(idx)
+                      }
+                      onPointerDown={(e) => {
+                        e.preventDefault();
+                        selectItem(item);
+                      }}
+                      className={`flex w-full items-center justify-between border-b border-[#E9EDF2] px-3 py-3 text-left text-xs font-semibold transition-colors last:border-b-0 sm:text-sm ${
+                        isHighlighted
+                          ? "bg-[#EFF6FF] text-[#0F5FC5]"
+                          : isSelected
+                          ? "bg-[#F8FAFC] text-[#111827]"
+                          : "bg-white text-[#374151] hover:bg-[#F8FAFC] hover:text-[#0F5FC5]"
+                      }`}
+                    >
+                      <span className="truncate">
+                        {item}
+                      </span>
+
+                      {isSelected && (
+                        <span className="ml-3 flex-none font-bold text-[#0F5FC5]">
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  );
+                }
+              )
             )}
           </div>
         </div>
@@ -270,23 +355,34 @@ function AnimatedSelect({
   );
 }
 
+/* =========================================================
+   WIZARD PAGE
+   ========================================================= */
+
 export default function WizardPage() {
   const router = useRouter();
+
   const { profile, setJourney } = useJourney();
   const { t } = useTranslation();
 
   const [step, setStep] = useState(0);
+
   const [data, setData] = useState<Data>(() =>
     profile
       ? {
           ...INITIAL,
           ...profile,
-          courseLocation: profile.courseLocation ?? "india",
+          courseLocation:
+            profile.courseLocation ?? "india",
         }
       : INITIAL
   );
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const [submitting, setSubmitting] =
+    useState(false);
+
+  const [error, setError] =
+    useState<string | null>(null);
 
   const steps = [
     t("wiz_step_0"),
@@ -295,21 +391,55 @@ export default function WizardPage() {
     t("wiz_step_3"),
   ];
 
-  const purposes: { id: Profile["purpose"]; icon: string; label: string; hint: string }[] = [
-    { id: "business", icon: "🏪", label: t("wiz_pur_biz"), hint: t("wiz_pur_biz_hint") },
-    { id: "agriculture", icon: "🌾", label: t("wiz_pur_agri"), hint: t("wiz_pur_agri_hint") },
-    { id: "education", icon: "🎓", label: t("wiz_pur_edu"), hint: t("wiz_pur_edu_hint") },
+  const purposes: {
+    id: Profile["purpose"];
+    label: string;
+    hint: string;
+  }[] = [
+    {
+      id: "business",
+      label: t("wiz_pur_biz"),
+      hint: t("wiz_pur_biz_hint"),
+    },
+    {
+      id: "agriculture",
+      label: t("wiz_pur_agri"),
+      hint: t("wiz_pur_agri_hint"),
+    },
+    {
+      id: "education",
+      label: t("wiz_pur_edu"),
+      hint: t("wiz_pur_edu_hint"),
+    },
   ];
 
   const stateList = Object.keys(LOCATIONS);
-  const districtList = data.state ? LOCATIONS[data.state] ?? [] : [];
 
-  const update = <K extends keyof Data>(key: K, value: Data[K]) =>
-    setData((prev) => ({ ...prev, [key]: value }));
+  const districtList = data.state
+    ? LOCATIONS[data.state] ?? []
+    : [];
 
-  const onSelectPurpose = (p: Profile["purpose"]) => {
+  const update = <
+    K extends keyof Data
+  >(
+    key: K,
+    value: Data[K]
+  ) =>
+    setData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+
+  /* =======================================================
+     PURPOSE SELECTION
+     ======================================================= */
+
+  const onSelectPurpose = (
+    p: Profile["purpose"]
+  ) => {
     let act = data.activityType;
     let cost = data.projectCost;
+
     if (p === "business") {
       act = BUSINESS_ACTIVITIES[0];
       cost = 300000;
@@ -320,32 +450,61 @@ export default function WizardPage() {
       act = EDUCATION_ACTIVITIES[0];
       cost = 1000000;
     }
-    setData((prev) => ({ ...prev, purpose: p, activityType: act, projectCost: cost }));
+
+    setData((prev) => ({
+      ...prev,
+      purpose: p,
+      activityType: act,
+      projectCost: cost,
+    }));
   };
+
+  /* =======================================================
+     NEXT
+     ======================================================= */
 
   const nextStep = () => {
     setError(null);
+
     if (step === 0) {
       if (!data.state) {
-        setError("Please select your state to continue.");
+        setError(
+          "Please select your state to continue."
+        );
         return;
       }
+
       if (!data.district) {
-        setError("Please select your district to continue.");
+        setError(
+          "Please select your district to continue."
+        );
         return;
       }
     }
-    setStep((s) => Math.min(s + 1, steps.length - 1));
+
+    setStep((s) =>
+      Math.min(s + 1, steps.length - 1)
+    );
   };
+
+  /* =======================================================
+     PREVIOUS
+     ======================================================= */
 
   const prevStep = () => {
     setError(null);
+
     setStep((s) => Math.max(s - 1, 0));
   };
+
+  /* =======================================================
+     SUBMIT
+     ======================================================= */
 
   const onSubmit = async () => {
     setError(null);
     setSubmitting(true);
+
     const finalProfile: Profile = {
       state: data.state,
       district: data.district,
@@ -354,83 +513,204 @@ export default function WizardPage() {
       purpose: data.purpose,
       activityType: data.activityType,
       projectCost: Number(data.projectCost),
-      annualIncome: Number(data.annualIncome),
+      annualIncome: Number(
+        data.annualIncome
+      ),
       educationLevel: data.educationLevel,
-      courseLocation: data.purpose === "education" ? data.courseLocation : undefined,
+      courseLocation:
+        data.purpose === "education"
+          ? data.courseLocation
+          : undefined,
     };
 
     try {
-      const groqKey = typeof window !== "undefined" ? localStorage.getItem("groq-api-key") || "" : "";
-      const res = await fetch("/api/recommend", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...finalProfile, apiKey: groqKey }),
-      });
-      if (!res.ok) throw new Error("Could not compute recommendation");
+      const groqKey =
+        typeof window !== "undefined"
+          ? localStorage.getItem(
+              "groq-api-key"
+            ) || ""
+          : "";
+
+      const res = await fetch(
+        "/api/recommend",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            ...finalProfile,
+            apiKey: groqKey,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(
+          "Could not compute recommendation"
+        );
+      }
+
       const json = await res.json();
-      setJourney({ profile: finalProfile, recommendation: json.recommendation });
+
+      setJourney({
+        profile: finalProfile,
+        recommendation:
+          json.recommendation,
+      });
+
       router.push("/recommendation");
     } catch {
-      setError("Failed to generate recommendation. Please check your network.");
+      setError(
+        "Failed to generate recommendation. Please check your network."
+      );
+
       setSubmitting(false);
     }
   };
 
-  return (
-    <div className="relative min-h-screen bg-[#0B0F19] text-white py-12 px-4 selection:bg-[#F97316] selection:text-white" style={{ color: "#FFFFFF" }}>
-      {/* Dynamic Background with Spotlight */}
-      <SiteBackground interactive={false} />
+  /* =======================================================
+     STEP HELPERS
+     ======================================================= */
 
-      <div className="relative z-10 mx-auto max-w-2xl">
-        {/* Step Progress Indicator with Liquid Glass */}
-        <div className="mb-8 flex items-center justify-between">
-          {steps.map((st, i) => (
-            <div key={st} className="flex flex-1 flex-col items-center">
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full text-xs sm:text-sm font-black transition-all ${
-                  i < step
-                    ? "bg-[#22C55E] text-white shadow-md shadow-green-500/25"
-                    : i === step
-                    ? "liquid-glass-active text-[#FED7AA] border border-[#F97316] shadow-lg shadow-orange-500/30 scale-105"
-                    : "liquid-glass-inner text-slate-300"
-                }`}
-                style={{ color: i === step ? "#FED7AA" : "#FFFFFF" }}
-              >
-                {i < step ? "✓" : i + 1}
-              </div>
-              <span
-                className={`mt-2 hidden text-[11px] font-bold text-center sm:block ${
-                  i === step ? "text-[#FED7AA]" : "text-slate-300"
-                }`}
-                style={{ color: i === step ? "#FED7AA" : "#CBD5E1" }}
-              >
-                {st}
-              </span>
-            </div>
-          ))}
+  const progress =
+    ((step + 1) / steps.length) * 100;
+
+  return (
+    <main className="min-h-screen overflow-x-hidden bg-[#F7F9FC] text-[#111827]">
+
+      {/* ===================================================
+          HEADER
+          =================================================== */}
+
+      <section className="border-b border-[#D7DEE8] bg-white">
+
+        <div className="mx-auto max-w-3xl px-4 py-7 sm:px-6 sm:py-9">
+
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#0F5FC5]">
+            NIRVAAN
+          </p>
+
+          <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#111827] sm:text-3xl">
+            Eligibility Assessment
+          </h1>
+
+          <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#687587] sm:text-sm">
+            Answer a few questions to identify
+            government schemes that may match
+            your profile.
+          </p>
+
         </div>
 
-        {/* Main Card with Liquid Frosted Glass */}
-        <div className="rounded-3xl liquid-glass p-6 sm:p-8 shadow-2xl">
-          {error && (
-            <div className="mb-6 rounded-2xl border border-red-500/40 bg-red-950/60 p-4 text-xs sm:text-sm font-bold text-red-200 shadow-md">
-              ⚠️ {error}
-            </div>
-          )}
+      </section>
 
-          {/* STEP 0: About You */}
-          {step === 0 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-white" style={{ color: "#FFFFFF" }}>
-                  {t("wiz_title_0")}
-                </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
-                  {t("wiz_sub_0")}
+      {/* ===================================================
+          PROGRESS
+          =================================================== */}
+
+      <section className="border-b border-[#D7DEE8] bg-white">
+
+        <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6">
+
+          <div className="flex items-center justify-between gap-4">
+
+            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#687587]">
+              Step {step + 1} of {steps.length}
+            </p>
+
+            <p className="text-[10px] font-bold text-[#0F5FC5]">
+              {Math.round(progress)}% complete
+            </p>
+
+          </div>
+
+          <div className="mt-3 h-2 w-full bg-[#E5EAF0]">
+
+            <div
+              className="h-full bg-[#0F5FC5] transition-all duration-300"
+              style={{
+                width: `${progress}%`,
+              }}
+            />
+
+          </div>
+
+          <div className="mt-4 grid grid-cols-4 gap-1">
+
+            {steps.map((st, i) => (
+              <div
+                key={st}
+                className={`border-t-2 pt-2 ${
+                  i <= step
+                    ? "border-[#0F5FC5]"
+                    : "border-[#D7DEE8]"
+                }`}
+              >
+                <p
+                  className={`hidden text-[10px] font-semibold sm:block ${
+                    i === step
+                      ? "text-[#0F5FC5]"
+                      : "text-[#687587]"
+                  }`}
+                >
+                  {st}
                 </p>
               </div>
+            ))}
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ===================================================
+          MAIN FORM
+          =================================================== */}
+
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
+
+        {/* ERROR */}
+
+        {error && (
+          <div className="mb-5 border-l-4 border-[#E87512] bg-[#FFF7ED] px-4 py-3">
+
+            <p className="text-xs font-semibold leading-5 text-[#9A4D08]">
+              {error}
+            </p>
+
+          </div>
+        )}
+
+        <section className="border border-[#CBD5E1] bg-white">
+
+          {/* =================================================
+              STEP 0
+              ================================================= */}
+
+          {step === 0 && (
+            <div className="space-y-7 p-5 sm:p-8">
+
+              <div className="border-b border-[#E5EAF0] pb-5">
+
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
+                  01
+                </p>
+
+                <h2 className="mt-1 text-xl font-extrabold tracking-tight text-[#111827] sm:text-2xl">
+                  {t("wiz_title_0")}
+                </h2>
+
+                <p className="mt-2 text-xs font-normal leading-5 text-[#687587] sm:text-sm">
+                  {t("wiz_sub_0")}
+                </p>
+
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+
                 <AnimatedSelect
                   label={t("wiz_state_lbl")}
                   placeholder={t("wiz_state_ph")}
@@ -438,319 +718,785 @@ export default function WizardPage() {
                   items={stateList}
                   onChange={(val) => {
                     update("state", val);
-                    const dList = LOCATIONS[val] ?? [];
-                    update("district", dList[0] || "");
+
+                    const dList =
+                      LOCATIONS[val] ?? [];
+
+                    update(
+                      "district",
+                      dList[0] || ""
+                    );
                   }}
                 />
 
                 <AnimatedSelect
                   label={t("wiz_dist_lbl")}
-                  placeholder={data.state ? t("wiz_dist_ph") : t("wiz_dist_wait")}
+                  placeholder={
+                    data.state
+                      ? t("wiz_dist_ph")
+                      : t("wiz_dist_wait")
+                  }
                   value={data.district}
                   items={districtList}
                   disabled={!data.state}
-                  onChange={(val) => update("district", val)}
+                  onChange={(val) =>
+                    update(
+                      "district",
+                      val
+                    )
+                  }
                 />
+
               </div>
 
-              {/* Category */}
+              {/* CATEGORY */}
+
               <div>
-                <span className="mb-2 block text-xs sm:text-sm font-bold text-white" style={{ color: "#FFFFFF" }}>
+
+                <span className="mb-2 block text-xs font-semibold text-[#374151] sm:text-sm">
                   {t("wiz_cat_lbl")}
                 </span>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {(["sc", "st", "obc"] as const).map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => update("category", cat)}
-                      className={`rounded-2xl border px-3 py-2.5 text-xs sm:text-sm font-extrabold uppercase transition ${
-                        data.category === cat
-                          ? "liquid-glass-active text-[#FED7AA] border-[#F97316] shadow-md shadow-orange-500/20"
-                          : "liquid-glass-inner text-slate-200 border-white/10 hover:bg-white/15"
-                      }`}
-                      style={{ color: data.category === cat ? "#FED7AA" : "#FFFFFF" }}
-                    >
-                      {cat === "sc" ? "SC" : cat === "st" ? "ST" : "OBC / Gen"}
-                    </button>
-                  ))}
+
+                <div className="grid grid-cols-3 gap-2">
+
+                  {(
+                    [
+                      "sc",
+                      "st",
+                      "obc",
+                    ] as const
+                  ).map((cat) => {
+
+                    const selected =
+                      data.category === cat;
+
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() =>
+                          update(
+                            "category", cat
+                          )
+                        }
+                        className={`min-h-12 border px-3 py-3 text-xs font-bold uppercase transition-colors sm:text-sm ${
+                          selected
+                            ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
+                            : "border-[#B9C4D1] bg-white text-[#374151] hover:border-[#0F5FC5] hover:bg-[#F8FAFC]"
+                        }`}
+                      >
+                        {cat === "sc"
+                          ? "SC"
+                          : cat === "st"
+                          ? "ST"
+                          : "OBC / Gen"}
+
+                        {selected && (
+                          <span className="ml-2">
+                            ✓
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+
                 </div>
+
               </div>
 
-              {/* Age Slider */}
+              {/* AGE */}
+
               <div>
-                <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-white mb-2" style={{ color: "#FFFFFF" }}>
-                  <span>{t("wiz_age_lbl")} — {data.age} {t("wiz_years")}</span>
+
+                <div className="flex items-center justify-between gap-4">
+
+                  <label
+                    htmlFor="age"
+                    className="text-xs font-semibold text-[#374151] sm:text-sm"
+                  >
+                    {t("wiz_age_lbl")}
+                  </label>
+
+                  <span className="border border-[#D7DEE8] bg-[#F8FAFC] px-3 py-1.5 text-sm font-bold text-[#0F5FC5]">
+                    {data.age}{" "}
+                    {t("wiz_years")}
+                  </span>
+
                 </div>
+
                 <input
+                  id="age"
                   type="range"
                   min={17}
                   max={70}
                   step={1}
                   value={data.age}
-                  onChange={(e) => update("age", Number(e.target.value))}
-                  className="w-full accent-[#F97316] cursor-pointer h-2 bg-white/10 rounded-lg"
+                  onChange={(e) =>
+                    update(
+                      "age",
+                      Number(
+                        e.target.value
+                      )
+                    )
+                  }
+                  className="mt-4 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0F5FC5]"
                 />
-                <div className="mt-1 flex justify-between text-[11px] text-slate-300 font-semibold" style={{ color: "#CBD5E1" }}>
-                  <span>17 {t("wiz_years")}</span>
-                  <span className="font-bold text-[#F97316]" style={{ color: "#F97316" }}>{data.age} {t("wiz_years")}</span>
-                  <span>70 {t("wiz_years")}</span>
+
+                <div className="mt-2 flex justify-between text-[10px] font-medium text-[#8A96A6]">
+
+                  <span>
+                    17 {t("wiz_years")}
+                  </span>
+
+                  <span>
+                    70 {t("wiz_years")}
+                  </span>
+
                 </div>
+
               </div>
+
             </div>
           )}
 
-          {/* STEP 1: Your Goal */}
+          {/* =================================================
+              STEP 1
+              ================================================= */}
+
           {step === 1 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-white" style={{ color: "#FFFFFF" }}>
+            <div className="space-y-7 p-5 sm:p-8">
+
+              <div className="border-b border-[#E5EAF0] pb-5">
+
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
+                  02
+                </p>
+
+                <h2 className="mt-1 text-xl font-extrabold tracking-tight text-[#111827] sm:text-2xl">
                   {t("wiz_title_1")}
                 </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
+
+                <p className="mt-2 text-xs leading-5 text-[#687587] sm:text-sm">
                   {t("wiz_sub_1")}
                 </p>
+
               </div>
 
-              {/* Purpose Cards */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {purposes.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => onSelectPurpose(p.id)}
-                    className={`flex flex-col items-start rounded-2xl border p-4 text-left transition-all ${
-                      data.purpose === p.id
-                        ? "liquid-glass-active text-[#FED7AA] border-[#F97316] shadow-lg shadow-orange-500/20 scale-[1.02]"
-                        : "liquid-glass-inner text-slate-200 border-white/10 hover:bg-white/15 hover:border-white/25"
-                    }`}
-                  >
-                    <span className="text-2xl mb-2">{p.icon}</span>
-                    <span className="text-sm font-bold text-white block" style={{ color: "#FFFFFF" }}>{p.label}</span>
-                    <span className="text-[11px] text-slate-300 mt-1 leading-snug font-medium" style={{ color: "#CBD5E1" }}>{p.hint}</span>
-                  </button>
-                ))}
+              {/* PURPOSE */}
+
+              <div className="grid gap-3 sm:grid-cols-3">
+
+                {purposes.map((p) => {
+
+                  const selected =
+                    data.purpose === p.id;
+
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() =>
+                        onSelectPurpose(
+                          p.id
+                        )
+                      }
+                      className={`min-h-[140px] border p-4 text-left transition-colors ${
+                        selected
+                          ? "border-[#0F5FC5] bg-[#EFF6FF]"
+                          : "border-[#CBD5E1] bg-white hover:border-[#0F5FC5] hover:bg-[#F8FAFC]"
+                      }`}
+                    >
+
+                      <div className="flex items-start justify-between gap-3">
+
+                        <span
+                          className={`text-sm font-bold uppercase ${
+                            selected
+                              ? "text-[#0F5FC5]"
+                              : "text-[#687587]"
+                          }`}
+                        >
+                          {p.id}
+                        </span>
+
+                        {selected && (
+                          <span className="text-xs font-bold text-[#0F5FC5]">
+                            SELECTED
+                          </span>
+                        )}
+
+                      </div>
+
+                      <p className="mt-7 text-sm font-bold text-[#111827]">
+                        {p.label}
+                      </p>
+
+                      <p className="mt-1 text-[11px] font-medium leading-5 text-[#687587]">
+                        {p.hint}
+                      </p>
+
+                    </button>
+                  );
+                })}
+
               </div>
 
-              {/* Specific Activity Dropdown */}
+              {/* ACTIVITY */}
+
               <div>
-                {data.purpose === "business" && (
+
+                {data.purpose ===
+                  "business" && (
                   <AnimatedSelect
-                    label={t("wiz_act_select")}
-                    placeholder={t("wiz_act_ph")}
-                    value={data.activityType}
-                    items={BUSINESS_ACTIVITIES}
-                    onChange={(val) => update("activityType", val)}
+                    label={t(
+                      "wiz_act_select"
+                    )}
+                    placeholder={t(
+                      "wiz_act_ph"
+                    )}
+                    value={
+                      data.activityType
+                    }
+                    items={
+                      BUSINESS_ACTIVITIES
+                    }
+                    onChange={(val) =>
+                      update(
+                        "activityType",
+                        val
+                      )
+                    }
                   />
                 )}
-                {data.purpose === "agriculture" && (
+
+                {data.purpose ===
+                  "agriculture" && (
                   <AnimatedSelect
-                    label={t("wiz_act_select")}
-                    placeholder={t("wiz_act_ph")}
-                    value={data.activityType}
-                    items={AGRICULTURE_ACTIVITIES}
-                    onChange={(val) => update("activityType", val)}
+                    label={t(
+                      "wiz_act_select"
+                    )}
+                    placeholder={t(
+                      "wiz_act_ph"
+                    )}
+                    value={
+                      data.activityType
+                    }
+                    items={
+                      AGRICULTURE_ACTIVITIES
+                    }
+                    onChange={(val) =>
+                      update(
+                        "activityType",
+                        val
+                      )
+                    }
                   />
                 )}
-                {data.purpose === "education" && (
-                  <div className="space-y-4">
+
+                {data.purpose ===
+                  "education" && (
+                  <div className="space-y-5">
+
                     <AnimatedSelect
-                      label={t("wiz_act_edu_select")}
-                      placeholder={t("wiz_act_ph")}
-                      value={data.activityType}
-                      items={EDUCATION_ACTIVITIES}
-                      onChange={(val) => update("activityType", val)}
+                      label={t(
+                        "wiz_act_edu_select"
+                      )}
+                      placeholder={t(
+                        "wiz_act_ph"
+                      )}
+                      value={
+                        data.activityType
+                      }
+                      items={
+                        EDUCATION_ACTIVITIES
+                      }
+                      onChange={(val) =>
+                        update(
+                          "activityType",
+                          val
+                        )
+                      }
                     />
 
                     <div>
-                      <span className="mb-2 block text-xs sm:text-sm font-bold text-white" style={{ color: "#FFFFFF" }}>
-                        {t("wiz_course_loc")}
+
+                      <span className="mb-2 block text-xs font-semibold text-[#374151] sm:text-sm">
+                        {t(
+                          "wiz_course_loc"
+                        )}
                       </span>
+
                       <div className="grid grid-cols-2 gap-3">
-                        <button
-                          type="button"
-                          onClick={() => update("courseLocation", "india")}
-                          className={`rounded-2xl border p-3 text-xs sm:text-sm font-bold transition ${
-                            data.courseLocation === "india"
-                              ? "liquid-glass-active text-[#FED7AA] border-[#F97316]"
-                              : "liquid-glass-inner text-slate-200 border-white/10 hover:bg-white/15"
-                          }`}
-                          style={{ color: data.courseLocation === "india" ? "#FED7AA" : "#FFFFFF" }}
-                        >
-                          {t("wiz_course_in")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => update("courseLocation", "abroad")}
-                          className={`rounded-2xl border p-3 text-xs sm:text-sm font-bold transition ${
-                            data.courseLocation === "abroad"
-                              ? "liquid-glass-active text-[#FED7AA] border-[#F97316]"
-                              : "liquid-glass-inner text-slate-200 border-white/10 hover:bg-white/15"
-                          }`}
-                          style={{ color: data.courseLocation === "abroad" ? "#FED7AA" : "#FFFFFF" }}
-                        >
-                          {t("wiz_course_ab")}
-                        </button>
+
+                        {(
+                          [
+                            "india",
+                            "abroad",
+                          ] as const
+                        ).map(
+                          (location) => {
+
+                            const selected =
+                              data.courseLocation ===
+                              location;
+
+                            return (
+                              <button
+                                key={location}
+                                type="button"
+                                onClick={() =>
+                                  update(
+                                    "courseLocation",
+                                    location
+                                  )
+                                }
+                                className={`min-h-12 border px-4 py-3 text-xs font-bold transition-colors sm:text-sm ${
+                                  selected
+                                    ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
+                                    : "border-[#CBD5E1] bg-white text-[#374151] hover:border-[#0F5FC5]"
+                                }`}
+                              >
+                                {location ===
+                                "india"
+                                  ? t(
+                                      "wiz_course_in"
+                                    )
+                                  : t(
+                                      "wiz_course_ab"
+                                    )}
+
+                                {selected && (
+                                  <span className="ml-2">
+                                    ✓
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          }
+                        )}
+
                       </div>
+
                     </div>
+
                   </div>
                 )}
+
               </div>
+
             </div>
           )}
 
-          {/* STEP 2: Project Cost */}
+          {/*
+            =================================================
+              STEP 2
+              ================================================= */}
+
           {step === 2 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-white" style={{ color: "#FFFFFF" }}>
+            <div className="space-y-8 p-5 sm:p-8">
+
+              <div className="border-b border-[#E5EAF0] pb-5">
+
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
+                  03
+                </p>
+
+                <h2 className="mt-1 text-xl font-extrabold tracking-tight text-[#111827] sm:text-2xl">
                   {t("wiz_title_2")}
                 </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
+
+                <p className="mt-2 text-xs leading-5 text-[#687587] sm:text-sm">
                   {t("wiz_sub_2")}
                 </p>
+
               </div>
 
-              {/* Project Cost Slider */}
+              {/* PROJECT COST */}
+
               <div>
-                <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-white mb-2" style={{ color: "#FFFFFF" }}>
-                  <span>{data.purpose === "education" ? t("wiz_course_cost_lbl") : t("wiz_cost_lbl")}</span>
-                  <span className="text-base sm:text-lg font-black text-[#F97316]" style={{ color: "#F97316" }}>
-                    {formatINR(data.projectCost)}
+
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+
+                  <label
+                    htmlFor="project-cost"
+                    className="text-xs font-semibold text-[#374151] sm:text-sm"
+                  >
+                    {data.purpose ===
+                    "education"
+                      ? t(
+                          "wiz_course_cost_lbl"
+                        )
+                      : t(
+                          "wiz_cost_lbl"
+                        )}
+                  </label>
+
+                  <span className="w-fit border border-[#D7DEE8] bg-[#F8FAFC] px-3 py-1.5 text-base font-extrabold text-[#0F5FC5]">
+                    {formatINR(
+                      data.projectCost
+                    )}
                   </span>
+
                 </div>
+
                 <input
+                  id="project-cost"
                   type="range"
                   min={10000}
-                  max={data.purpose === "education" ? (data.courseLocation === "abroad" ? 4000000 : 2500000) : 5000000}
+                  max={
+                    data.purpose ===
+                    "education"
+                      ? data.courseLocation ===
+                        "abroad"
+                        ? 4000000
+                        : 2500000
+                      : 5000000
+                  }
                   step={10000}
-                  value={data.projectCost}
-                  onChange={(e) => update("projectCost", Number(e.target.value))}
-                  className="w-full accent-[#F97316] cursor-pointer h-2 bg-white/10 rounded-lg"
+                  value={
+                    data.projectCost
+                  }
+                  onChange={(e) =>
+                    update(
+                      "projectCost",
+                      Number(
+                        e.target.value
+                      )
+                    )
+                  }
+                  className="mt-5 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0F5FC5]"
                 />
-                <div className="mt-1 flex justify-between text-[11px] text-slate-300 font-semibold" style={{ color: "#CBD5E1" }}>
-                  <span>₹10,000</span>
-                  <span className="text-[#22C55E] font-bold">
-                    {t("wiz_financed_lbl")} {formatINR(Math.round(data.projectCost * 0.9))}
+
+                <div className="mt-3 flex flex-wrap justify-between gap-2 text-[10px] font-medium text-[#8A96A6]">
+
+                  <span>
+                    ₹10,000
                   </span>
-                  <span>{formatINR(data.purpose === "education" ? (data.courseLocation === "abroad" ? 4000000 : 2500000) : 5000000)}</span>
+
+                  <span className="font-bold text-[#0F5FC5]">
+                    {t(
+                      "wiz_financed_lbl"
+                    )}{" "}
+                    {formatINR(
+                      Math.round(
+                        data.projectCost *
+                          0.9
+                      )
+                    )}
+                  </span>
+
+                  <span>
+                    {formatINR(
+                      data.purpose ===
+                        "education"
+                        ? data.courseLocation ===
+                          "abroad"
+                          ? 4000000
+                          : 2500000
+                        : 5000000
+                    )}
+                  </span>
+
                 </div>
+
               </div>
 
-              {/* Annual Income Slider */}
+              {/* INCOME */}
+
               <div>
-                <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-white mb-2" style={{ color: "#FFFFFF" }}>
-                  <span>{t("wiz_income_lbl")}</span>
-                  <span className="text-base sm:text-lg font-black text-[#F97316]" style={{ color: "#F97316" }}>
-                    {formatINR(data.annualIncome)}/yr
+
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+
+                  <label
+                    htmlFor="annual-income"
+                    className="text-xs font-semibold text-[#374151] sm:text-sm"
+                  >
+                    {t(
+                      "wiz_income_lbl"
+                    )}
+                  </label>
+
+                  <span className="w-fit border border-[#D7DEE8] bg-[#F8FAFC] px-3 py-1.5 text-base font-extrabold text-[#0F5FC5]">
+                    {formatINR(
+                      data.annualIncome
+                    )}
+                    /yr
                   </span>
+
                 </div>
+
                 <input
+                  id="annual-income"
                   type="range"
                   min={50000}
                   max={1200000}
                   step={10000}
-                  value={data.annualIncome}
-                  onChange={(e) => update("annualIncome", Number(e.target.value))}
-                  className="w-full accent-[#F97316] cursor-pointer h-2 bg-white/10 rounded-lg"
+                  value={
+                    data.annualIncome
+                  }
+                  onChange={(e) =>
+                    update(
+                      "annualIncome",
+                      Number(
+                        e.target.value
+                      )
+                    )
+                  }
+                  className="mt-5 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0F5FC5]"
                 />
-                <div className="mt-1 flex justify-between text-[11px] text-slate-300 font-semibold" style={{ color: "#CBD5E1" }}>
-                  <span>₹50,000/yr</span>
-                  <span>₹12,00,000/yr</span>
+
+                <div className="mt-3 flex justify-between text-[10px] font-medium text-[#8A96A6]">
+
+                  <span>
+                    ₹50,000/yr
+                  </span>
+
+                  <span>
+                    ₹12,00,000/yr
+                  </span>
+
                 </div>
-                <p className="mt-2 text-[11px] text-[#FED7AA] font-medium leading-relaxed" style={{ color: "#FED7AA" }}>
-                  {t("wiz_income_rule")}
-                </p>
+
+                <div className="mt-4 border-l-4 border-[#E87512] bg-[#FFF7ED] px-4 py-3">
+
+                  <p className="text-[11px] font-medium leading-5 text-[#7C4A18]">
+                    {t(
+                      "wiz_income_rule"
+                    )}
+                  </p>
+
+                </div>
+
               </div>
+
             </div>
           )}
 
-          {/* STEP 3: Background & Review */}
+          {/* =================================================
+              STEP 3
+              ================================================= */}
+
           {step === 3 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-white" style={{ color: "#FFFFFF" }}>
+            <div className="space-y-7 p-5 sm:p-8">
+
+              <div className="border-b border-[#E5EAF0] pb-5">
+
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
+                  04
+                </p>
+
+                <h2 className="mt-1 text-xl font-extrabold tracking-tight text-[#111827] sm:text-2xl">
                   {t("wiz_title_3")}
                 </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
+
+                <p className="mt-2 text-xs leading-5 text-[#687587] sm:text-sm">
                   {t("wiz_sub_3")}
                 </p>
+
               </div>
 
-              {/* Education Level */}
+              {/* EDUCATION */}
+
               <AnimatedSelect
-                label={t("wiz_edu_lbl")}
-                placeholder={t("wiz_edu_ph")}
-                value={EDUCATION_LEVELS.find((l) => l.id === data.educationLevel)?.label || "10th – 12th"}
-                items={EDUCATION_LEVELS.map((l) => l.label)}
+                label={t(
+                  "wiz_edu_lbl"
+                )}
+                placeholder={t(
+                  "wiz_edu_ph"
+                )}
+                value={
+                  EDUCATION_LEVELS.find(
+                    (l) =>
+                      l.id ===
+                      data.educationLevel
+                  )?.label ||
+                  "10th – 12th"
+                }
+                items={EDUCATION_LEVELS.map(
+                  (l) => l.label
+                )}
                 onChange={(val) => {
-                  const found = EDUCATION_LEVELS.find((l) => l.label === val);
-                  if (found) update("educationLevel", found.id);
+                  const found =
+                    EDUCATION_LEVELS.find(
+                      (l) =>
+                        l.label === val
+                    );
+
+                  if (found) {
+                    update(
+                      "educationLevel",
+                      found.id
+                    );
+                  }
                 }}
               />
 
-              {/* Summary Box */}
-              <div className="rounded-2xl liquid-glass-inner p-4 space-y-2 text-xs sm:text-sm">
-                <p className="font-bold text-[#FED7AA] mb-1" style={{ color: "#FED7AA" }}>📋 {t("wiz_profile_sum")}</p>
-                <div className="flex justify-between text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
-                  <span>{t("wiz_sum_loc")}</span>
-                  <span className="font-bold text-white" style={{ color: "#FFFFFF" }}>{data.district}, {data.state}</span>
+              {/* SUMMARY */}
+
+              <div className="border border-[#CBD5E1] bg-[#F8FAFC]">
+
+                <div className="border-b border-[#D7DEE8] bg-white px-4 py-3">
+
+                  <p className="text-xs font-bold uppercase tracking-[0.08em] text-[#0F5FC5]">
+                    {t(
+                      "wiz_profile_sum"
+                    )}
+                  </p>
+
                 </div>
-                <div className="flex justify-between text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
-                  <span>{t("wiz_sum_pur")}</span>
-                  <span className="font-bold text-white" style={{ color: "#FFFFFF" }}>{data.activityType}</span>
+
+                <div className="divide-y divide-[#E5EAF0]">
+
+                  <div className="grid grid-cols-2 gap-4 px-4 py-3 text-xs">
+
+                    <span className="font-medium text-[#687587]">
+                      {t(
+                        "wiz_sum_loc"
+                      )}
+                    </span>
+
+                    <span className="text-right font-bold text-[#111827]">
+                      {data.district},{" "}
+                      {data.state}
+                    </span>
+
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 px-4 py-3 text-xs">
+
+                    <span className="font-medium text-[#687587]">
+                      {t(
+                        "wiz_sum_pur"
+                      )}
+                    </span>
+
+                    <span className="text-right font-bold text-[#111827]">
+                      {
+                        data.activityType
+                      }
+                    </span>
+
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 px-4 py-3 text-xs">
+
+                    <span className="font-medium text-[#687587]">
+                      {t(
+                        "wiz_sum_cost"
+                      )}
+                    </span>
+
+                    <span className="text-right font-bold text-[#0F5FC5]">
+                      {formatINR(
+                        data.projectCost
+                      )}
+                    </span>
+
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 px-4 py-3 text-xs">
+
+                    <span className="font-medium text-[#687587]">
+                      {t(
+                        "wiz_sum_inc"
+                      )}
+                    </span>
+
+                    <span className="text-right font-bold text-[#111827]">
+                      {formatINR(
+                        data.annualIncome
+                      )}
+                      /yr
+                    </span>
+
+                  </div>
+
                 </div>
-                <div className="flex justify-between text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
-                  <span>{t("wiz_sum_cost")}</span>
-                  <span className="font-bold text-[#F97316]" style={{ color: "#F97316" }}>{formatINR(data.projectCost)}</span>
-                </div>
-                <div className="flex justify-between text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
-                  <span>{t("wiz_sum_inc")}</span>
-                  <span className="font-bold text-white" style={{ color: "#FFFFFF" }}>{formatINR(data.annualIncome)}/yr</span>
-                </div>
+
               </div>
+
+              {/* REVIEW NOTE */}
+
+              <div className="border-l-4 border-[#0F5FC5] bg-[#EFF6FF] px-4 py-3">
+
+                <p className="text-xs font-semibold leading-5 text-[#174A83]">
+                  Review your information carefully
+                  before generating your scheme
+                  recommendation.
+                </p>
+
+              </div>
+
             </div>
           )}
 
-          {/* Navigation Action Buttons */}
-          <div className="mt-8 flex items-center justify-between gap-3 pt-4 border-t border-white/10">
+          {/* =================================================
+              NAVIGATION
+              ================================================= */}
+
+          <div className="flex flex-col-reverse gap-3 border-t border-[#D7DEE8] bg-[#F8FAFC] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+
             {step > 0 ? (
               <button
                 type="button"
                 onClick={prevStep}
                 disabled={submitting}
-                className="rounded-xl liquid-glass-inner px-5 py-2.5 text-xs sm:text-sm font-bold text-white transition hover:bg-white/20"
-                style={{ color: "#FFFFFF" }}
+                className="min-h-11 border border-[#B9C4D1] bg-white px-6 text-xs font-semibold text-[#374151] transition-colors hover:border-[#0F5FC5] hover:bg-[#EFF6FF] hover:text-[#0F5FC5] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
               >
-                {t("wiz_btn_back")}
+                {t(
+                  "wiz_btn_back"
+                )}
               </button>
             ) : (
               <div />
             )}
 
-            {step < steps.length - 1 ? (
+            {step <
+            steps.length - 1 ? (
               <button
                 type="button"
                 onClick={nextStep}
-                className="rounded-xl bg-[#F97316] px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition hover:bg-[#EA580C] hover:scale-[1.02]"
-                style={{ color: "#FFFFFF" }}
+                className="min-h-11 border border-[#0F5FC5] bg-[#0F5FC5] px-7 text-xs font-bold text-white transition-colors hover:bg-[#0B4FA7] sm:text-sm"
               >
-                {t("wiz_btn_continue")}
+                {t(
+                  "wiz_btn_continue"
+                )}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onSubmit}
                 disabled={submitting}
-                className="rounded-xl bg-[#F97316] px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition hover:bg-[#EA580C] hover:scale-[1.02] disabled:opacity-50"
-                style={{ color: "#FFFFFF" }}
+                className="min-h-11 border border-[#0F5FC5] bg-[#0F5FC5] px-7 text-xs font-bold text-white transition-colors hover:bg-[#0B4FA7] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
               >
-                {submitting ? t("wiz_btn_analyzing") : t("wiz_btn_submit")}
+                {submitting
+                  ? t(
+                      "wiz_btn_analyzing"
+                    )
+                  : t(
+                      "wiz_btn_submit"
+                    )}
               </button>
             )}
+
           </div>
-        </div>
+
+        </section>
+
+        {/* =================================================
+            FOOTNOTE
+            ================================================= */}
+
+        <p className="px-2 py-5 text-center text-[10px] leading-4 text-[#8A96A6]">
+          NIRVAAN uses the information you provide to
+          identify potentially relevant government
+          schemes. Final eligibility is determined by
+          the applicable authority and lending
+          institution.
+        </p>
+
       </div>
-    </div>
+
+    </main>
   );
-}
+    }
