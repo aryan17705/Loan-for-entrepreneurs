@@ -1,54 +1,15 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef } from "react";
-import { CircleMarker, MapContainer, TileLayer, Popup, Tooltip, useMap } from "react-leaflet";
+import mapboxgl from "mapbox-gl";
 import type { PartnerWithMeta } from "@/lib/types";
-import L from "leaflet";
 
 const COLORS: Record<PartnerWithMeta["healthStatus"], string> = {
-  green: "#22C55E",
-  yellow: "#F59E0B",
-  red: "#EF4444",
+  green: "#16A34A",
+  yellow: "#D97706",
+  red: "#DC2626",
 };
-
-/** Smooth, non-jerky map camera controller with gentle easing */
-function MapController({
-  center,
-  zoom,
-  selectedPartner,
-}: {
-  center: [number, number];
-  zoom: number;
-  selectedPartner?: PartnerWithMeta | null;
-}) {
-  const map = useMap();
-  const prevCoordRef = useRef<string>("");
-
-  useEffect(() => {
-    if (selectedPartner) {
-      const key = `partner-${selectedPartner.lat}-${selectedPartner.lng}`;
-      if (prevCoordRef.current !== key) {
-        prevCoordRef.current = key;
-        map.flyTo([selectedPartner.lat, selectedPartner.lng], 14, {
-          duration: 1.2,
-          easeLinearity: 0.15,
-        });
-      }
-    } else if (center) {
-      const key = `center-${center[0]}-${center[1]}-${zoom}`;
-      if (prevCoordRef.current !== key) {
-        prevCoordRef.current = key;
-        map.flyTo(center, zoom, {
-          duration: 1.2,
-          easeLinearity: 0.15,
-        });
-      }
-    }
-  }, [center, zoom, selectedPartner, map]);
-
-  return null;
-}
 
 interface Props {
   partners: PartnerWithMeta[];
@@ -59,201 +20,402 @@ interface Props {
   onSelect: (id: string | null) => void;
 }
 
+function getHealthLabel(status: PartnerWithMeta["healthStatus"]) {
+  if (status === "green") return "Healthy";
+  if (status === "yellow") return "Watchlist";
+  return "High NPA";
+}
+
 export default function MapClient({
   partners,
   center,
-  zoom = 12,
+  zoom = 5,
   selectedId,
   userLocation,
   onSelect,
 }: Props) {
-  const selectedPartner = partners.find((p) => p.id === selectedId) || null;
-  const markerRefs = useRef<Record<string, L.CircleMarker>>({});
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
+  const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const initializedRef = useRef(false);
 
-  // Automatically open popup when selectedId changes
+  const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
   useEffect(() => {
-    if (selectedId && markerRefs.current[selectedId]) {
-      const timer = setTimeout(() => {
-        try {
-          markerRefs.current[selectedId]?.openPopup();
-        } catch {}
-      }, 250);
-      return () => clearTimeout(timer);
+    if (!containerRef.current || !token || mapRef.current) {
+      return;
     }
-  }, [selectedId]);
+
+    mapboxgl.accessToken = token;
+
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: "mapbox://styles/mapbox/satellite-streets-v12",
+      center,
+      zoom,
+      attributionControl: true,
+      cooperativeGestures: false,
+      dragRotate: false,
+      pitchWithRotate: false,
+      touchPitch: false,
+      maxZoom: 18,
+      minZoom: 3,
+    });
+
+    map.addControl(
+      new mapboxgl.NavigationControl({
+        showCompass: false,
+        visualizePitch: false,
+      }),
+      "top-right"
+    );
+
+    map.on("load", () => {
+      initializedRef.current = true;
+    });
+
+    mapRef.current = map;
+
+    return () => {
+      initializedRef.current = false;
+
+      Object.values(markersRef.current).forEach((marker) => {
+        marker.remove();
+      });
+
+      markersRef.current = {};
+
+      userMarkerRef.current?.remove();
+      userMarkerRef.current = null;
+
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [token]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map || !initializedRef.current) {
+      return;
+    }
+
+    const existingIds = new Set(partners.map((partner) => partner.id));
+
+    Object.entries(markersRef.current).forEach(([id, marker]) => {
+      if (!existingIds.has(id)) {
+        marker.remove();
+        delete markersRef.current[id];
+      }
+    });
+
+    partners.forEach((partner) => {
+      const isSelected = selectedId === partner.id;
+      const color = COLORS[partner.healthStatus];
+
+      let marker = markersRef.current[partner.id];
+
+      if (!marker) {
+        const element = document.createElement("button");
+
+        element.type = "button";
+        element.setAttribute(
+          "aria-label",
+          `Select ${partner.name}`
+        );
+
+        marker = new mapboxgl.Marker({
+          element,
+          anchor: "center",
+        })
+          .setLngLat([partner.lng, partner.lat])
+          .addTo(map);
+
+        element.addEventListener("click", (event) => {
+          event.stopPropagation();
+          onSelect(partner.id);
+        });
+
+        markersRef.current[partner.id] = marker;
+      }
+
+      const element = marker.getElement();
+
+      element.style.width = isSelected ? "28px" : "18px";
+      element.style.height = isSelected ? "28px" : "18px";
+      element.style.borderRadius = "50%";
+      element.style.border = isSelected
+        ? "4px solid #FFFFFF"
+        : "3px solid #FFFFFF";
+      element.style.backgroundColor = isSelected
+        ? "#F97316"
+        : color;
+      element.style.boxShadow = isSelected
+        ? "0 0 0 5px rgba(249,115,22,0.35), 0 3px 12px rgba(0,0,0,0.55)"
+        : "0 2px 8px rgba(0,0,0,0.55)";
+      element.style.cursor = "pointer";
+      element.style.padding = "0";
+      element.style.margin = "0";
+      element.style.transition =
+        "width 160ms ease, height 160ms ease, background-color 160ms ease, box-shadow 160ms ease";
+
+      marker
+        .setLngLat([partner.lng, partner.lat])
+        .addTo(map);
+
+      const popup = new mapboxgl.Popup({
+        offset: 18,
+        closeButton: true,
+        closeOnClick: false,
+        maxWidth: "320px",
+        className: "nirvaan-map-popup",
+      }).setHTML(`
+        <div style="
+          width: 270px;
+          padding: 2px;
+          font-family: Arial, sans-serif;
+          color: #111827;
+        ">
+          <div style="
+            border-bottom: 1px solid #D7DEE8;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+          ">
+            <div style="
+              font-size: 14px;
+              line-height: 1.35;
+              font-weight: 800;
+              color: #111827;
+            ">
+              ${partner.name}
+            </div>
+          </div>
+
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+          ">
+            <span style="
+              display: inline-block;
+              padding: 4px 7px;
+              border: 1px solid ${color};
+              background: #FFFFFF;
+              color: ${color};
+              font-size: 10px;
+              line-height: 1;
+              font-weight: 800;
+              text-transform: uppercase;
+              letter-spacing: 0.04em;
+            ">
+              ${getHealthLabel(partner.healthStatus)}
+            </span>
+
+            ${
+              partner.distanceKm >= 0
+                ? `
+                  <span style="
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: #475569;
+                    white-space: nowrap;
+                  ">
+                    ${partner.distanceKm.toFixed(1)} km
+                  </span>
+                `
+                : ""
+            }
+          </div>
+
+          <div style="
+            font-size: 11px;
+            line-height: 1.55;
+            color: #475569;
+            margin-bottom: 12px;
+          ">
+            ${partner.address}, ${partner.city}<br />
+            ${partner.district}, ${partner.state}
+            ${
+              partner.pincode
+                ? `<br />PIN ${partner.pincode}`
+                : ""
+            }
+          </div>
+
+          <div style="
+            display: flex;
+            gap: 6px;
+            border-top: 1px solid #E2E8F0;
+            padding-top: 10px;
+          ">
+            ${
+              partner.phone
+                ? `
+                  <a
+                    href="tel:${partner.phone}"
+                    style="
+                      flex: 1;
+                      display: block;
+                      padding: 8px 6px;
+                      border: 1px solid #CBD5E1;
+                      background: #FFFFFF;
+                      color: #0F5FC5;
+                      text-align: center;
+                      text-decoration: none;
+                      font-size: 11px;
+                      font-weight: 800;
+                    "
+                  >
+                    Call
+                  </a>
+                `
+                : ""
+            }
+
+            <a
+              href="https://www.google.com/maps/dir/?api=1&destination=${partner.lat},${partner.lng}"
+              target="_blank"
+              rel="noreferrer"
+              style="
+                flex: 1;
+                display: block;
+                padding: 8px 6px;
+                border: 1px solid #0F5FC5;
+                background: #0F5FC5;
+                color: #FFFFFF;
+                text-align: center;
+                text-decoration: none;
+                font-size: 11px;
+                font-weight: 800;
+              "
+            >
+              Directions
+            </a>
+          </div>
+        </div>
+      `);
+
+      marker.setPopup(popup);
+
+      if (isSelected && !marker.getPopup()?.isOpen()) {
+        popup.addTo(map);
+      }
+
+      if (!isSelected && marker.getPopup()?.isOpen()) {
+        marker.togglePopup();
+      }
+    });
+  }, [partners, selectedId, onSelect]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map || !initializedRef.current) {
+      return;
+    }
+
+    if (userMarkerRef.current) {
+      userMarkerRef.current.remove();
+      userMarkerRef.current = null;
+    }
+
+    if (!userLocation) {
+      return;
+    }
+
+    const element = document.createElement("div");
+
+    element.style.width = "18px";
+    element.style.height = "18px";
+    element.style.borderRadius = "50%";
+    element.style.background = "#0F5FC5";
+    element.style.border = "4px solid #FFFFFF";
+    element.style.boxShadow =
+      "0 0 0 8px rgba(15,95,197,0.25), 0 3px 12px rgba(0,0,0,0.45)";
+
+    userMarkerRef.current = new mapboxgl.Marker({
+      element,
+    })
+      .setLngLat([userLocation.lng, userLocation.lat])
+      .setPopup(
+        new mapboxgl.Popup({
+          offset: 14,
+          closeButton: false,
+        }).setHTML(`
+          <div style="
+            padding: 2px 4px;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            color: #111827;
+          ">
+            Your current location
+          </div>
+        `)
+      )
+      .addTo(map);
+  }, [userLocation]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map || !initializedRef.current) {
+      return;
+    }
+
+    if (selectedId) {
+      const selected = partners.find(
+        (partner) => partner.id === selectedId
+      );
+
+      if (selected) {
+        map.flyTo({
+          center: [selected.lng, selected.lat],
+          zoom: 14,
+          speed: 0.8,
+          curve: 1.2,
+          essential: true,
+        });
+
+        return;
+      }
+    }
+
+    map.flyTo({
+      center,
+      zoom,
+      speed: 0.7,
+      curve: 1.1,
+      essential: true,
+    });
+  }, [center, zoom, selectedId, partners]);
 
   return (
-    <MapContainer
-      center={center}
-      zoom={zoom}
-      scrollWheelZoom
-      className="h-full w-full z-0"
-      attributionControl={false}
+    <div
+      ref={containerRef}
+      className="h-full w-full"
+      style={{
+        minHeight: "100%",
+        background: "#DDE5EC",
+      }}
     >
-      {/* Standard OpenStreetMap Tile Layer (100% Free, No Watermark) */}
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        maxZoom={19}
-      />
+      {!token && (
+        <div className="flex h-full items-center justify-center bg-[#F8FAFC] p-6 text-center">
+          <div className="max-w-md border border-[#CBD5E1] bg-white p-6">
+            <div className="mb-2 text-sm font-extrabold text-[#111827]">
+              Satellite map configuration required
+            </div>
 
-      <MapController
-        center={center}
-        zoom={zoom}
-        selectedPartner={selectedPartner}
-      />
-
-      {/* User GPS Location Marker (if enabled) */}
-      {userLocation && (
-        <>
-          {/* Pulsing Outer GPS Radius */}
-          <CircleMarker
-            center={[userLocation.lat, userLocation.lng]}
-            radius={22}
-            pathOptions={{
-              color: "#38BDF8",
-              weight: 1.5,
-              fillColor: "#38BDF8",
-              fillOpacity: 0.18,
-            }}
-          />
-          <CircleMarker
-            center={[userLocation.lat, userLocation.lng]}
-            radius={8}
-            pathOptions={{
-              color: "#FFFFFF",
-              weight: 2.5,
-              fillColor: "#0284C7",
-              fillOpacity: 1,
-            }}
-          >
-            <Popup>
-              <div className="text-xs font-bold text-white p-1">
-                📍 <strong>Your Current Location</strong>
-              </div>
-            </Popup>
-            <Tooltip permanent direction="top" offset={[0, -10]}>
-              📍 You Are Here
-            </Tooltip>
-          </CircleMarker>
-        </>
-      )}
-
-      {/* Channel Partner Office Markers */}
-      {partners.map((p) => {
-        const isSelected = selectedId === p.id;
-        const color = COLORS[p.healthStatus];
-
-        return (
-          <div key={p.id}>
-            {/* Elegant Glowing Halo for Active Selected Marker */}
-            {isSelected && (
-              <CircleMarker
-                center={[p.lat, p.lng]}
-                radius={24}
-                pathOptions={{
-                  color: "#F97316",
-                  weight: 1.5,
-                  fillColor: "#F97316",
-                  fillOpacity: 0.22,
-                }}
-              />
-            )}
-
-            <CircleMarker
-              center={[p.lat, p.lng]}
-              radius={isSelected ? 11 : 7}
-              ref={(ref) => {
-                if (ref) markerRefs.current[p.id] = ref;
-              }}
-              eventHandlers={{
-                click: () => {
-                  onSelect(p.id);
-                },
-              }}
-              pathOptions={{
-                color: isSelected ? "#FFFFFF" : color,
-                weight: isSelected ? 3 : 1.5,
-                fillColor: isSelected ? "#F97316" : color,
-                fillOpacity: isSelected ? 1 : 0.85,
-              }}
-            >
-              {/* Liquid Frosted Glass Popup */}
-              <Popup className="custom-map-popup" closeButton={true}>
-                <div className="p-1 min-w-[220px] max-w-[280px] font-sans">
-                  {/* Header */}
-                  <div className="border-b border-white/15 pb-2 mb-2">
-                    <h4 className="font-black text-sm text-white leading-tight" style={{ color: "#FFFFFF" }}>
-                      {p.name}
-                    </h4>
-                  </div>
-
-                  {/* Health Badge & Distance */}
-                  <div className="mb-2.5 flex items-center justify-between gap-1 text-[11px]">
-                    <span
-                      className={`px-2 py-0.5 rounded-lg font-extrabold ${
-                        p.healthStatus === "green"
-                          ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/40"
-                          : p.healthStatus === "yellow"
-                          ? "bg-amber-500/25 text-amber-300 border border-amber-500/40"
-                          : "bg-red-500/25 text-red-300 border border-red-500/40"
-                      }`}
-                    >
-                      {p.healthStatus === "green"
-                        ? "Healthy"
-                        : p.healthStatus === "yellow"
-                        ? "Watchlist"
-                        : "High NPA"}{" "}
-                      ({p.npaPercent}% NPA)
-                    </span>
-
-                    {p.distanceKm >= 0 && (
-                      <span className="font-mono font-bold text-[#FED7AA]">
-                        📏 {p.distanceKm.toFixed(1)} km
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Full Physical Address */}
-                  <p className="text-slate-200 text-xs leading-relaxed mb-3 font-medium" style={{ color: "#E2E8F0" }}>
-                    📍 {p.address}, {p.city} ({p.state}) {p.pincode ? `— ${p.pincode}` : ""}
-                  </p>
-
-                  {/* Quick Action Buttons */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-white/15">
-                    {p.phone && (
-                      <a
-                        href={`tel:${p.phone}`}
-                        className="flex-1 text-center py-1.5 px-2 rounded-xl liquid-glass-inner text-[#FED7AA] font-bold text-xs hover:bg-white/15 transition"
-                        style={{ color: "#FED7AA" }}
-                      >
-                        📞 Call
-                      </a>
-                    )}
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex-1 text-center py-1.5 px-2 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-xs shadow-md shadow-orange-500/30 transition"
-                      style={{ color: "#FFFFFF" }}
-                    >
-                      ➤ Directions
-                    </a>
-                  </div>
-                </div>
-              </Popup>
-
-              <Tooltip direction="top" offset={[0, -10]}>
-                <div className="text-xs font-bold text-white">
-                  {p.name}
-                  <div className="text-[10px] text-[#FED7AA] font-semibold mt-0.5">
-                    {p.distanceKm >= 0 ? `${p.distanceKm.toFixed(1)} km away · ` : ""}NPA {p.npaPercent}%
-                  </div>
-                </div>
-              </Tooltip>
-            </CircleMarker>
+            <p className="text-xs leading-5 text-[#64748B]">
+              Add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to the
+              environment variables before deploying.
+            </p>
           </div>
-        );
-      })}
-    </MapContainer>
+        </div>
+      )}
+    </div>
   );
 }
