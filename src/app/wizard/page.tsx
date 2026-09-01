@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useJourney } from "@/context/JourneyContext";
 import { useTranslation } from "@/context/LanguageContext";
