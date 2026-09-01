@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import SiteBackground from "@/components/SiteBackground";
 import { useTranslation } from "@/context/LanguageContext";
 
 export default function Home() {
@@ -42,98 +41,112 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#0B0F19] text-white overflow-hidden selection:bg-[#F97316] selection:text-white" style={{ color: "#FFFFFF" }}>
-      {/* Dark Ambient Background with DotGrid Texture */}
-      <SiteBackground interactive={true} />
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 antialiased selection:bg-orange-200 selection:text-slate-900">
+      
+      {/* 🏛️ Official Government Banner Strip */}
+      <div className="bg-slate-100 border-b border-slate-200 py-1.5 px-4 text-xs">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center text-slate-600 gap-1 font-medium">
+          <span>Ministry of Social Justice & Empowerment</span>
+          <span>Smart India Hackathon Prototype · SIH26092</span>
+        </div>
+      </div>
 
-      {/* Foreground Content */}
-      <div className="relative z-10">
-        {/* Hero Section */}
-        <section className="mx-auto max-w-5xl px-4 pt-20 pb-16 text-center md:pt-28 md:pb-24">
-          <span className="inline-block rounded-full liquid-glass-active px-4 py-1.5 text-xs font-bold tracking-wide text-[#FED7AA] uppercase shadow-lg shadow-orange-950/30" style={{ color: "#FED7AA" }}>
+      {/* Main Content Area */}
+      <div className="relative">
+        
+        {/* 🌐 Minimalist Hero Section */}
+        <section className="mx-auto max-w-5xl px-4 pt-16 pb-12 text-center md:pt-20 md:pb-16">
+          <span className="inline-block rounded bg-orange-100 border border-orange-200 px-3 py-1 text-xs font-bold tracking-wide text-orange-800 uppercase shadow-sm">
             {t("hero_badge")}
           </span>
-          <h1 className="mx-auto mt-6 max-w-4xl text-3xl font-black tracking-tight text-white sm:text-4xl md:text-6xl drop-shadow-md leading-tight" style={{ color: "#FFFFFF" }}>
+          
+          <h1 className="mx-auto mt-6 max-w-4xl text-2xl font-black tracking-tight text-[#0F294A] sm:text-4xl md:text-5xl leading-tight">
             {t("hero_title_1")}
             <br />
-            <span className="bg-gradient-to-r from-[#F97316] via-[#FB923C] to-[#FDBA74] bg-clip-text text-transparent">
+            <span className="text-[#EA580C]">
               {t("hero_title_2")}
             </span>
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-sm sm:text-base md:text-lg leading-relaxed text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>
+          
+          <p className="mx-auto mt-5 max-w-2xl text-sm sm:text-base leading-relaxed text-slate-600 font-medium">
             {t("hero_desc")}
           </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
+          
+          {/* Action Buttons */}
+          <div className="mt-8 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
             <Link
               href="/wizard"
-              className="w-full rounded-xl bg-[#F97316] px-8 py-3.5 text-base font-bold text-white shadow-xl shadow-orange-500/25 transition hover:bg-[#EA580C] hover:scale-[1.02] sm:w-auto"
-              style={{ color: "#FFFFFF" }}
+              className="w-full rounded-md bg-[#0F294A] hover:bg-[#1A3E66] px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors text-center sm:w-auto"
             >
               {t("hero_cta_find")}
             </Link>
             <Link
               href="/locator"
-              className="w-full rounded-xl liquid-glass-inner px-8 py-3.5 text-base font-bold text-white transition hover:bg-white/20 hover:scale-[1.02] sm:w-auto shadow-md"
-              style={{ color: "#FFFFFF" }}
+              className="w-full rounded-md bg-white border border-slate-300 hover:bg-slate-50 px-6 py-3 text-sm font-bold text-slate-700 shadow-sm transition-colors text-center sm:w-auto"
             >
               {t("hero_cta_locate")}
             </Link>
           </div>
         </section>
 
-        {/* Stats Grid with Liquid Glass */}
-        <section className="mx-auto max-w-6xl px-4 py-6">
-          <div className="grid grid-cols-2 gap-4 rounded-3xl liquid-glass p-6 md:grid-cols-4 md:p-8 shadow-2xl">
+        {/* 📊 Metrics & Statistics Dashboard Panel */}
+        <section className="mx-auto max-w-6xl px-4 py-4">
+          <div className="grid grid-cols-2 gap-y-6 gap-x-4 border border-slate-200 bg-white rounded-lg p-6 md:grid-cols-4 shadow-sm divide-x-0 md:divide-x divide-slate-100">
             {STATS.map((s, idx) => (
               <div key={idx} className="px-4 text-center">
-                <p className="text-2xl sm:text-3xl font-black text-[#F97316] md:text-4xl" style={{ color: "#F97316" }}>{s.value}</p>
-                <p className="mt-1 text-xs leading-snug text-slate-200 md:text-sm font-semibold" style={{ color: "#E2E8F0" }}>{s.label}</p>
+                <p className="text-xl sm:text-2xl font-extrabold text-[#0F294A] md:text-3xl">{s.value}</p>
+                <p className="mt-1 text-xs leading-snug text-slate-500 font-medium">{s.label}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Modules Section */}
-        <section className="mx-auto max-w-6xl px-4 py-16">
-          <div className="text-center">
-            <span className="rounded-full liquid-glass-active px-3.5 py-1 text-xs font-bold text-[#FED7AA]" style={{ color: "#FED7AA" }}>
+        {/* 📦 Core Services & Modules Section */}
+        <section className="mx-auto max-w-6xl px-4 py-12">
+          <div className="text-center border-b border-slate-200 pb-6">
+            <span className="rounded bg-slate-200 px-2.5 py-0.5 text-xs font-bold text-slate-700">
               {t("mod_badge")}
             </span>
-            <h2 className="mt-3 text-2xl font-bold text-white md:text-3xl" style={{ color: "#FFFFFF" }}>
+            <h2 className="mt-2 text-xl font-bold text-[#0F294A] md:text-2xl">
               {t("mod_title")}
             </h2>
-            <p className="mt-2 text-slate-300 font-medium text-xs sm:text-sm" style={{ color: "#CBD5E1" }}>
+            <p className="mt-1 text-slate-500 font-medium text-xs sm:text-sm">
               {t("mod_sub")}
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
             {MODULES.map((m) => (
               <div
                 key={m.step}
-                className="group flex flex-col rounded-3xl liquid-glass p-7 shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#F97316]/60 hover:shadow-2xl hover:shadow-orange-500/15"
+                className="group flex flex-col rounded-lg bg-white border border-slate-200 p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:border-blue-300"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl transition-transform group-hover:scale-110">{m.icon}</span>
-                  <span className="rounded-full liquid-glass-active px-3 py-0.5 text-xs font-bold text-[#FED7AA]" style={{ color: "#FED7AA" }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl">{m.icon}</span>
+                  <span className="rounded bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-0.5 text-xs font-bold">
                     Module {m.step}
                   </span>
                 </div>
-                <h3 className="mt-5 text-xl font-bold text-white group-hover:text-[#F97316] transition-colors" style={{ color: "#FFFFFF" }}>
+                
+                <h3 className="mt-4 text-lg font-bold text-[#0F294A] group-hover:text-blue-700 transition-colors">
                   {m.title}
                 </h3>
-                <p className="mt-2.5 flex-1 text-xs sm:text-sm leading-relaxed text-slate-200 font-medium" style={{ color: "#E2E8F0" }}>{m.desc}</p>
+                
+                <p className="mt-2 flex-1 text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
+                  {m.desc}
+                </p>
+                
                 <Link
                   href={m.href}
-                  className="mt-6 inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#F97316] group-hover:text-[#FB923C] transition-colors"
-                  style={{ color: "#F97316" }}
+                  className="mt-5 inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors"
                 >
-                  {m.cta} <span aria-hidden>→</span>
+                  {m.cta} <span aria-hidden="true">→</span>
                 </Link>
               </div>
             ))}
           </div>
         </section>
+        
       </div>
     </div>
   );
