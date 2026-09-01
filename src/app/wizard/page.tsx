@@ -1,18 +1,14 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-
+import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useJourney } from "@/context/JourneyContext";
 import { useTranslation } from "@/context/LanguageContext";
-
 import {
   AGRICULTURE_ACTIVITIES,
   BUSINESS_ACTIVITIES,
   LOCATIONS,
 } from "@/lib/locations";
-
 import type { Profile } from "@/lib/types";
 import { formatINR } from "@/lib/format";
 
@@ -54,10 +50,6 @@ const EDUCATION_LEVELS: {
   { id: "post-graduate", label: "Post-graduate" },
 ];
 
-/* =========================================================
-   SHARED FIELD
-   ========================================================= */
-
 function Field({
   label,
   children,
@@ -67,18 +59,13 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-semibold text-[#374151] sm:text-sm">
+      <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[#475569] sm:text-sm">
         {label}
       </span>
-
       {children}
     </label>
   );
 }
-
-/* =========================================================
-   SHARP RECTANGULAR SEARCH SELECT
-   ========================================================= */
 
 function AnimatedSelect({
   label,
@@ -104,17 +91,13 @@ function AnimatedSelect({
   const listRef = useRef<HTMLDivElement>(null);
 
   const sortedAndFilteredItems = useMemo(() => {
-    const sorted = [...items].sort((a, b) =>
-      a.localeCompare(b)
-    );
+    const sorted = [...items].sort((a, b) => a.localeCompare(b));
 
-    if (!search.trim()) {
-      return sorted;
-    }
+    if (!search.trim()) return sorted;
 
     const q = search.trim().toLowerCase();
 
-    const exactStart = sorted.filter((item) =>
+    const startsWith = sorted.filter((item) =>
       item.toLowerCase().startsWith(q)
     );
 
@@ -124,31 +107,24 @@ function AnimatedSelect({
         item.toLowerCase().includes(q)
     );
 
-    return [...exactStart, ...contains];
+    return [...startsWith, ...contains];
   }, [items, search]);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(
-          e.target as Node
-        )
+        !dropdownRef.current.contains(event.target as Node)
       ) {
         setOpen(false);
       }
     }
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
-    return () =>
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -156,18 +132,18 @@ function AnimatedSelect({
 
     setSearch("");
 
-    const initialIdx =
-      sortedAndFilteredItems.indexOf(value);
+    const initialIndex = sortedAndFilteredItems.indexOf(value);
 
     setHighlightedIndex(
-      initialIdx !== -1 ? initialIdx : 0
+      initialIndex !== -1 ? initialIndex : 0
     );
 
-    setTimeout(
-      () => searchInputRef.current?.focus(),
-      40
-    );
-  }, [open]);
+    const timer = window.setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 40);
+
+    return () => window.clearTimeout(timer);
+  }, [open, sortedAndFilteredItems, value]);
 
   useEffect(() => {
     setHighlightedIndex(0);
@@ -176,11 +152,11 @@ function AnimatedSelect({
   useEffect(() => {
     if (!open || !listRef.current) return;
 
-    const el = listRef.current.querySelector(
-      `[data-item-index="${highlightedIndex}"]`
+    const element = listRef.current.querySelector(
+      `[data-wizard-item-index="${highlightedIndex}"]`
     ) as HTMLElement | null;
 
-    el?.scrollIntoView({
+    element?.scrollIntoView({
       block: "nearest",
     });
   }, [highlightedIndex, open]);
@@ -191,36 +167,39 @@ function AnimatedSelect({
   };
 
   const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>
+    event: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
 
-      setHighlightedIndex((prev) =>
-        prev < sortedAndFilteredItems.length - 1
-          ? prev + 1
+      setHighlightedIndex((previous) =>
+        previous < sortedAndFilteredItems.length - 1
+          ? previous + 1
           : 0
       );
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
+    }
 
-      setHighlightedIndex((prev) =>
-        prev > 0
-          ? prev - 1
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+
+      setHighlightedIndex((previous) =>
+        previous > 0
+          ? previous - 1
           : sortedAndFilteredItems.length - 1
       );
-    } else if (e.key === "Enter") {
-      e.preventDefault();
+    }
 
-      if (
-        sortedAndFilteredItems[highlightedIndex]
-      ) {
-        selectItem(
-          sortedAndFilteredItems[highlightedIndex]
-        );
-      }
-    } else if (e.key === "Escape") {
-      e.preventDefault();
+    if (event.key === "Enter") {
+      event.preventDefault();
+
+      const selected =
+        sortedAndFilteredItems[highlightedIndex];
+
+      if (selected) selectItem(selected);
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
       setOpen(false);
     }
   };
@@ -232,31 +211,29 @@ function AnimatedSelect({
         open ? "z-[99999]" : "z-20"
       }`}
     >
-      <span className="mb-2 block text-xs font-semibold text-[#374151] sm:text-sm">
+      <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[#475569] sm:text-sm">
         {label}
       </span>
 
       <button
         type="button"
         disabled={disabled}
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((o) => !o);
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen((previous) => !previous);
         }}
-        className="flex min-h-12 w-full items-center justify-between border border-[#B9C4D1] bg-white px-4 py-3 text-left text-xs font-medium text-[#111827] outline-none transition-colors hover:border-[#0F5FC5] focus:border-[#0F5FC5] focus:ring-2 focus:ring-[#0F5FC5]/15 disabled:cursor-not-allowed disabled:bg-[#F3F5F8] disabled:text-[#9AA4B2] sm:text-sm"
+        className="flex min-h-12 w-full items-center justify-between border border-[#CBD5E1] bg-white px-4 py-3 text-left text-sm font-semibold text-[#111827] outline-none transition hover:border-[#0F5FC5] focus:border-[#0F5FC5] focus:ring-2 focus:ring-[#0F5FC5]/10 disabled:cursor-not-allowed disabled:bg-[#F1F5F9] disabled:text-[#94A3B8]"
       >
         <span
           className={`truncate ${
-            value
-              ? "font-semibold text-[#111827]"
-              : "text-[#687587]"
+            value ? "text-[#111827]" : "text-[#94A3B8]"
           }`}
         >
           {value || placeholder}
         </span>
 
         <span
-          className={`ml-3 flex-none text-xs font-bold text-[#0F5FC5] transition-transform duration-200 ${
+          className={`ml-3 flex-none text-xs font-bold text-[#0F5FC5] transition-transform ${
             open ? "rotate-180" : ""
           }`}
         >
@@ -266,88 +243,74 @@ function AnimatedSelect({
 
       {open && !disabled && (
         <div
-          className="absolute left-0 right-0 top-full z-[99999] mt-1 border border-[#B9C4D1] bg-white p-2 shadow-[0_16px_40px_rgba(17,24,39,0.16)]"
-          onClick={(e) => e.stopPropagation()}
+          className="absolute left-0 right-0 top-full z-[99999] mt-1 border border-[#CBD5E1] bg-white p-2 shadow-[0_16px_40px_rgba(15,23,42,0.14)]"
+          onClick={(event) => event.stopPropagation()}
         >
-          <div className="mb-2 flex items-center gap-2 border border-[#D7DEE8] bg-[#F8FAFC] px-3 py-2">
-            <span className="text-xs font-bold text-[#0F5FC5]">
-              Search
-            </span>
-
+          <div className="mb-2 flex items-center border border-[#CBD5E1] bg-[#F8FAFC]">
             <input
               ref={searchInputRef}
               type="text"
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(event) => setSearch(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type a name..."
-              className="min-w-0 flex-1 bg-transparent text-xs font-medium text-[#111827] outline-none placeholder:text-[#8A96A6]"
+              placeholder="Search..."
+              className="h-10 min-w-0 flex-1 bg-transparent px-3 text-sm font-medium text-[#111827] outline-none placeholder:text-[#94A3B8]"
             />
 
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="px-1 text-xs font-bold text-[#687587] hover:text-[#0F5FC5]"
-                aria-label="Clear search"
+                className="px-3 text-sm font-bold text-[#64748B] hover:text-[#0F5FC5]"
               >
-                ×
+                Clear
               </button>
             )}
           </div>
 
           <div
             ref={listRef}
-            className="max-h-60 overflow-y-auto scrollable-touch"
+            className="max-h-56 overflow-y-auto"
           >
             {sortedAndFilteredItems.length === 0 ? (
-              <div className="p-4 text-center text-xs font-medium text-[#687587]">
-                No results for &ldquo;{search}&rdquo;
+              <div className="px-3 py-5 text-center text-xs font-medium text-[#64748B]">
+                No results found.
               </div>
             ) : (
-              sortedAndFilteredItems.map(
-                (item, idx) => {
-                  const isSelected =
-                    value === item;
+              sortedAndFilteredItems.map((item, index) => {
+                const selected = value === item;
+                const highlighted =
+                  highlightedIndex === index;
 
-                  const isHighlighted =
-                    highlightedIndex === idx;
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    data-wizard-item-index={index}
+                    onMouseEnter={() =>
+                      setHighlightedIndex(index)
+                    }
+                    onClick={() => selectItem(item)}
+                    className={`flex min-h-10 w-full items-center justify-between border-b border-[#E2E8F0] px-3 py-2 text-left text-sm font-semibold transition last:border-b-0 ${
+                      highlighted
+                        ? "bg-[#EFF6FF] text-[#0F5FC5]"
+                        : selected
+                        ? "bg-[#F8FAFC] text-[#111827]"
+                        : "text-[#334155] hover:bg-[#F8FAFC]"
+                    }`}
+                  >
+                    <span className="truncate">
+                      {item}
+                    </span>
 
-                  return (
-                    <button
-                      key={item}
-                      type="button"
-                      data-item-index={idx}
-                      onMouseEnter={() =>
-                        setHighlightedIndex(idx)
-                      }
-                      onPointerDown={(e) => {
-                        e.preventDefault();
-                        selectItem(item);
-                      }}
-                      className={`flex w-full items-center justify-between border-b border-[#E9EDF2] px-3 py-3 text-left text-xs font-semibold transition-colors last:border-b-0 sm:text-sm ${
-                        isHighlighted
-                          ? "bg-[#EFF6FF] text-[#0F5FC5]"
-                          : isSelected
-                          ? "bg-[#F8FAFC] text-[#111827]"
-                          : "bg-white text-[#374151] hover:bg-[#F8FAFC] hover:text-[#0F5FC5]"
-                      }`}
-                    >
-                      <span className="truncate">
-                        {item}
+                    {selected && (
+                      <span className="ml-3 text-xs font-black text-[#0F5FC5]">
+                        Selected
                       </span>
-
-                      {isSelected && (
-                        <span className="ml-3 flex-none font-bold text-[#0F5FC5]">
-                          ✓
-                        </span>
-                      )}
-                    </button>
-                  );
-                }
-              )
+                    )}
+                  </button>
+                );
+              })
             )}
           </div>
         </div>
@@ -355,10 +318,6 @@ function AnimatedSelect({
     </div>
   );
 }
-
-/* =========================================================
-   WIZARD PAGE
-   ========================================================= */
 
 export default function WizardPage() {
   const router = useRouter();
@@ -379,11 +338,8 @@ export default function WizardPage() {
       : INITIAL
   );
 
-  const [submitting, setSubmitting] =
-    useState(false);
-
-  const [error, setError] =
-    useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const steps = [
     t("wiz_step_0"),
@@ -420,49 +376,40 @@ export default function WizardPage() {
     ? LOCATIONS[data.state] ?? []
     : [];
 
-  const update = <
-    K extends keyof Data
-  >(
+  const update = <K extends keyof Data>(
     key: K,
     value: Data[K]
-  ) =>
-    setData((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-
-  /* =======================================================
-     PURPOSE SELECTION
-     ======================================================= */
-
-  const onSelectPurpose = (
-    p: Profile["purpose"]
   ) => {
-    let act = data.activityType;
-    let cost = data.projectCost;
-
-    if (p === "business") {
-      act = BUSINESS_ACTIVITIES[0];
-      cost = 300000;
-    } else if (p === "agriculture") {
-      act = AGRICULTURE_ACTIVITIES[0];
-      cost = 250000;
-    } else {
-      act = EDUCATION_ACTIVITIES[0];
-      cost = 1000000;
-    }
-
-    setData((prev) => ({
-      ...prev,
-      purpose: p,
-      activityType: act,
-      projectCost: cost,
+    setData((previous) => ({
+      ...previous,
+      [key]: value,
     }));
   };
 
-  /* =======================================================
-     NEXT
-     ======================================================= */
+  const onSelectPurpose = (
+    purpose: Profile["purpose"]
+  ) => {
+    let activity = data.activityType;
+    let cost = data.projectCost;
+
+    if (purpose === "business") {
+      activity = BUSINESS_ACTIVITIES[0];
+      cost = 300000;
+    } else if (purpose === "agriculture") {
+      activity = AGRICULTURE_ACTIVITIES[0];
+      cost = 250000;
+    } else {
+      activity = EDUCATION_ACTIVITIES[0];
+      cost = 1000000;
+    }
+
+    setData((previous) => ({
+      ...previous,
+      purpose,
+      activityType: activity,
+      projectCost: cost,
+    }));
+  };
 
   const nextStep = () => {
     setError(null);
@@ -483,24 +430,18 @@ export default function WizardPage() {
       }
     }
 
-    setStep((s) =>
-      Math.min(s + 1, steps.length - 1)
+    setStep((previous) =>
+      Math.min(previous + 1, steps.length - 1)
     );
   };
-
-  /* =======================================================
-     PREVIOUS
-     ======================================================= */
 
   const prevStep = () => {
     setError(null);
 
-    setStep((s) => Math.max(s - 1, 0));
+    setStep((previous) =>
+      Math.max(previous - 1, 0)
+    );
   };
-
-  /* =======================================================
-     SUBMIT
-     ======================================================= */
 
   const onSubmit = async () => {
     setError(null);
@@ -514,9 +455,7 @@ export default function WizardPage() {
       purpose: data.purpose,
       activityType: data.activityType,
       projectCost: Number(data.projectCost),
-      annualIncome: Number(
-        data.annualIncome
-      ),
+      annualIncome: Number(data.annualIncome),
       educationLevel: data.educationLevel,
       courseLocation:
         data.purpose === "education"
@@ -527,18 +466,15 @@ export default function WizardPage() {
     try {
       const groqKey =
         typeof window !== "undefined"
-          ? localStorage.getItem(
-              "groq-api-key"
-            ) || ""
+          ? localStorage.getItem("groq-api-key") || ""
           : "";
 
-      const res = await fetch(
+      const response = await fetch(
         "/api/recommend",
         {
           method: "POST",
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             ...finalProfile,
@@ -547,18 +483,17 @@ export default function WizardPage() {
         }
       );
 
-      if (!res.ok) {
+      if (!response.ok) {
         throw new Error(
           "Could not compute recommendation"
         );
       }
 
-      const json = await res.json();
+      const json = await response.json();
 
       setJourney({
         profile: finalProfile,
-        recommendation:
-          json.recommendation,
+        recommendation: json.recommendation,
       });
 
       router.push("/recommendation");
@@ -566,166 +501,121 @@ export default function WizardPage() {
       setError(
         "Failed to generate recommendation. Please check your network."
       );
-
       setSubmitting(false);
     }
   };
 
-  /* =======================================================
-     STEP HELPERS
-     ======================================================= */
-
-  const progress =
-    ((step + 1) / steps.length) * 100;
-
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#F7F9FC] text-[#111827]">
+    <main className="min-h-screen bg-[#F7F9FC] px-4 py-8 text-[#111827] sm:px-6 sm:py-12">
+      <div className="mx-auto w-full max-w-3xl">
 
-      {/* ===================================================
-          HEADER
-          =================================================== */}
-
-      <section className="border-b border-[#D7DEE8] bg-white">
-
-        <div className="mx-auto max-w-3xl px-4 py-7 sm:px-6 sm:py-9">
-
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#0F5FC5]">
+        <header className="mb-8">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#0F5FC5]">
             NIRVAAN
           </p>
 
           <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#111827] sm:text-3xl">
-            Eligibility Assessment
+            Find the right scheme
           </h1>
 
-          <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#687587] sm:text-sm">
-            Answer a few questions to identify
-            government schemes that may match
-            your profile.
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#64748B]">
+            Answer a few questions to identify the government
+            scheme that best matches your profile.
           </p>
+        </header>
 
-        </div>
+        <section className="mb-6 border border-[#CBD5E1] bg-white">
+          <div className="grid grid-cols-4">
+            {steps.map((stepLabel, index) => {
+              const active = index === step;
+              const completed = index < step;
 
-      </section>
+              return (
+                <div
+                  key={stepLabel}
+                  className={`border-r border-[#E2E8F0] px-2 py-3 text-center last:border-r-0 sm:px-4 ${
+                    active
+                      ? "bg-[#EFF6FF]"
+                      : "bg-white"
+                  }`}
+                >
+                  <div
+                    className={`mx-auto flex h-8 w-8 items-center justify-center border text-xs font-extrabold ${
+                      completed
+                        ? "border-[#0F5FC5] bg-[#0F5FC5] text-white"
+                        : active
+                        ? "border-[#0F5FC5] bg-white text-[#0F5FC5]"
+                        : "border-[#CBD5E1] bg-white text-[#64748B]"
+                    }`}
+                  >
+                    {completed ? "✓" : index + 1}
+                  </div>
 
-      {/* ===================================================
-          PROGRESS
-          =================================================== */}
-
-      <section className="border-b border-[#D7DEE8] bg-white">
-
-        <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6">
-
-          <div className="flex items-center justify-between gap-4">
-
-            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#687587]">
-              Step {step + 1} of {steps.length}
-            </p>
-
-            <p className="text-[10px] font-bold text-[#0F5FC5]">
-              {Math.round(progress)}% complete
-            </p>
-
+                  <p
+                    className={`mt-2 hidden text-[10px] font-semibold sm:block ${
+                      active
+                        ? "text-[#0F5FC5]"
+                        : "text-[#64748B]"
+                    }`}
+                  >
+                    {stepLabel}
+                  </p>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="mt-3 h-2 w-full bg-[#E5EAF0]">
-
+          <div className="h-1 bg-[#E2E8F0]">
             <div
               className="h-full bg-[#0F5FC5] transition-all duration-300"
               style={{
-                width: `${progress}%`,
+                width: `${(step / (steps.length - 1)) * 100}%`,
               }}
             />
-
           </div>
+        </section>
 
-          <div className="mt-4 grid grid-cols-4 gap-1">
+        <section className="border border-[#CBD5E1] bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
 
-            {steps.map((st, i) => (
-              <div
-                key={st}
-                className={`border-t-2 pt-2 ${
-                  i <= step
-                    ? "border-[#0F5FC5]"
-                    : "border-[#D7DEE8]"
-                }`}
-              >
-                <p
-                  className={`hidden text-[10px] font-semibold sm:block ${
-                    i === step
-                      ? "text-[#0F5FC5]"
-                      : "text-[#687587]"
-                  }`}
-                >
-                  {st}
-                </p>
-              </div>
-            ))}
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ===================================================
-          MAIN FORM
-          =================================================== */}
-
-      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
-
-        {/* ERROR */}
-
-        {error && (
-          <div className="mb-5 border-l-4 border-[#E87512] bg-[#FFF7ED] px-4 py-3">
-
-            <p className="text-xs font-semibold leading-5 text-[#9A4D08]">
+          {error && (
+            <div className="mb-6 border border-[#F59E0B] bg-[#FFF7ED] px-4 py-3 text-sm font-semibold text-[#9A3412]">
               {error}
-            </p>
-
-          </div>
-        )}
-
-        <section className="border border-[#CBD5E1] bg-white">
-
-          {/* =================================================
-              STEP 0
-              ================================================= */}
+            </div>
+          )}
 
           {step === 0 && (
-            <div className="space-y-7 p-5 sm:p-8">
+            <div className="space-y-7">
 
-              <div className="border-b border-[#E5EAF0] pb-5">
-
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
-                  01
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
+                  Step 1
                 </p>
 
-                <h2 className="mt-1 text-xl font-extrabold tracking-tight text-[#111827] sm:text-2xl">
+                <h2 className="mt-1 text-xl font-extrabold text-[#111827] sm:text-2xl">
                   {t("wiz_title_0")}
                 </h2>
 
-                <p className="mt-2 text-xs font-normal leading-5 text-[#687587] sm:text-sm">
+                <p className="mt-2 text-sm leading-6 text-[#64748B]">
                   {t("wiz_sub_0")}
                 </p>
-
               </div>
 
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
                 <AnimatedSelect
                   label={t("wiz_state_lbl")}
                   placeholder={t("wiz_state_ph")}
                   value={data.state}
                   items={stateList}
-                  onChange={(val) => {
-                    update("state", val);
+                  onChange={(value) => {
+                    update("state", value);
 
-                    const dList =
-                      LOCATIONS[val] ?? [];
+                    const districts =
+                      LOCATIONS[value] ?? [];
 
                     update(
                       "district",
-                      dList[0] || ""
+                      districts[0] || ""
                     );
                   }}
                 />
@@ -740,587 +630,393 @@ export default function WizardPage() {
                   value={data.district}
                   items={districtList}
                   disabled={!data.state}
-                  onChange={(val) =>
-                    update(
-                      "district",
-                      val
-                    )
+                  onChange={(value) =>
+                    update("district", value)
                   }
                 />
 
               </div>
 
-              {/* CATEGORY */}
+              <Field label={t("wiz_cat_lbl")}>
+                <div className="grid grid-cols-3 gap-3">
+                  {(["sc", "st", "obc"] as const).map(
+                    (category) => {
+                      const selected =
+                        data.category === category;
 
-              <div>
-
-                <span className="mb-2 block text-xs font-semibold text-[#374151] sm:text-sm">
-                  {t("wiz_cat_lbl")}
-                </span>
-
-                <div className="grid grid-cols-3 gap-2">
-
-                  {(
-                    [
-                      "sc",
-                      "st",
-                      "obc",
-                    ] as const
-                  ).map((cat) => {
-
-                    const selected =
-                      data.category === cat;
-
-                    return (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() =>
-                          update(
-                            "category", cat
-                          )
-                        }
-                        className={`min-h-12 border px-3 py-3 text-xs font-bold uppercase transition-colors sm:text-sm ${
-                          selected
-                            ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
-                            : "border-[#B9C4D1] bg-white text-[#374151] hover:border-[#0F5FC5] hover:bg-[#F8FAFC]"
-                        }`}
-                      >
-                        {cat === "sc"
-                          ? "SC"
-                          : cat === "st"
-                          ? "ST"
-                          : "OBC / Gen"}
-
-                        {selected && (
-                          <span className="ml-2">
-                            ✓
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-
+                      return (
+                        <button
+                          key={category}
+                          type="button"
+                          onClick={() =>
+                            update(
+                              "category",
+                              category
+                            )
+                          }
+                          className={`min-h-12 border px-3 py-3 text-xs font-bold transition sm:text-sm ${
+                            selected
+                              ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
+                              : "border-[#CBD5E1] bg-white text-[#475569] hover:border-[#0F5FC5] hover:bg-[#F8FAFC]"
+                          }`}
+                        >
+                          {category === "sc"
+                            ? "SC"
+                            : category === "st"
+                            ? "ST"
+                            : "OBC / Gen"}
+                        </button>
+                      );
+                    }
+                  )}
                 </div>
+              </Field>
 
-              </div>
-
-              {/* AGE */}
-
-              <div>
-
-                <div className="flex items-center justify-between gap-4">
-
-                  <label
-                    htmlFor="age"
-                    className="text-xs font-semibold text-[#374151] sm:text-sm"
-                  >
-                    {t("wiz_age_lbl")}
-                  </label>
-
-                  <span className="border border-[#D7DEE8] bg-[#F8FAFC] px-3 py-1.5 text-sm font-bold text-[#0F5FC5]">
-                    {data.age}{" "}
-                    {t("wiz_years")}
-                  </span>
-
-                </div>
-
+              <Field
+                label={`${t("wiz_age_lbl")} • ${data.age} ${t(
+                  "wiz_years"
+                )}`}
+              >
                 <input
-                  id="age"
                   type="range"
                   min={17}
                   max={70}
                   step={1}
                   value={data.age}
-                  onChange={(e) =>
+                  onChange={(event) =>
                     update(
                       "age",
-                      Number(
-                        e.target.value
-                      )
+                      Number(event.target.value)
                     )
                   }
-                  className="mt-4 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0F5FC5]"
+                  className="h-2 w-full cursor-pointer accent-[#0F5FC5]"
                 />
 
-                <div className="mt-2 flex justify-between text-[10px] font-medium text-[#8A96A6]">
-
-                  <span>
-                    17 {t("wiz_years")}
+                <div className="mt-2 flex justify-between text-xs font-semibold text-[#64748B]">
+                  <span>17 years</span>
+                  <span className="font-bold text-[#0F5FC5]">
+                    {data.age} years
                   </span>
-
-                  <span>
-                    70 {t("wiz_years")}
-                  </span>
-
+                  <span>70 years</span>
                 </div>
-
-              </div>
+              </Field>
 
             </div>
-          )}
+          )}{step === 1 && (
+            <div className="space-y-7">
 
-          {/* =================================================
-              STEP 1
-              ================================================= */}
-
-          {step === 1 && (
-            <div className="space-y-7 p-5 sm:p-8">
-
-              <div className="border-b border-[#E5EAF0] pb-5">
-
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
-                  02
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
+                  Step 2
                 </p>
 
-                <h2 className="mt-1 text-xl font-extrabold tracking-tight text-[#111827] sm:text-2xl">
+                <h2 className="mt-1 text-xl font-extrabold text-[#111827] sm:text-2xl">
                   {t("wiz_title_1")}
                 </h2>
 
-                <p className="mt-2 text-xs leading-5 text-[#687587] sm:text-sm">
+                <p className="mt-2 text-sm leading-6 text-[#64748B]">
                   {t("wiz_sub_1")}
                 </p>
-
               </div>
 
-              {/* PURPOSE */}
+              <Field label="Purpose">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {purposes.map((purpose) => {
+                    const selected =
+                      data.purpose === purpose.id;
 
-              <div className="grid gap-3 sm:grid-cols-3">
-
-                {purposes.map((p) => {
-
-                  const selected =
-                    data.purpose === p.id;
-
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() =>
-                        onSelectPurpose(
-                          p.id
-                        )
-                      }
-                      className={`min-h-[140px] border p-4 text-left transition-colors ${
-                        selected
-                          ? "border-[#0F5FC5] bg-[#EFF6FF]"
-                          : "border-[#CBD5E1] bg-white hover:border-[#0F5FC5] hover:bg-[#F8FAFC]"
-                      }`}
-                    >
-
-                      <div className="flex items-start justify-between gap-3">
-
+                    return (
+                      <button
+                        key={purpose.id}
+                        type="button"
+                        onClick={() =>
+                          onSelectPurpose(purpose.id)
+                        }
+                        className={`min-h-[120px] border p-4 text-left transition ${
+                          selected
+                            ? "border-[#0F5FC5] bg-[#EFF6FF]"
+                            : "border-[#CBD5E1] bg-white hover:border-[#0F5FC5] hover:bg-[#F8FAFC]"
+                        }`}
+                      >
                         <span
-                          className={`text-sm font-bold uppercase ${
+                          className={`block text-sm font-extrabold ${
                             selected
                               ? "text-[#0F5FC5]"
-                              : "text-[#687587]"
+                              : "text-[#111827]"
                           }`}
                         >
-                          {p.id}
+                          {purpose.label}
+                        </span>
+
+                        <span className="mt-2 block text-xs leading-5 text-[#64748B]">
+                          {purpose.hint}
                         </span>
 
                         {selected && (
-                          <span className="text-xs font-bold text-[#0F5FC5]">
-                            SELECTED
+                          <span className="mt-4 block text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
+                            Selected
                           </span>
                         )}
-
-                      </div>
-
-                      <p className="mt-7 text-sm font-bold text-[#111827]">
-                        {p.label}
-                      </p>
-
-                      <p className="mt-1 text-[11px] font-medium leading-5 text-[#687587]">
-                        {p.hint}
-                      </p>
-
-                    </button>
-                  );
-                })}
-
-              </div>
-
-              {/* ACTIVITY */}
+                      </button>
+                    );
+                  })}
+                </div>
+              </Field>
 
               <div>
-
-                {data.purpose ===
-                  "business" && (
+                {data.purpose === "business" && (
                   <AnimatedSelect
-                    label={t(
-                      "wiz_act_select"
-                    )}
-                    placeholder={t(
-                      "wiz_act_ph"
-                    )}
-                    value={
-                      data.activityType
-                    }
-                    items={
-                      BUSINESS_ACTIVITIES
-                    }
-                    onChange={(val) =>
-                      update(
-                        "activityType",
-                        val
-                      )
+                    label={t("wiz_act_select")}
+                    placeholder={t("wiz_act_ph")}
+                    value={data.activityType}
+                    items={BUSINESS_ACTIVITIES}
+                    onChange={(value) =>
+                      update("activityType", value)
                     }
                   />
                 )}
 
-                {data.purpose ===
-                  "agriculture" && (
+                {data.purpose === "agriculture" && (
                   <AnimatedSelect
-                    label={t(
-                      "wiz_act_select"
-                    )}
-                    placeholder={t(
-                      "wiz_act_ph"
-                    )}
-                    value={
-                      data.activityType
-                    }
-                    items={
-                      AGRICULTURE_ACTIVITIES
-                    }
-                    onChange={(val) =>
-                      update(
-                        "activityType",
-                        val
-                      )
+                    label={t("wiz_act_select")}
+                    placeholder={t("wiz_act_ph")}
+                    value={data.activityType}
+                    items={AGRICULTURE_ACTIVITIES}
+                    onChange={(value) =>
+                      update("activityType", value)
                     }
                   />
                 )}
 
-                {data.purpose ===
-                  "education" && (
+                {data.purpose === "education" && (
                   <div className="space-y-5">
 
                     <AnimatedSelect
-                      label={t(
-                        "wiz_act_edu_select"
-                      )}
-                      placeholder={t(
-                        "wiz_act_ph"
-                      )}
-                      value={
-                        data.activityType
-                      }
-                      items={
-                        EDUCATION_ACTIVITIES
-                      }
-                      onChange={(val) =>
+                      label={t("wiz_act_edu_select")}
+                      placeholder={t("wiz_act_ph")}
+                      value={data.activityType}
+                      items={EDUCATION_ACTIVITIES}
+                      onChange={(value) =>
                         update(
                           "activityType",
-                          val
+                          value
                         )
                       }
                     />
 
-                    <div>
+                    <Field label={t("wiz_course_loc")}>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 
-                      <span className="mb-2 block text-xs font-semibold text-[#374151] sm:text-sm">
-                        {t(
-                          "wiz_course_loc"
-                        )}
-                      </span>
-
-                      <div className="grid grid-cols-2 gap-3">
-
-                        {(
-                          [
-                            "india",
-                            "abroad",
-                          ] as const
-                        ).map(
-                          (location) => {
-
-                            const selected =
-                              data.courseLocation ===
-                              location;
-
-                            return (
-                              <button
-                                key={location}
-                                type="button"
-                                onClick={() =>
-                                  update(
-                                    "courseLocation",
-                                    location
-                                  )
-                                }
-                                className={`min-h-12 border px-4 py-3 text-xs font-bold transition-colors sm:text-sm ${
-                                  selected
-                                    ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
-                                    : "border-[#CBD5E1] bg-white text-[#374151] hover:border-[#0F5FC5]"
-                                }`}
-                              >
-                                {location ===
-                                "india"
-                                  ? t(
-                                      "wiz_course_in"
-                                    )
-                                  : t(
-                                      "wiz_course_ab"
-                                    )}
-
-                                {selected && (
-                                  <span className="ml-2">
-                                    ✓
-                                  </span>
-                                )}
-                              </button>
-                            );
+                        <button
+                          type="button"
+                          onClick={() =>
+                            update(
+                              "courseLocation",
+                              "india"
+                            )
                           }
-                        )}
+                          className={`min-h-12 border px-4 py-3 text-sm font-bold transition ${
+                            data.courseLocation ===
+                            "india"
+                              ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
+                              : "border-[#CBD5E1] bg-white text-[#475569] hover:border-[#0F5FC5]"
+                          }`}
+                        >
+                          {t("wiz_course_in")}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            update(
+                              "courseLocation",
+                              "abroad"
+                            )
+                          }
+                          className={`min-h-12 border px-4 py-3 text-sm font-bold transition ${
+                            data.courseLocation ===
+                            "abroad"
+                              ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
+                              : "border-[#CBD5E1] bg-white text-[#475569] hover:border-[#0F5FC5]"
+                          }`}
+                        >
+                          {t("wiz_course_ab")}
+                        </button>
 
                       </div>
-
-                    </div>
+                    </Field>
 
                   </div>
                 )}
-
               </div>
 
             </div>
           )}
 
-          {/*
-            =================================================
-              STEP 2
-              ================================================= */}
-
           {step === 2 && (
-            <div className="space-y-8 p-5 sm:p-8">
+            <div className="space-y-7">
 
-              <div className="border-b border-[#E5EAF0] pb-5">
-
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
-                  03
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
+                  Step 3
                 </p>
 
-                <h2 className="mt-1 text-xl font-extrabold tracking-tight text-[#111827] sm:text-2xl">
+                <h2 className="mt-1 text-xl font-extrabold text-[#111827] sm:text-2xl">
                   {t("wiz_title_2")}
                 </h2>
 
-                <p className="mt-2 text-xs leading-5 text-[#687587] sm:text-sm">
+                <p className="mt-2 text-sm leading-6 text-[#64748B]">
                   {t("wiz_sub_2")}
                 </p>
-
               </div>
 
-              {/* PROJECT COST */}
+              <Field
+                label={t("wiz_cost_lbl")}
+              >
+                <div className="border border-[#CBD5E1] bg-[#F8FAFC] p-4">
 
-              <div>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-sm font-semibold text-[#475569]">
+                      {data.purpose === "education"
+                        ? t("wiz_course_cost_lbl")
+                        : t("wiz_cost_lbl")}
+                    </span>
 
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xl font-extrabold text-[#0F5FC5]">
+                      {formatINR(data.projectCost)}
+                    </span>
+                  </div>
 
-                  <label
-                    htmlFor="project-cost"
-                    className="text-xs font-semibold text-[#374151] sm:text-sm"
-                  >
-                    {data.purpose ===
-                    "education"
-                      ? t(
-                          "wiz_course_cost_lbl"
-                        )
-                      : t(
-                          "wiz_cost_lbl"
-                        )}
-                  </label>
-
-                  <span className="w-fit border border-[#D7DEE8] bg-[#F8FAFC] px-3 py-1.5 text-base font-extrabold text-[#0F5FC5]">
-                    {formatINR(
-                      data.projectCost
-                    )}
-                  </span>
-
-                </div>
-
-                <input
-                  id="project-cost"
-                  type="range"
-                  min={10000}
-                  max={
-                    data.purpose ===
-                    "education"
-                      ? data.courseLocation ===
-                        "abroad"
-                        ? 4000000
-                        : 2500000
-                      : 5000000
-                  }
-                  step={10000}
-                  value={
-                    data.projectCost
-                  }
-                  onChange={(e) =>
-                    update(
-                      "projectCost",
-                      Number(
-                        e.target.value
-                      )
-                    )
-                  }
-                  className="mt-5 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0F5FC5]"
-                />
-
-                <div className="mt-3 flex flex-wrap justify-between gap-2 text-[10px] font-medium text-[#8A96A6]">
-
-                  <span>
-                    ₹10,000
-                  </span>
-
-                  <span className="font-bold text-[#0F5FC5]">
-                    {t(
-                      "wiz_financed_lbl"
-                    )}{" "}
-                    {formatINR(
-                      Math.round(
-                        data.projectCost *
-                          0.9
-                      )
-                    )}
-                  </span>
-
-                  <span>
-                    {formatINR(
-                      data.purpose ===
-                        "education"
+                  <input
+                    type="range"
+                    min={10000}
+                    max={
+                      data.purpose === "education"
                         ? data.courseLocation ===
                           "abroad"
                           ? 4000000
                           : 2500000
                         : 5000000
-                    )}
-                  </span>
-
-                </div>
-
-              </div>
-
-              {/* INCOME */}
-
-              <div>
-
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-
-                  <label
-                    htmlFor="annual-income"
-                    className="text-xs font-semibold text-[#374151] sm:text-sm"
-                  >
-                    {t(
-                      "wiz_income_lbl"
-                    )}
-                  </label>
-
-                  <span className="w-fit border border-[#D7DEE8] bg-[#F8FAFC] px-3 py-1.5 text-base font-extrabold text-[#0F5FC5]">
-                    {formatINR(
-                      data.annualIncome
-                    )}
-                    /yr
-                  </span>
-
-                </div>
-
-                <input
-                  id="annual-income"
-                  type="range"
-                  min={50000}
-                  max={1200000}
-                  step={10000}
-                  value={
-                    data.annualIncome
-                  }
-                  onChange={(e) =>
-                    update(
-                      "annualIncome",
-                      Number(
-                        e.target.value
+                    }
+                    step={10000}
+                    value={data.projectCost}
+                    onChange={(event) =>
+                      update(
+                        "projectCost",
+                        Number(event.target.value)
                       )
-                    )
-                  }
-                  className="mt-5 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0F5FC5]"
-                />
+                    }
+                    className="mt-5 h-2 w-full cursor-pointer accent-[#0F5FC5]"
+                  />
 
-                <div className="mt-3 flex justify-between text-[10px] font-medium text-[#8A96A6]">
+                  <div className="mt-2 flex justify-between text-[11px] font-semibold text-[#64748B]">
+                    <span>₹10,000</span>
 
-                  <span>
-                    ₹50,000/yr
-                  </span>
+                    <span className="text-[#0F5FC5]">
+                      {t("wiz_financed_lbl")}{" "}
+                      {formatINR(
+                        Math.round(
+                          data.projectCost * 0.9
+                        )
+                      )}
+                    </span>
 
-                  <span>
-                    ₹12,00,000/yr
-                  </span>
+                    <span>
+                      {formatINR(
+                        data.purpose === "education"
+                          ? data.courseLocation ===
+                            "abroad"
+                            ? 4000000
+                            : 2500000
+                          : 5000000
+                      )}
+                    </span>
+                  </div>
 
                 </div>
+              </Field>
 
-                <div className="mt-4 border-l-4 border-[#E87512] bg-[#FFF7ED] px-4 py-3">
+              <Field label={t("wiz_income_lbl")}>
+                <div className="border border-[#CBD5E1] bg-[#F8FAFC] p-4">
 
-                  <p className="text-[11px] font-medium leading-5 text-[#7C4A18]">
-                    {t(
-                      "wiz_income_rule"
-                    )}
-                  </p>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-sm font-semibold text-[#475569]">
+                      Annual family income
+                    </span>
+
+                    <span className="text-xl font-extrabold text-[#0F5FC5]">
+                      {formatINR(data.annualIncome)}
+                      /yr
+                    </span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min={50000}
+                    max={1200000}
+                    step={10000}
+                    value={data.annualIncome}
+                    onChange={(event) =>
+                      update(
+                        "annualIncome",
+                        Number(event.target.value)
+                      )
+                    }
+                    className="mt-5 h-2 w-full cursor-pointer accent-[#0F5FC5]"
+                  />
+
+                  <div className="mt-2 flex justify-between text-[11px] font-semibold text-[#64748B]">
+                    <span>₹50,000/yr</span>
+                    <span>₹12,00,000/yr</span>
+                  </div>
+
+                  <div className="mt-4 border-l-2 border-[#E87512] bg-[#FFF7ED] px-3 py-2">
+                    <p className="text-xs font-semibold leading-5 text-[#9A3412]">
+                      {t("wiz_income_rule")}
+                    </p>
+                  </div>
 
                 </div>
-
-              </div>
+              </Field>
 
             </div>
           )}
 
-          {/* =================================================
-              STEP 3
-              ================================================= */}
-
           {step === 3 && (
-            <div className="space-y-7 p-5 sm:p-8">
+            <div className="space-y-7">
 
-              <div className="border-b border-[#E5EAF0] pb-5">
-
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
-                  04
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
+                  Step 4
                 </p>
 
-                <h2 className="mt-1 text-xl font-extrabold tracking-tight text-[#111827] sm:text-2xl">
+                <h2 className="mt-1 text-xl font-extrabold text-[#111827] sm:text-2xl">
                   {t("wiz_title_3")}
                 </h2>
 
-                <p className="mt-2 text-xs leading-5 text-[#687587] sm:text-sm">
+                <p className="mt-2 text-sm leading-6 text-[#64748B]">
                   {t("wiz_sub_3")}
                 </p>
-
               </div>
 
-              {/* EDUCATION */}
-
               <AnimatedSelect
-                label={t(
-                  "wiz_edu_lbl"
-                )}
-                placeholder={t(
-                  "wiz_edu_ph"
-                )}
+                label={t("wiz_edu_lbl")}
+                placeholder={t("wiz_edu_ph")}
                 value={
                   EDUCATION_LEVELS.find(
-                    (l) =>
-                      l.id ===
+                    (level) =>
+                      level.id ===
                       data.educationLevel
-                  )?.label ||
-                  "10th – 12th"
+                  )?.label || "10th – 12th"
                 }
                 items={EDUCATION_LEVELS.map(
-                  (l) => l.label
+                  (level) => level.label
                 )}
-                onChange={(val) => {
+                onChange={(value) => {
                   const found =
                     EDUCATION_LEVELS.find(
-                      (l) =>
-                        l.label === val
+                      (level) =>
+                        level.label === value
                     );
 
                   if (found) {
@@ -1332,151 +1028,101 @@ export default function WizardPage() {
                 }}
               />
 
-              {/* SUMMARY */}
-
               <div className="border border-[#CBD5E1] bg-[#F8FAFC]">
 
-                <div className="border-b border-[#D7DEE8] bg-white px-4 py-3">
-
-                  <p className="text-xs font-bold uppercase tracking-[0.08em] text-[#0F5FC5]">
-                    {t(
-                      "wiz_profile_sum"
-                    )}
+                <div className="border-b border-[#CBD5E1] bg-white px-4 py-3">
+                  <p className="text-xs font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
+                    {t("wiz_profile_sum")}
                   </p>
-
                 </div>
 
-                <div className="divide-y divide-[#E5EAF0]">
+                <div className="divide-y divide-[#E2E8F0]">
 
-                  <div className="grid grid-cols-2 gap-4 px-4 py-3 text-xs">
-
-                    <span className="font-medium text-[#687587]">
-                      {t(
-                        "wiz_sum_loc"
-                      )}
+                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs font-medium text-[#64748B]">
+                      {t("wiz_sum_loc")}
                     </span>
 
-                    <span className="text-right font-bold text-[#111827]">
+                    <span className="text-sm font-bold text-[#111827]">
                       {data.district},{" "}
                       {data.state}
                     </span>
-
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 px-4 py-3 text-xs">
-
-                    <span className="font-medium text-[#687587]">
-                      {t(
-                        "wiz_sum_pur"
-                      )}
+                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs font-medium text-[#64748B]">
+                      {t("wiz_sum_pur")}
                     </span>
 
-                    <span className="text-right font-bold text-[#111827]">
-                      {
-                        data.activityType
-                      }
+                    <span className="text-sm font-bold text-[#111827]">
+                      {data.activityType}
                     </span>
-
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 px-4 py-3 text-xs">
-
-                    <span className="font-medium text-[#687587]">
-                      {t(
-                        "wiz_sum_cost"
-                      )}
+                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs font-medium text-[#64748B]">
+                      {t("wiz_sum_cost")}
                     </span>
 
-                    <span className="text-right font-bold text-[#0F5FC5]">
+                    <span className="text-sm font-bold text-[#0F5FC5]">
                       {formatINR(
                         data.projectCost
                       )}
                     </span>
-
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 px-4 py-3 text-xs">
-
-                    <span className="font-medium text-[#687587]">
-                      {t(
-                        "wiz_sum_inc"
-                      )}
+                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs font-medium text-[#64748B]">
+                      {t("wiz_sum_inc")}
                     </span>
 
-                    <span className="text-right font-bold text-[#111827]">
+                    <span className="text-sm font-bold text-[#111827]">
                       {formatINR(
                         data.annualIncome
                       )}
                       /yr
                     </span>
-
                   </div>
 
                 </div>
-
-              </div>
-
-              {/* REVIEW NOTE */}
-
-              <div className="border-l-4 border-[#0F5FC5] bg-[#EFF6FF] px-4 py-3">
-
-                <p className="text-xs font-semibold leading-5 text-[#174A83]">
-                  Review your information carefully
-                  before generating your scheme
-                  recommendation.
-                </p>
-
               </div>
 
             </div>
           )}
 
-          {/* =================================================
-              NAVIGATION
-              ================================================= */}
-
-          <div className="flex flex-col-reverse gap-3 border-t border-[#D7DEE8] bg-[#F8FAFC] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <div className="mt-8 flex items-center justify-between gap-3 border-t border-[#E2E8F0] pt-5">
 
             {step > 0 ? (
               <button
                 type="button"
                 onClick={prevStep}
                 disabled={submitting}
-                className="min-h-11 border border-[#B9C4D1] bg-white px-6 text-xs font-semibold text-[#374151] transition-colors hover:border-[#0F5FC5] hover:bg-[#EFF6FF] hover:text-[#0F5FC5] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                className="min-h-11 border border-[#CBD5E1] bg-white px-5 text-sm font-bold text-[#475569] transition hover:border-[#0F5FC5] hover:bg-[#F8FAFC] hover:text-[#0F5FC5] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {t(
-                  "wiz_btn_back"
-                )}
+                {t("wiz_btn_back")}
               </button>
             ) : (
               <div />
             )}
 
-            {step <
-            steps.length - 1 ? (
+            {step < steps.length - 1 ? (
               <button
                 type="button"
                 onClick={nextStep}
-                className="min-h-11 border border-[#0F5FC5] bg-[#0F5FC5] px-7 text-xs font-bold text-white transition-colors hover:bg-[#0B4FA7] sm:text-sm"
+                className="min-h-11 border border-[#0F5FC5] bg-[#0F5FC5] px-6 text-sm font-bold text-white transition hover:bg-[#0B4FA7]"
               >
-                {t(
-                  "wiz_btn_continue"
-                )}
+                {t("wiz_btn_continue")}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onSubmit}
                 disabled={submitting}
-                className="min-h-11 border border-[#0F5FC5] bg-[#0F5FC5] px-7 text-xs font-bold text-white transition-colors hover:bg-[#0B4FA7] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                className="min-h-11 border border-[#E87512] bg-[#E87512] px-6 text-sm font-bold text-white transition hover:bg-[#C95F0A] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting
-                  ? t(
-                      "wiz_btn_analyzing"
-                    )
-                  : t(
-                      "wiz_btn_submit"
-                    )}
+                  ? t("wiz_btn_analyzing")
+                  : t("wiz_btn_submit")}
               </button>
             )}
 
@@ -1484,20 +1130,11 @@ export default function WizardPage() {
 
         </section>
 
-        {/* =================================================
-            FOOTNOTE
-            ================================================= */}
-
-        <p className="px-2 py-5 text-center text-[10px] leading-4 text-[#8A96A6]">
-          NIRVAAN uses the information you provide to
-          identify potentially relevant government
-          schemes. Final eligibility is determined by
-          the applicable authority and lending
-          institution.
+        <p className="mt-5 text-center text-[11px] font-medium text-[#94A3B8]">
+          Your information is used only to identify suitable government schemes.
         </p>
 
       </div>
-
     </main>
   );
     }
