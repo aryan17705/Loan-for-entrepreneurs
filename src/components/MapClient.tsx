@@ -1,382 +1,214 @@
 "use client";
 
-import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+
 import type { PartnerWithMeta } from "@/lib/types";
 
-const COLORS: Record<PartnerWithMeta["healthStatus"], string> = {
-  green: "#16A34A",
-  yellow: "#D97706",
-  red: "#DC2626",
-};
-
-interface Props {
+type MapClientProps = {
   partners: PartnerWithMeta[];
   center: [number, number];
-  zoom?: number;
-  selectedId?: string | null;
-  userLocation?: { lat: number; lng: number } | null;
+  zoom: number;
+  selectedId: string | null;
+  userLocation: {
+    lat: number;
+    lng: number;
+  } | null;
   onSelect: (id: string | null) => void;
+};
+
+const MAPBOX_TOKEN =
+  process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
+function getHealthColor(
+  status: PartnerWithMeta["healthStatus"]
+) {
+  if (status === "green") {
+    return "#16A34A";
+  }
+
+  if (status === "yellow") {
+    return "#D97706";
+  }
+
+  return "#DC2626";
 }
 
-function getHealthLabel(status: PartnerWithMeta["healthStatus"]) {
-  if (status === "green") return "Healthy";
-  if (status === "yellow") return "Watchlist";
+function getHealthLabel(
+  status: PartnerWithMeta["healthStatus"]
+) {
+  if (status === "green") {
+    return "Healthy";
+  }
+
+  if (status === "yellow") {
+    return "Watchlist";
+  }
+
   return "High NPA";
+}
+
+function getTypeLabel(
+  type: PartnerWithMeta["type"]
+) {
+  if (type === "public-sector-bank") {
+    return "PSU Bank";
+  }
+
+  if (type === "private-bank") {
+    return "Private Bank";
+  }
+
+  if (type === "nbfc") {
+    return "NBFC";
+  }
+
+  if (type === "regional-agency") {
+    return "Govt. Agency";
+  }
+
+  return "Co-op Bank";
 }
 
 export default function MapClient({
   partners,
   center,
-  zoom = 5,
+  zoom,
   selectedId,
   userLocation,
   onSelect,
-}: Props) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<Record<string, mapboxgl.Marker>>({});
-  const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
-  const initializedRef = useRef(false);
+}: MapClientProps) {
+  const mapContainerRef =
+    useRef<HTMLDivElement | null>(null);
 
-  const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+  const mapRef =
+    useRef<mapboxgl.Map | null>(null);
+
+  const markersRef =
+    useRef<
+      Record<
+        string,
+        mapboxgl.Marker
+      >
+    >({});
+
+  const userMarkerRef =
+    useRef<mapboxgl.Marker | null>(
+      null
+    );
+
+  const initializedRef =
+    useRef(false);
+
+  /*
+   * Keep the latest selection callback
+   * available to marker click handlers.
+   */
+  const onSelectRef =
+    useRef(onSelect);
 
   useEffect(() => {
-    if (!containerRef.current || !token || mapRef.current) {
+    onSelectRef.current =
+      onSelect;
+  }, [onSelect]);
+
+  /*
+   * Create the Mapbox map once.
+   */
+  useEffect(() => {
+    if (
+      !mapContainerRef.current ||
+      mapRef.current
+    ) {
       return;
     }
 
-    mapboxgl.accessToken = token;
+    if (!MAPBOX_TOKEN) {
+      return;
+    }
 
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: "mapbox://styles/mapbox/satellite-streets-v12",
-      center,
-      zoom,
-      attributionControl: true,
-      cooperativeGestures: false,
-      dragRotate: false,
-      pitchWithRotate: false,
-      touchPitch: false,
-      maxZoom: 18,
-      minZoom: 3,
-    });
+    mapboxgl.accessToken =
+      MAPBOX_TOKEN;
+
+    const map =
+      new mapboxgl.Map({
+        container:
+          mapContainerRef.current,
+        style:
+          "mapbox://styles/mapbox/satellite-streets-v12",
+        center: [
+          center[1],
+          center[0],
+        ],
+        zoom,
+        attributionControl: true,
+      });
 
     map.addControl(
       new mapboxgl.NavigationControl({
         showCompass: false,
-        visualizePitch: false,
       }),
       "top-right"
     );
 
-    map.on("load", () => {
-      initializedRef.current = true;
-    });
-
     mapRef.current = map;
 
-    return () => {
-      initializedRef.current = false;
+    map.on("load", () => {
+      initializedRef.current =
+        true;
+    });
 
-      Object.values(markersRef.current).forEach((marker) => {
+    return () => {
+      initializedRef.current =
+        false;
+
+      Object.values(
+        markersRef.current
+      ).forEach((marker) => {
         marker.remove();
       });
 
       markersRef.current = {};
 
-      userMarkerRef.current?.remove();
-      userMarkerRef.current = null;
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current =
+          null;
+      }
 
       map.remove();
       mapRef.current = null;
     };
-  }, [token]);
+  }, []);
 
+  /*
+   * Update map camera when the locator
+   * changes district, user location or
+   * selected partner.
+   */
   useEffect(() => {
     const map = mapRef.current;
 
-    if (!map || !initializedRef.current) {
-      return;
-    }
-
-    const existingIds = new Set(partners.map((partner) => partner.id));
-
-    Object.entries(markersRef.current).forEach(([id, marker]) => {
-      if (!existingIds.has(id)) {
-        marker.remove();
-        delete markersRef.current[id];
-      }
-    });
-
-    partners.forEach((partner) => {
-      const isSelected = selectedId === partner.id;
-      const color = COLORS[partner.healthStatus];
-
-      let marker = markersRef.current[partner.id];
-
-      if (!marker) {
-        const element = document.createElement("button");
-
-        element.type = "button";
-        element.setAttribute(
-          "aria-label",
-          `Select ${partner.name}`
-        );
-
-        marker = new mapboxgl.Marker({
-          element,
-          anchor: "center",
-        })
-          .setLngLat([partner.lng, partner.lat])
-          .addTo(map);
-
-        element.addEventListener("click", (event) => {
-          event.stopPropagation();
-          onSelect(partner.id);
-        });
-
-        markersRef.current[partner.id] = marker;
-      }
-
-      const element = marker.getElement();
-
-      element.style.width = isSelected ? "28px" : "18px";
-      element.style.height = isSelected ? "28px" : "18px";
-      element.style.borderRadius = "50%";
-      element.style.border = isSelected
-        ? "4px solid #FFFFFF"
-        : "3px solid #FFFFFF";
-      element.style.backgroundColor = isSelected
-        ? "#F97316"
-        : color;
-      element.style.boxShadow = isSelected
-        ? "0 0 0 5px rgba(249,115,22,0.35), 0 3px 12px rgba(0,0,0,0.55)"
-        : "0 2px 8px rgba(0,0,0,0.55)";
-      element.style.cursor = "pointer";
-      element.style.padding = "0";
-      element.style.margin = "0";
-      element.style.transition =
-        "width 160ms ease, height 160ms ease, background-color 160ms ease, box-shadow 160ms ease";
-
-      marker
-        .setLngLat([partner.lng, partner.lat])
-        .addTo(map);
-
-      const popup = new mapboxgl.Popup({
-        offset: 18,
-        closeButton: true,
-        closeOnClick: false,
-        maxWidth: "320px",
-        className: "nirvaan-map-popup",
-      }).setHTML(`
-        <div style="
-          width: 270px;
-          padding: 2px;
-          font-family: Arial, sans-serif;
-          color: #111827;
-        ">
-          <div style="
-            border-bottom: 1px solid #D7DEE8;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-          ">
-            <div style="
-              font-size: 14px;
-              line-height: 1.35;
-              font-weight: 800;
-              color: #111827;
-            ">
-              ${partner.name}
-            </div>
-          </div>
-
-          <div style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            margin-bottom: 10px;
-          ">
-            <span style="
-              display: inline-block;
-              padding: 4px 7px;
-              border: 1px solid ${color};
-              background: #FFFFFF;
-              color: ${color};
-              font-size: 10px;
-              line-height: 1;
-              font-weight: 800;
-              text-transform: uppercase;
-              letter-spacing: 0.04em;
-            ">
-              ${getHealthLabel(partner.healthStatus)}
-            </span>
-
-            ${
-              partner.distanceKm >= 0
-                ? `
-                  <span style="
-                    font-size: 11px;
-                    font-weight: 700;
-                    color: #475569;
-                    white-space: nowrap;
-                  ">
-                    ${partner.distanceKm.toFixed(1)} km
-                  </span>
-                `
-                : ""
-            }
-          </div>
-
-          <div style="
-            font-size: 11px;
-            line-height: 1.55;
-            color: #475569;
-            margin-bottom: 12px;
-          ">
-            ${partner.address}, ${partner.city}<br />
-            ${partner.district}, ${partner.state}
-            ${
-              partner.pincode
-                ? `<br />PIN ${partner.pincode}`
-                : ""
-            }
-          </div>
-
-          <div style="
-            display: flex;
-            gap: 6px;
-            border-top: 1px solid #E2E8F0;
-            padding-top: 10px;
-          ">
-            ${
-              partner.phone
-                ? `
-                  <a
-                    href="tel:${partner.phone}"
-                    style="
-                      flex: 1;
-                      display: block;
-                      padding: 8px 6px;
-                      border: 1px solid #CBD5E1;
-                      background: #FFFFFF;
-                      color: #0F5FC5;
-                      text-align: center;
-                      text-decoration: none;
-                      font-size: 11px;
-                      font-weight: 800;
-                    "
-                  >
-                    Call
-                  </a>
-                `
-                : ""
-            }
-
-            <a
-              href="https://www.google.com/maps/dir/?api=1&destination=${partner.lat},${partner.lng}"
-              target="_blank"
-              rel="noreferrer"
-              style="
-                flex: 1;
-                display: block;
-                padding: 8px 6px;
-                border: 1px solid #0F5FC5;
-                background: #0F5FC5;
-                color: #FFFFFF;
-                text-align: center;
-                text-decoration: none;
-                font-size: 11px;
-                font-weight: 800;
-              "
-            >
-              Directions
-            </a>
-          </div>
-        </div>
-      `);
-
-      marker.setPopup(popup);
-
-      if (isSelected && !marker.getPopup()?.isOpen()) {
-        popup.addTo(map);
-      }
-
-      if (!isSelected && marker.getPopup()?.isOpen()) {
-        marker.togglePopup();
-      }
-    });
-  }, [partners, selectedId, onSelect]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-
-    if (!map || !initializedRef.current) {
-      return;
-    }
-
-    if (userMarkerRef.current) {
-      userMarkerRef.current.remove();
-      userMarkerRef.current = null;
-    }
-
-    if (!userLocation) {
-      return;
-    }
-
-    const element = document.createElement("div");
-
-    element.style.width = "18px";
-    element.style.height = "18px";
-    element.style.borderRadius = "50%";
-    element.style.background = "#0F5FC5";
-    element.style.border = "4px solid #FFFFFF";
-    element.style.boxShadow =
-      "0 0 0 8px rgba(15,95,197,0.25), 0 3px 12px rgba(0,0,0,0.45)";
-
-    userMarkerRef.current = new mapboxgl.Marker({
-      element,
-    })
-      .setLngLat([userLocation.lng, userLocation.lat])
-      .setPopup(
-        new mapboxgl.Popup({
-          offset: 14,
-          closeButton: false,
-        }).setHTML(`
-          <div style="
-            padding: 2px 4px;
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-            font-weight: 800;
-            color: #111827;
-          ">
-            Your current location
-          </div>
-        `)
-      )
-      .addTo(map);
-  }, [userLocation]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-
-    if (!map || !initializedRef.current) {
+    if (!map) {
       return;
     }
 
     if (selectedId) {
-      const selected = partners.find(
-        (partner) => partner.id === selectedId
-      );
+      const selected =
+        partners.find(
+          (partner) =>
+            partner.id === selectedId
+        );
 
       if (selected) {
         map.flyTo({
-          center: [selected.lng, selected.lat],
+          center: [
+            selected.lng,
+            selected.lat,
+          ],
           zoom: 14,
-          speed: 0.8,
-          curve: 1.2,
+          duration: 900,
           essential: true,
         });
 
@@ -385,37 +217,512 @@ export default function MapClient({
     }
 
     map.flyTo({
-      center,
+      center: [
+        center[1],
+        center[0],
+      ],
       zoom,
-      speed: 0.7,
-      curve: 1.1,
+      duration: 700,
       essential: true,
     });
-  }, [center, zoom, selectedId, partners]);
+  }, [
+    center,
+    zoom,
+    selectedId,
+    partners,
+  ]);
+
+  /*
+   * Render all partner markers.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map) {
+      return;
+    }
+
+    /*
+     * Remove markers that no longer exist
+     * in the current partner response.
+     */
+    const currentIds =
+      new Set(
+        partners.map(
+          (partner) => partner.id
+        )
+      );
+
+    Object.entries(
+      markersRef.current
+    ).forEach(([id, marker]) => {
+      if (!currentIds.has(id)) {
+        marker.remove();
+        delete markersRef.current[id];
+      }
+    });
+
+    partners.forEach((partner) => {
+      const existing =
+        markersRef.current[
+          partner.id
+        ];
+
+      const isSelected =
+        partner.id === selectedId;
+
+      const healthColor =
+        getHealthColor(
+          partner.healthStatus
+        );
+
+      /*
+       * Update an existing marker.
+       */
+      if (existing) {
+        const element =
+          existing.getElement();
+
+        element.style.width =
+          isSelected
+            ? "34px"
+            : "26px";
+
+        element.style.height =
+          isSelected
+            ? "34px"
+            : "26px";
+
+        element.style.background =
+          isSelected
+            ? "#E87512"
+            : healthColor;
+
+        element.style.borderColor =
+          isSelected
+            ? "#FFFFFF"
+            : "#FFFFFF";
+
+        element.style.boxShadow =
+          isSelected
+            ? "0 0 0 3px rgba(232,117,18,0.35), 0 4px 12px rgba(0,0,0,0.35)"
+            : "0 2px 8px rgba(0,0,0,0.35)";
+
+        existing.setLngLat([
+          partner.lng,
+          partner.lat,
+        ]);
+
+        const popup =
+          existing.getPopup();
+
+        if (popup) {
+          popup.setHTML(
+            createPopupHtml(
+              partner
+            )
+          );
+        }
+
+        return;
+      }
+
+      /*
+       * Create a new rectangular marker
+       * container with a circular location
+       * point inside it.
+       *
+       * The marker itself is intentionally
+       * circular because it is a geographic
+       * map-location symbol, not UI chrome.
+       */
+      const markerElement =
+        document.createElement(
+          "button"
+        );
+
+      markerElement.type =
+        "button";
+
+      markerElement.setAttribute(
+        "aria-label",
+        `Select ${partner.name}`
+      );
+
+      markerElement.style.width =
+        isSelected
+          ? "34px"
+          : "26px";
+
+      markerElement.style.height =
+        isSelected
+          ? "34px"
+          : "26px";
+
+      markerElement.style.borderRadius =
+        "50%";
+
+      markerElement.style.border =
+        "3px solid #FFFFFF";
+
+      markerElement.style.background =
+        isSelected
+          ? "#E87512"
+          : healthColor;
+
+      markerElement.style.boxShadow =
+        isSelected
+          ? "0 0 0 3px rgba(232,117,18,0.35), 0 4px 12px rgba(0,0,0,0.35)"
+          : "0 2px 8px rgba(0,0,0,0.35)";
+
+      markerElement.style.cursor =
+        "pointer";
+
+      markerElement.style.padding =
+        "0";
+
+      markerElement.style.margin =
+        "0";
+
+      markerElement.style.display =
+        "block";
+
+      markerElement.style.transition =
+        "all 160ms ease";
+
+      markerElement.addEventListener(
+        "click",
+        (event) => {
+          event.stopPropagation();
+
+          onSelectRef.current(
+            partner.id
+          );
+        }
+      );
+
+      const popup =
+        new mapboxgl.Popup({
+          offset: 18,
+          closeButton: true,
+          closeOnClick: false,
+          maxWidth: "320px",
+        }).setHTML(
+          createPopupHtml(
+            partner
+          )
+        );
+
+      const marker =
+        new mapboxgl.Marker({
+          element: markerElement,
+          anchor: "center",
+        })
+          .setLngLat([
+            partner.lng,
+            partner.lat,
+          ])
+          .setPopup(popup)
+          .addTo(map);
+
+      markersRef.current[
+        partner.id
+      ] = marker;
+    });
+  }, [partners, selectedId]);
+
+  /*
+   * Show the user's current location.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map) {
+      return;
+    }
+
+    if (!userLocation) {
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current =
+          null;
+      }
+
+      return;
+    }
+
+    if (userMarkerRef.current) {
+      userMarkerRef.current.setLngLat([
+        userLocation.lng,
+        userLocation.lat,
+      ]);
+
+      return;
+    }
+
+    const userElement =
+      document.createElement(
+        "div"
+      );
+
+    userElement.style.width =
+      "18px";
+
+    userElement.style.height =
+      "18px";
+
+    userElement.style.borderRadius =
+      "50%";
+
+    userElement.style.background =
+      "#2563EB";
+
+    userElement.style.border =
+      "3px solid #FFFFFF";
+
+    userElement.style.boxShadow =
+      "0 0 0 5px rgba(37,99,235,0.25), 0 2px 8px rgba(0,0,0,0.35)";
+
+    userMarkerRef.current =
+      new mapboxgl.Marker({
+        element: userElement,
+        anchor: "center",
+      })
+        .setLngLat([
+          userLocation.lng,
+          userLocation.lat,
+        ])
+        .setPopup(
+          new mapboxgl.Popup({
+            offset: 12,
+            closeButton: true,
+          }).setHTML(
+            `
+              <div style="font-family: Arial, sans-serif; padding: 2px;">
+                <div style="font-size:12px; font-weight:700; color:#111827;">
+                  Your location
+                </div>
+              </div>
+            `
+          )
+        )
+        .addTo(map);
+  }, [userLocation]);
+
+  if (!MAPBOX_TOKEN) {
+    return (
+      <div
+        ref={mapContainerRef}
+        className="flex h-full items-center justify-center bg-[#F8FAFC] p-6"
+      >
+        <div className="w-full max-w-md border border-[#CBD5E1] bg-white p-6 text-center">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#E87512]">
+            Map configuration required
+          </p>
+
+          <h3 className="mt-2 text-lg font-extrabold text-[#111827]">
+            Satellite map is not configured
+          </h3>
+
+          <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+            Add your Mapbox public access token
+            as NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+            in the local environment and Vercel
+            project settings.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
-      ref={containerRef}
+      ref={mapContainerRef}
       className="h-full w-full"
-      style={{
-        minHeight: "100%",
-        background: "#DDE5EC",
-      }}
-    >
-      {!token && (
-        <div className="flex h-full items-center justify-center bg-[#F8FAFC] p-6 text-center">
-          <div className="max-w-md border border-[#CBD5E1] bg-white p-6">
-            <div className="mb-2 text-sm font-extrabold text-[#111827]">
-              Satellite map configuration required
-            </div>
-
-            <p className="text-xs leading-5 text-[#64748B]">
-              Add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to the
-              environment variables before deploying.
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
+    />
   );
+}
+
+function createPopupHtml(
+  partner: PartnerWithMeta
+) {
+  const healthLabel =
+    getHealthLabel(
+      partner.healthStatus
+    );
+
+  const healthColor =
+    getHealthColor(
+      partner.healthStatus
+    );
+
+  const typeLabel =
+    getTypeLabel(
+      partner.type
+    );
+
+  const distance =
+    typeof partner.distanceKm ===
+      "number" &&
+    partner.distanceKm >= 0
+      ? `${partner.distanceKm.toFixed(
+          1
+        )} km away`
+      : "Distance unavailable";
+
+  const directionsUrl =
+    `https://www.google.com/maps/dir/?api=1&destination=${partner.lat},${partner.lng}`;
+
+  const phoneHtml =
+    partner.phone
+      ? `
+          <a
+            href="tel:${escapeHtml(
+              partner.phone
+            )}"
+            style="
+              display:inline-block;
+              padding:7px 10px;
+              border:1px solid #0F5FC5;
+              color:#0F5FC5;
+              background:#FFFFFF;
+              text-decoration:none;
+              font-size:11px;
+              font-weight:700;
+            "
+          >
+            Call
+          </a>
+        `
+      : "";
+
+  return `
+    <div
+      style="
+        width:100%;
+        font-family:Arial,sans-serif;
+        color:#111827;
+        padding:2px;
+      "
+    >
+      <div
+        style="
+          font-size:15px;
+          line-height:20px;
+          font-weight:800;
+          margin-bottom:6px;
+        "
+      >
+        ${escapeHtml(
+          partner.name
+        )}
+      </div>
+
+      <div
+        style="
+          font-size:11px;
+          line-height:17px;
+          color:#64748B;
+          font-weight:600;
+          margin-bottom:9px;
+        "
+      >
+        ${escapeHtml(
+          partner.city
+        )}, ${escapeHtml(
+          partner.district
+        )}, ${escapeHtml(
+          partner.state
+        )}
+      </div>
+
+      <div
+        style="
+          display:inline-block;
+          border:1px solid ${healthColor};
+          color:${healthColor};
+          padding:4px 7px;
+          font-size:10px;
+          font-weight:800;
+          margin-bottom:9px;
+        "
+      >
+        ${healthLabel} · ${
+          partner.npaPercent
+        }% NPA
+      </div>
+
+      <div
+        style="
+          font-size:11px;
+          line-height:17px;
+          color:#475569;
+          margin-bottom:8px;
+        "
+      >
+        ${escapeHtml(
+          partner.address
+        )}
+        ${
+          partner.pincode
+            ? ` - ${escapeHtml(
+                partner.pincode
+              )}`
+            : ""
+        }
+      </div>
+
+      <div
+        style="
+          font-size:10px;
+          color:#64748B;
+          font-weight:700;
+          margin-bottom:10px;
+        "
+      >
+        ${escapeHtml(
+          typeLabel
+        )} · ${distance}
+      </div>
+
+      <div
+        style="
+          display:flex;
+          gap:7px;
+          align-items:center;
+        "
+      >
+        ${phoneHtml}
+
+        <a
+          href="${directionsUrl}"
+          target="_blank"
+          rel="noreferrer"
+          style="
+            display:inline-block;
+            padding:7px 10px;
+            border:1px solid #E87512;
+            color:#FFFFFF;
+            background:#E87512;
+            text-decoration:none;
+            font-size:11px;
+            font-weight:700;
+          "
+        >
+          Directions
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(
+  value: string
+) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
