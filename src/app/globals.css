@@ -4,7 +4,7 @@
 
 /* =========================================================
    NIRVAAN GLOBAL DESIGN SYSTEM
-   Font: Inclusive Sans
+   Font: Raleway
    ========================================================= */
 
 :root {
@@ -24,7 +24,7 @@
 }
 
 /* =========================================================
-   GLOBAL FONT
+   GLOBAL FOUNDATION
    ========================================================= */
 
 html,
@@ -39,9 +39,7 @@ body {
   background: #ffffff;
   color: #111827;
 
-  font-family:
-    "Inclusive Sans",
-    sans-serif;
+  font-family: var(--font-raleway), "Raleway", sans-serif;
 
   overflow-x: hidden;
 
@@ -52,7 +50,7 @@ body {
 }
 
 /*
- * Force Inclusive Sans across the entire application.
+ * Force Raleway throughout the application.
  */
 
 *,
@@ -60,9 +58,7 @@ body {
 *::after {
   box-sizing: border-box;
 
-  font-family:
-    "Inclusive Sans",
-    sans-serif;
+  font-family: var(--font-raleway), "Raleway", sans-serif;
 
   border-radius: 0 !important;
 }
@@ -77,10 +73,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family:
-    "Inclusive Sans",
-    sans-serif;
-
+  font-family: var(--font-raleway), "Raleway", sans-serif;
   color: #111827;
 }
 
@@ -102,10 +95,7 @@ h6 {
 }
 
 p {
-  font-family:
-    "Inclusive Sans",
-    sans-serif;
-
+  font-family: var(--font-raleway), "Raleway", sans-serif;
   font-weight: 400;
 }
 
@@ -114,12 +104,8 @@ p {
    ========================================================= */
 
 .nirvaan-wordmark {
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
-
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
   font-weight: 800 !important;
-
   letter-spacing: 0.06em;
 }
 
@@ -130,10 +116,7 @@ p {
 nav,
 nav a,
 nav button {
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
-
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
   font-weight: 500;
 }
 
@@ -142,10 +125,7 @@ nav button {
    ========================================================= */
 
 button {
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
-
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
   font-weight: 600;
 }
 
@@ -154,20 +134,14 @@ button {
    ========================================================= */
 
 label {
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
-
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
   font-weight: 500;
 }
 
 input,
 select,
 textarea {
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
-
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
   font-weight: 400;
 
   border-radius: 0 !important;
@@ -175,10 +149,7 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
-
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
   font-weight: 400;
 }
 
@@ -187,9 +158,7 @@ textarea::placeholder {
    ========================================================= */
 
 a {
-  font-family:
-    "Inclusive Sans",
-    sans-serif;
+  font-family: var(--font-raleway), "Raleway", sans-serif;
 }
 
 /* =========================================================
@@ -345,7 +314,6 @@ input:not([type="range"]),
 select,
 textarea {
   background: #ffffff;
-
   color: #111827;
 
   border: 1px solid #b9c4d1;
@@ -426,7 +394,6 @@ textarea:focus-visible {
 
 .recharts-tooltip-wrapper {
   z-index: 1000 !important;
-
   pointer-events: none !important;
 }
 
@@ -444,16 +411,11 @@ textarea:focus-visible {
   box-shadow:
     0 8px 24px rgba(17, 24, 39, 0.12) !important;
 
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
 }
 
 .recharts-default-tooltip * {
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
-
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
   color: #111827 !important;
 }
 
@@ -463,11 +425,8 @@ textarea:focus-visible {
 
 .map-isolate-box {
   isolation: isolate !important;
-
   position: relative !important;
-
   z-index: 0 !important;
-
   transform: translate3d(0, 0, 0) !important;
 }
 
@@ -491,15 +450,11 @@ textarea:focus-visible {
 
 .leaflet-container {
   background: #eef2f7 !important;
-
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
 }
 
 .leaflet-bar {
   border: 1px solid #b9c4d1 !important;
-
   overflow: hidden;
 
   box-shadow:
@@ -508,21 +463,17 @@ textarea:focus-visible {
 
 .leaflet-bar a {
   background: #ffffff !important;
-
   color: #111827 !important;
 
   border-bottom: 1px solid #d7dee8 !important;
 
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
 
   font-weight: 600;
 }
 
 .leaflet-bar a:hover {
   background: #0f5fc5 !important;
-
   color: #ffffff !important;
 }
 
@@ -540,14 +491,11 @@ textarea:focus-visible {
   box-shadow:
     0 12px 28px rgba(17, 24, 39, 0.16) !important;
 
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
 }
 
 .leaflet-popup-tip {
   background: #ffffff !important;
-
   border-radius: 0 !important;
 }
 
@@ -571,9 +519,7 @@ textarea:focus-visible {
   box-shadow:
     0 6px 16px rgba(17, 24, 39, 0.12) !important;
 
-  font-family:
-    "Inclusive Sans",
-    sans-serif !important;
+  font-family: var(--font-raleway), "Raleway", sans-serif !important;
 }
 
 /* =========================================================
@@ -606,7 +552,8 @@ textarea:focus-visible {
     color: #111827 !important;
 
     font-family:
-      "Inclusive Sans",
+      var(--font-raleway),
+      "Raleway",
       sans-serif !important;
   }
 }
