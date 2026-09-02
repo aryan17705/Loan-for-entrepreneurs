@@ -1,184 +1,330 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const STEPS = [
   {
     number: "01",
     title: "Verification",
     description:
-      "Verify your identity through DigiLocker OTP and link either Aadhaar or PAN.",
-    details: ["DigiLocker OTP", "Aadhaar or PAN"],
+      "Secure identity verification through DigiLocker with Aadhaar or PAN.",
+    icon: "✓",
   },
   {
     number: "02",
     title: "Earning Status",
     description:
-      "Tell us whether you are earning or currently non-earning so NIRVAAN can guide you through the right route.",
-    details: [
-      "Earning assessment",
-      "Income proof",
-      "Non-earning assessment",
-    ],
+      "Select your earning status and complete the required verification or assessment.",
+    icon: "◎",
   },
   {
     number: "03",
     title: "Smart Scheme Recommender",
     description:
-      "AI analyses your verified information and identifies a suitable scheme with its maximum loan amount.",
-    details: ["AI-powered matching", "Scheme recommendation", "Maximum loan"],
+      "AI-powered scheme matching based on your verified profile and financial requirements.",
+    icon: "◎",
   },
   {
     number: "04",
     title: "Financial Calculator",
     description:
-      "Choose a loan amount within your recommended maximum and understand the financing before moving ahead.",
-    details: ["₹50,000 increments", "Loan amount selection", "AI assistance"],
+      "Choose your loan amount and understand EMI, interest and repayment details.",
+    icon: "▦",
   },
   {
     number: "05",
     title: "Geo-Spatial Partner Locator & Router",
     description:
-      "View partner locations across India on a satellite map, select a partner and get directions.",
-    details: [
-      "Satellite map",
-      "Partner selection",
-      "Route & directions",
-    ],
+      "Find partner institutions, select a suitable location and get directions.",
+    icon: "⌖",
   },
 ];
 
-const ROUTES = [
-  {
-    label: "EARNING",
-    title: "For earning applicants",
-    description:
-      "Provide your income details and upload bank income proof for verification.",
-    points: [
-      "Enter annual income",
-      "Upload bank income proof PDF",
-      "Income verification",
-      "Continue to Smart Scheme Recommender",
-    ],
-  },
-  {
-    label: "NON-EARNING",
-    title: "For non-earning applicants",
-    description:
-      "Choose an educational loan or a small project loan and complete a NIRVAAN team assessment.",
-    points: [
-      "Educational Loan",
-      "Small Project Loan",
-      "Video assessment with the NIRVAAN team",
-      "Verification of claims and guarantor",
-    ],
-  },
-];
-
-export default function Home() {
+function NirvaanLogo({ light = false }: { light?: boolean }) {
   return (
-    <div className="min-h-screen bg-white text-[#111827]">
+    <span className="relative inline-flex items-center">
+      <span
+        className={`nirvaan-wordmark text-[28px] leading-none font-extrabold tracking-[0.08em] sm:text-[31px] ${
+          light ? "text-white" : "text-[#102A43]"
+        }`}
+      >
+        NIRVAAN
+      </span>
+
+      <span className="absolute -right-2 -top-1 h-2.5 w-2.5 bg-[#F47B20]" />
+    </span>
+  );
+}
+
+function IndiaNetworkIllustration() {
+  return (
+    <div className="relative h-full min-h-[390px] w-full overflow-hidden border-l border-[#E6EDF5] bg-[#F8FBFF]">
+      <div className="absolute inset-0 opacity-60">
+        <div className="absolute left-[8%] top-[18%] h-px w-[75%] rotate-[12deg] bg-[#B8CBE6]" />
+        <div className="absolute left-[15%] top-[48%] h-px w-[75%] -rotate-[16deg] bg-[#B8CBE6]" />
+        <div className="absolute left-[30%] top-[68%] h-px w-[55%] rotate-[10deg] bg-[#B8CBE6]" />
+        <div className="absolute left-[45%] top-[25%] h-[55%] w-px rotate-[28deg] bg-[#B8CBE6]" />
+      </div>
+
+      <svg
+        viewBox="0 0 500 500"
+        className="absolute left-[23%] top-[6%] h-[82%] w-[55%]"
+        aria-hidden="true"
+      >
+        <path
+          d="M236 30
+             L282 45 L301 74 L330 92 L325 124
+             L350 143 L335 174 L349 198 L334 225
+             L347 250 L330 278 L318 309 L300 337
+             L284 365 L271 397 L250 423 L226 405
+             L213 376 L195 350 L177 330 L167 299
+             L148 276 L154 247 L139 223 L158 198
+             L151 168 L174 143 L169 116 L192 91
+             L202 60 Z"
+          fill="#F9FCFF"
+          stroke="#8EB2E3"
+          strokeWidth="2"
+        />
+
+        <path
+          d="M202 94 L252 130 L300 112 M173 164 L230 190 L330 174
+             M158 223 L215 245 L334 225 M177 276 L245 288 L330 278
+             M195 350 L248 327 L300 337"
+          fill="none"
+          stroke="#B6CAE6"
+          strokeWidth="1.2"
+        />
+
+        <circle cx="252" cy="130" r="5" fill="#1769D2" />
+        <circle cx="300" cy="112" r="5" fill="#F47B20" />
+        <circle cx="230" cy="190" r="5" fill="#1769D2" />
+        <circle cx="330" cy="174" r="5" fill="#1769D2" />
+        <circle cx="215" cy="245" r="5" fill="#F47B20" />
+        <circle cx="334" cy="225" r="5" fill="#1769D2" />
+        <circle cx="245" cy="288" r="5" fill="#1769D2" />
+        <circle cx="330" cy="278" r="5" fill="#F47B20" />
+        <circle cx="248" cy="327" r="5" fill="#1769D2" />
+      </svg>
+
+      <div className="absolute left-[8%] top-[22%] border border-[#BFD0E6] bg-white px-4 py-3 text-center shadow-sm">
+        <div className="text-2xl text-[#1769D2]">▤</div>
+        <p className="mt-1 text-[11px] font-extrabold text-[#102A43]">
+          Loan Schemes
+        </p>
+      </div>
+
+      <div className="absolute right-[9%] top-[18%] border border-[#BFD0E6] bg-white px-4 py-3 text-center shadow-sm">
+        <div className="text-2xl text-[#1769D2]">♙</div>
+        <p className="mt-1 text-[11px] font-extrabold text-[#102A43]">
+          Applicants
+        </p>
+      </div>
+
+      <div className="absolute bottom-[17%] left-[18%] border border-[#BFD0E6] bg-white px-5 py-3 text-center shadow-sm">
+        <div className="text-2xl font-bold text-[#1769D2]">₹</div>
+        <p className="mt-1 text-[11px] font-extrabold text-[#102A43]">
+          Financing Options
+        </p>
+      </div>
+
+      <div className="absolute bottom-[14%] right-[12%] border border-[#BFD0E6] bg-white px-5 py-3 text-center shadow-sm">
+        <div className="text-2xl text-[#1769D2]">♢</div>
+        <p className="mt-1 text-[11px] font-extrabold text-[#102A43]">
+          Partner Institutions
+        </p>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
+    </div>
+  );
+}
+
+export default function HomePage() {
+  const router = useRouter();
+
+  const startJourney = () => {
+    router.push("/wizard");
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-[#102A43]">
       {/* HERO */}
-      <section className="border-b border-[#D9E0E7] bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
-            <div>
-              <div className="inline-flex border border-[#E87512] bg-[#FFF7ED] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#B45309]">
-                Government Scheme Assistance
-              </div>
+      <section className="border-b border-[#E4EBF3] bg-white">
+        <div className="mx-auto grid min-h-[570px] max-w-7xl lg:grid-cols-[0.92fr_1.08fr]">
+          <div className="flex flex-col justify-center px-6 py-14 sm:px-10 lg:px-12 lg:py-20">
+            <div className="mb-6 h-[3px] w-16 bg-[#F47B20]" />
 
-              <h1 className="mt-6 max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-[-0.035em] text-[#002244] sm:text-5xl lg:text-6xl">
-                Find the right scheme.
-                <br />
-                <span className="text-[#0077CC]">
-                  Plan your financing.
-                </span>
-              </h1>
+            <p className="mb-4 text-xs font-extrabold uppercase tracking-[0.18em] text-[#1769D2]">
+              Government Scheme Assistance
+            </p>
 
-              <p className="mt-6 max-w-2xl text-base font-medium leading-8 text-[#526071]">
-                NIRVAAN guides you through identity verification,
-                earning-status assessment, AI-based scheme matching,
-                financing selection and partner location.
+            <h1 className="max-w-[620px] text-4xl font-extrabold leading-[1.12] tracking-[-0.025em] text-[#102A43] sm:text-5xl lg:text-[56px]">
+              Find the right scheme.
+              <br />
+              Understand your
+              <br />
+              <span className="text-[#1769D2]">financing options.</span>
+            </h1>
+
+            <div className="mt-7 max-w-[570px] border-l-[3px] border-[#F47B20] pl-5">
+              <p className="text-base font-medium leading-7 text-[#40556D] sm:text-lg">
+                NIRVAAN is an independent platform for discovering government
+                schemes, understanding financing options and preparing for
+                applications.
               </p>
+            </div>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/wizard"
-                  className="inline-flex min-h-[50px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-sm font-bold text-white transition-colors hover:border-[#005FA3] hover:bg-[#005FA3] focus:outline-none focus:ring-2 focus:ring-[#0077CC] focus:ring-offset-2"
-                >
-                  Start Application
-                  <span className="ml-3" aria-hidden="true">
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={startJourney}
+                className="inline-flex min-h-14 items-center justify-center gap-8 border border-[#0758C7] bg-[#0758C7] px-7 text-sm font-extrabold tracking-[0.04em] text-white transition hover:bg-[#064CA9]"
+              >
+                START MY JOURNEY
+                <span className="text-xl">→</span>
+              </button>
+
+              <Link
+                href="/recommendation"
+                className="inline-flex min-h-14 items-center justify-center border border-[#B7C7D9] bg-white px-6 text-sm font-bold text-[#17324F] transition hover:border-[#1769D2] hover:text-[#1769D2]"
+              >
+                EXPLORE SCHEMES
+              </Link>
+            </div>
+          </div>
+
+          <IndiaNetworkIllustration />
+        </div>
+      </section>
+            {/* FIVE STEP JOURNEY */}
+      <section className="bg-white py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3">
+              <span className="h-px w-10 bg-[#1769D2]" />
+              <span className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#F47B20]">
+                A Simple Five-Step Journey
+              </span>
+              <span className="h-px w-10 bg-[#1769D2]" />
+            </div>
+
+            <h2 className="mt-4 text-2xl font-extrabold text-[#102A43] sm:text-3xl">
+              From verification to financing in five simple steps
+            </h2>
+
+            <p className="mx-auto mt-3 max-w-2xl text-sm font-medium leading-6 text-[#64748B]">
+              Complete each stage in sequence. Your verified journey
+              information is carried forward to the next portal.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-4 lg:grid-cols-5">
+            {STEPS.map((step, index) => (
+              <button
+                key={step.number}
+                type="button"
+                onClick={index === 0 ? startJourney : undefined}
+                className={`group relative min-h-[250px] border border-[#E1E8F0] bg-white p-6 text-left shadow-[0_4px_18px_rgba(16,42,67,0.05)] transition ${
+                  index === 0
+                    ? "cursor-pointer hover:border-[#1769D2] hover:shadow-[0_8px_24px_rgba(23,105,210,0.10)]"
+                    : "cursor-default"
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex h-14 w-14 items-center justify-center border border-[#DCE7F4] bg-[#F4F8FD] text-2xl font-bold text-[#1769D2]">
+                    {step.icon}
+                  </div>
+
+                  <span className="text-3xl font-extrabold text-[#1769D2]">
+                    {step.number}
+                  </span>
+                </div>
+
+                <h3 className="mt-7 text-base font-extrabold leading-6 text-[#102A43]">
+                  {step.title}
+                </h3>
+
+                <p className="mt-3 text-xs font-medium leading-5 text-[#64748B]">
+                  {step.description}
+                </p>
+
+                {index === 0 ? (
+                  <span className="absolute bottom-5 right-5 text-lg font-bold text-[#1769D2] transition group-hover:translate-x-1">
                     →
                   </span>
-                </Link>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                <Link
-                  href="/recommendation"
-                  className="inline-flex min-h-[50px] items-center justify-center border border-[#B9C4D1] bg-white px-7 text-sm font-bold text-[#002244] transition-colors hover:border-[#0077CC] hover:bg-[#F7F9FB] hover:text-[#0077CC] focus:outline-none focus:ring-2 focus:ring-[#0077CC] focus:ring-offset-2"
-                >
-                  Smart Scheme Recommender
-                </Link>
+      {/* ROUTES */}
+      <section className="border-y border-[#E3EAF2] bg-[#F8FAFC] py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="border border-[#DDE6EF] bg-white p-7 sm:p-9">
+              <div className="flex items-center justify-between border-b border-[#E5EBF2] pb-5">
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#1769D2]">
+                    Route A
+                  </p>
+                  <h2 className="mt-2 text-2xl font-extrabold text-[#102A43]">
+                    Earning
+                  </h2>
+                </div>
+
+                <span className="text-3xl font-bold text-[#1769D2]">₹</span>
               </div>
 
-              <div className="mt-9 grid border-t border-[#E5EAF0] pt-5 sm:grid-cols-3">
-                <div className="border-b border-[#E5EAF0] pb-4 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-5">
-                  <p className="text-2xl font-extrabold text-[#002244]">
-                    01
-                  </p>
-                  <p className="mt-1 text-xs font-semibold leading-5 text-[#667085]">
-                    Verify your identity
-                  </p>
-                </div>
-
-                <div className="border-b border-[#E5EAF0] py-4 sm:border-b-0 sm:border-r sm:px-5 sm:py-0">
-                  <p className="text-2xl font-extrabold text-[#0077CC]">
-                    02
-                  </p>
-                  <p className="mt-1 text-xs font-semibold leading-5 text-[#667085]">
-                    Assess your route
-                  </p>
-                </div>
-
-                <div className="pt-4 sm:pl-5 sm:pt-0">
-                  <p className="text-2xl font-extrabold text-[#E87512]">
-                    05
-                  </p>
-                  <p className="mt-1 text-xs font-semibold leading-5 text-[#667085]">
-                    Reach a partner
-                  </p>
-                </div>
+              <div className="mt-6 space-y-4">
+                {[
+                  "Enter annual income",
+                  "Upload bank income proof",
+                  "Complete income verification",
+                  "Continue to AI scheme matching",
+                ].map((item, index) => (
+                  <div key={item} className="flex items-start gap-4">
+                    <span className="flex h-7 w-7 flex-none items-center justify-center border border-[#C9D9EA] text-xs font-extrabold text-[#1769D2]">
+                      {index + 1}
+                    </span>
+                    <p className="pt-1 text-sm font-semibold text-[#334155]">
+                      {item}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="border border-[#CBD5E1] bg-[#F7F9FB]">
-              <div className="border-b border-[#CBD5E1] bg-[#002244] px-5 py-4">
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-white">
-                  NIRVAAN Journey
-                </p>
-                <p className="mt-1 text-xs font-medium leading-5 text-[#DCE7F5]">
-                  Five connected stages from verification to partner selection.
-                </p>
+            <div className="border border-[#DDE6EF] bg-white p-7 sm:p-9">
+              <div className="flex items-center justify-between border-b border-[#E5EBF2] pb-5">
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#F47B20]">
+                    Route B
+                  </p>
+                  <h2 className="mt-2 text-2xl font-extrabold text-[#102A43]">
+                    Non-Earning
+                  </h2>
+                </div>
+
+                <span className="text-3xl font-bold text-[#F47B20]">+</span>
               </div>
 
-              <div className="divide-y divide-[#D9E0E7] bg-white">
-                {STEPS.map((step) => (
-                  <div
-                    key={step.number}
-                    className="flex gap-4 px-5 py-4"
-                  >
-                    <span className="w-9 shrink-0 text-sm font-extrabold text-[#0077CC]">
-                      {step.number}
+              <div className="mt-6 space-y-4">
+                {[
+                  "Educational loan or small project purpose",
+                  "Video assessment with the NIRVAAN team",
+                  "Discuss need, repayment plan and guarantor",
+                  "Continue after successful verification",
+                ].map((item, index) => (
+                  <div key={item} className="flex items-start gap-4">
+                    <span className="flex h-7 w-7 flex-none items-center justify-center border border-[#E8D4C4] text-xs font-extrabold text-[#F47B20]">
+                      {index + 1}
                     </span>
-
-                    <div>
-                      <h2 className="text-sm font-extrabold text-[#002244]">
-                        {step.title}
-                      </h2>
-
-                      <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
-                        {step.description}
-                      </p>
-                    </div>
+                    <p className="pt-1 text-sm font-semibold text-[#334155]">
+                      {item}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -186,412 +332,120 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* INTRODUCTION */}
-      <section
-        id="how-it-works"
-        className="border-b border-[#D9E0E7] bg-[#F7F9FB]"
-      >
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0077CC]">
-              How NIRVAAN works
-            </p>
-
-            <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.025em] text-[#002244] sm:text-4xl">
-              One guided journey, five clear stages.
-            </h2>
-
-            <p className="mt-4 text-sm font-medium leading-7 text-[#526071] sm:text-base">
-              Instead of moving between disconnected tools, NIRVAAN
-              keeps the applicant journey connected. Verified
-              information can be used to guide the next stage.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* STEPS */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="grid border border-[#CBD5E1] md:grid-cols-2 lg:grid-cols-5">
-            {STEPS.map((step, index) => (
-              <article
-                key={step.number}
-                className={`min-h-[300px] bg-white p-6 transition-colors hover:bg-[#F8FAFC] ${
-                  index !== STEPS.length - 1
-                    ? "border-b border-[#D9E0E7] lg:border-b-0 lg:border-r"
-                    : ""
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="text-3xl font-extrabold text-[#D9E0E7]">
-                    {step.number}
-                  </span>
-
-                  <span className="border border-[#D9E0E7] bg-[#F7F9FB] px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.08em] text-[#667085]">
-                    Stage
-                  </span>
-                </div>
-
-                <h3 className="mt-7 text-base font-extrabold leading-6 text-[#002244]">
-                  {step.title}
-                </h3>
-
-                <p className="mt-3 text-xs font-medium leading-5 text-[#667085]">
-                  {step.description}
-                </p>
-
-                <div className="mt-5 border-t border-[#E5EAF0] pt-4">
-                  {step.details.map((detail) => (
-                    <p
-                      key={detail}
-                      className="border-b border-[#F1F5F9] py-2 text-[11px] font-semibold text-[#526071] last:border-b-0"
-                    >
-                      <span className="mr-2 text-[#0077CC]">
-                        ✓
-                      </span>
-                      {detail}
-                    </p>
-                  ))}
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-            {/* APPLICANT ROUTES */}
-      <section className="border-t border-[#D9E0E7] bg-[#F7F9FB]">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-            <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#E87512]">
-                Stage 02
-              </p>
-
-              <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.025em] text-[#002244]">
-                Choose the route that matches your situation.
-              </h2>
-
-              <p className="mt-4 text-sm font-medium leading-7 text-[#526071]">
-                Earning and non-earning applicants follow different
-                assessment paths before reaching the same AI-powered
-                scheme recommendation stage.
-              </p>
-
-              <Link
-                href="/wizard"
-                className="mt-7 inline-flex min-h-[46px] items-center border border-[#0077CC] bg-[#0077CC] px-6 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
-              >
-                Begin Verification
-                <span className="ml-3" aria-hidden="true">
-                  →
-                </span>
-              </Link>
-            </div>
-
-            <div className="grid border border-[#CBD5E1] bg-white md:grid-cols-2">
-              {ROUTES.map((route, index) => (
-                <article
-                  key={route.label}
-                  className={`p-6 sm:p-7 ${
-                    index === 0
-                      ? "border-b border-[#D9E0E7] md:border-b-0 md:border-r"
-                      : ""
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
-                      {route.label}
-                    </span>
-
-                    <span className="h-2 w-2 bg-[#E87512]" />
-                  </div>
-
-                  <h3 className="mt-5 text-xl font-extrabold text-[#002244]">
-                    {route.title}
-                  </h3>
-
-                  <p className="mt-3 text-sm font-medium leading-6 text-[#667085]">
-                    {route.description}
-                  </p>
-
-                  <div className="mt-5 border-t border-[#E5EAF0] pt-3">
-                    {route.points.map((point) => (
-                      <div
-                        key={point}
-                        className="flex gap-3 border-b border-[#F1F5F9] py-2.5 last:border-b-0"
-                      >
-                        <span className="text-xs font-extrabold text-[#0077CC]">
-                          ✓
-                        </span>
-
-                        <span className="text-xs font-semibold leading-5 text-[#526071]">
-                          {point}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AI RECOMMENDATION */}
-      <section className="border-t border-[#D9E0E7] bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="grid gap-8 border border-[#CBD5E1] lg:grid-cols-[1fr_1fr]">
-            <div className="bg-[#002244] p-7 sm:p-9">
-              <div className="flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center border border-[#3B82C4] bg-[#07345E] text-xs font-extrabold text-white">
-                  AI
-                </span>
-
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
-                  Intelligent assistance
-                </p>
-              </div>
-
-              <h2 className="mt-6 text-3xl font-extrabold tracking-[-0.025em] text-white">
-                Smart Scheme Recommender
-              </h2>
-
-              <p className="mt-4 text-sm font-medium leading-7 text-[#D8E4F0]">
-                Once your relevant information has been verified,
-                NIRVAAN uses it to help identify a suitable scheme
-                and the maximum loan amount available within the
-                applicable criteria.
-              </p>
-
-              <Link
-                href="/recommendation"
-                className="mt-7 inline-flex min-h-[46px] items-center border border-white bg-white px-6 text-xs font-bold text-[#002244] transition-colors hover:bg-[#EAF3FA]"
-              >
-                Open Recommender
-                <span className="ml-3" aria-hidden="true">
-                  →
-                </span>
-              </Link>
-            </div>
-
-            <div className="bg-[#F7F9FB] p-7 sm:p-9">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
-                What comes next
-              </p>
-
-              <div className="mt-6 space-y-0 border-t border-[#D9E0E7]">
-                <div className="grid grid-cols-[42px_1fr] gap-4 border-b border-[#D9E0E7] py-5">
-                  <span className="text-sm font-extrabold text-[#0077CC]">
-                    03
-                  </span>
-
-                  <div>
-                    <h3 className="text-sm font-extrabold text-[#002244]">
-                      Scheme + maximum loan
-                    </h3>
-
-                    <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
-                      Receive a recommendation based on your verified
-                      applicant information.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-[42px_1fr] gap-4 border-b border-[#D9E0E7] py-5">
-                  <span className="text-sm font-extrabold text-[#0077CC]">
-                    04
-                  </span>
-
-                  <div>
-                    <h3 className="text-sm font-extrabold text-[#002244]">
-                      Select your loan amount
-                    </h3>
-
-                    <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
-                      Choose an amount from ₹50,000 upward in ₹50,000
-                      increments, up to your maximum.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-[42px_1fr] gap-4 py-5">
-                  <span className="text-sm font-extrabold text-[#0077CC]">
-                    05
-                  </span>
-
-                  <div>
-                    <h3 className="text-sm font-extrabold text-[#002244]">
-                      Find a partner
-                    </h3>
-
-                    <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
-                      Use the satellite map to explore partner
-                      locations and plan your route.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TOOLS */}
-      <section className="border-t border-[#D9E0E7] bg-[#F7F9FB]">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#0077CC]">
-                NIRVAAN tools
-              </p>
-
-              <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.025em] text-[#002244]">
-                Everything stays connected.
-              </h2>
-            </div>
-
-            <p className="max-w-md text-sm font-medium leading-6 text-[#667085] sm:text-right">
-              Move from recommendation to financing and then to a
-              physical partner location without losing the context
-              of your journey.
-            </p>
-          </div>
-
-          <div className="mt-8 grid border border-[#CBD5E1] bg-white md:grid-cols-3">
+            {/* TOOLS */}
+      <section className="bg-white py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="grid gap-5 md:grid-cols-3">
             <Link
               href="/recommendation"
-              className="group border-b border-[#D9E0E7] p-6 transition-colors hover:bg-[#F8FAFC] md:border-b-0 md:border-r sm:p-7"
+              className="border border-[#DDE6EF] bg-white p-7 transition hover:border-[#1769D2] hover:shadow-[0_8px_24px_rgba(16,42,67,0.07)]"
             >
-              <span className="text-3xl font-extrabold text-[#D9E0E7]">
-                03
-              </span>
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#1769D2]">
+                Step 03
+              </p>
 
-              <h3 className="mt-7 text-lg font-extrabold text-[#002244] group-hover:text-[#0077CC]">
+              <h3 className="mt-3 text-xl font-extrabold text-[#102A43]">
                 Smart Scheme Recommender
               </h3>
 
-              <p className="mt-3 text-sm font-medium leading-6 text-[#667085]">
-                Identify suitable financing options using the
-                information collected through your journey.
+              <p className="mt-3 text-sm font-medium leading-6 text-[#64748B]">
+                Use AI-assisted matching to understand suitable schemes and
+                maximum financing options.
               </p>
 
-              <div className="mt-7 border-t border-[#D9E0E7] pt-4 text-xs font-extrabold text-[#0077CC]">
-                Explore recommender
-                <span className="float-right" aria-hidden="true">
-                  →
-                </span>
-              </div>
+              <span className="mt-6 inline-block text-sm font-extrabold text-[#1769D2]">
+                View recommender →
+              </span>
             </Link>
 
             <Link
               href="/calculator"
-              className="group border-b border-[#D9E0E7] p-6 transition-colors hover:bg-[#F8FAFC] md:border-b-0 md:border-r sm:p-7"
+              className="border border-[#DDE6EF] bg-white p-7 transition hover:border-[#1769D2] hover:shadow-[0_8px_24px_rgba(16,42,67,0.07)]"
             >
-              <span className="text-3xl font-extrabold text-[#D9E0E7]">
-                04
-              </span>
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#F47B20]">
+                Step 04
+              </p>
 
-              <h3 className="mt-7 text-lg font-extrabold text-[#002244] group-hover:text-[#0077CC]">
+              <h3 className="mt-3 text-xl font-extrabold text-[#102A43]">
                 Financial Calculator
               </h3>
 
-              <p className="mt-3 text-sm font-medium leading-6 text-[#667085]">
-                Select your required loan amount within the maximum
-                recommended amount and plan the financing.
+              <p className="mt-3 text-sm font-medium leading-6 text-[#64748B]">
+                Select a loan amount and understand EMI, interest, tenure and
+                repayment details.
               </p>
 
-              <div className="mt-7 border-t border-[#D9E0E7] pt-4 text-xs font-extrabold text-[#0077CC]">
-                Open financial calculator
-                <span className="float-right" aria-hidden="true">
-                  →
-                </span>
-              </div>
+              <span className="mt-6 inline-block text-sm font-extrabold text-[#1769D2]">
+                Open calculator →
+              </span>
             </Link>
 
             <Link
               href="/locator"
-              className="group p-6 transition-colors hover:bg-[#F8FAFC] sm:p-7"
+              className="border border-[#DDE6EF] bg-white p-7 transition hover:border-[#1769D2] hover:shadow-[0_8px_24px_rgba(16,42,67,0.07)]"
             >
-              <span className="text-3xl font-extrabold text-[#D9E0E7]">
-                05
-              </span>
-
-              <h3 className="mt-7 text-lg font-extrabold text-[#002244] group-hover:text-[#0077CC]">
-                Geo-Spatial Partner Locator & Router
-              </h3>
-
-              <p className="mt-3 text-sm font-medium leading-6 text-[#667085]">
-                Explore the partner network on a satellite map,
-                select a location and plan your route.
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#1769D2]">
+                Step 05
               </p>
 
-              <div className="mt-7 border-t border-[#D9E0E7] pt-4 text-xs font-extrabold text-[#0077CC]">
-                Open partner locator
-                <span className="float-right" aria-hidden="true">
-                  →
-                </span>
-              </div>
+              <h3 className="mt-3 text-xl font-extrabold text-[#102A43]">
+                Geo-Spatial Partner Locator &amp; Router
+              </h3>
+
+              <p className="mt-3 text-sm font-medium leading-6 text-[#64748B]">
+                Locate partner institutions, review available details and
+                continue with directions.
+              </p>
+
+              <span className="mt-6 inline-block text-sm font-extrabold text-[#1769D2]">
+                Find partners →
+              </span>
             </Link>
           </div>
         </div>
       </section>
-            {/* FINAL ACTION */}
-      <section className="border-t border-[#D9E0E7] bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="grid border border-[#CBD5E1] lg:grid-cols-[1fr_auto] lg:items-center">
-            <div className="p-7 sm:p-9">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#E87512]">
-                Ready to begin?
-              </p>
 
-              <h2 className="mt-3 text-2xl font-extrabold tracking-[-0.02em] text-[#002244] sm:text-3xl">
-                Start your NIRVAAN journey.
-              </h2>
-
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-[#667085]">
-                Begin with verification. NIRVAAN will guide you through
-                the relevant assessment route, scheme recommendation,
-                financing selection and partner discovery.
-              </p>
-            </div>
-
-            <div className="border-t border-[#D9E0E7] p-7 lg:border-l lg:border-t-0 sm:p-9">
-              <Link
-                href="/wizard"
-                className="inline-flex min-h-[50px] min-w-[210px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-sm font-bold text-white transition-colors hover:border-[#005FA3] hover:bg-[#005FA3] focus:outline-none focus:ring-2 focus:ring-[#0077CC] focus:ring-offset-2"
-              >
-                Start Application
-                <span className="ml-3" aria-hidden="true">
-                  →
-                </span>
-              </Link>
-
-              <p className="mt-3 text-center text-[10px] font-medium leading-4 text-[#7A8797]">
-                Begin with Step 01: Verification
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* INDEPENDENT PLATFORM NOTICE */}
-      <section className="border-t border-[#D9E0E7] bg-[#F7F9FB]">
-        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
-          <div className="border-l-[3px] border-[#E87512] bg-white px-5 py-4">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#002244]">
-              Important
+      {/* FINAL CTA */}
+      <section className="border-t border-[#DCE5EE] bg-[#0E2A4A] py-14">
+        <div className="mx-auto flex max-w-7xl flex-col gap-7 px-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-10">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#F47B20]">
+              Ready to begin?
             </p>
 
-            <p className="mt-2 max-w-5xl text-xs font-medium leading-5 text-[#667085]">
-              NIRVAAN is an independent platform for scheme discovery
-              and application assistance. It does not represent,
-              operate, or speak on behalf of any government department,
-              bank, financial institution, or scheme authority.
-              Eligibility, loan limits, interest rates and final
-              approval are subject to the applicable rules and the
-              concerned institution.
+            <h2 className="mt-3 text-3xl font-extrabold text-white">
+              Start your NIRVAAN journey.
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-[#B9CDE1]">
+              Complete verification first. NIRVAAN will guide you through the
+              remaining stages in sequence.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={startJourney}
+            className="inline-flex min-h-14 flex-none items-center justify-center gap-6 border border-[#F47B20] bg-[#F47B20] px-7 text-sm font-extrabold text-white transition hover:bg-[#DD6912]"
+          >
+            START MY JOURNEY
+            <span className="text-xl">→</span>
+          </button>
+        </div>
+      </section>
+            {/* INDEPENDENT PLATFORM NOTICE */}
+      <section className="border-t border-[#DCE5EE] bg-white py-7">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="border-l-[3px] border-[#F47B20] bg-[#FFF9F5] px-5 py-4">
+            <p className="text-xs font-extrabold text-[#102A43]">
+              Independent platform notice
+            </p>
+
+            <p className="mt-1 max-w-5xl text-[11px] font-medium leading-5 text-[#64748B]">
+              NIRVAAN is an independent platform and is not a government
+              department, bank or lending institution. Scheme eligibility,
+              final approval, sanction and disbursement are determined by the
+              relevant institutions and applicable rules.
             </p>
           </div>
         </div>
