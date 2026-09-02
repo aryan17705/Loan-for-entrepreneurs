@@ -4,31 +4,29 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { useJourney } from "@/context/JourneyContext";
-import { useTranslation } from "@/context/LanguageContext";
 import { amortizationSchedule, totals } from "@/lib/emi";
 import { formatINR } from "@/lib/format";
 import type { Recommendation } from "@/lib/types";
 
 export default function CalculatorPage() {
   const { recommendation, ready } = useJourney();
-  const { t } = useTranslation();
 
   if (!ready) {
     return (
       <main className="min-h-screen bg-white text-[#111827]">
         <div className="mx-auto flex min-h-[70vh] max-w-5xl items-center justify-center px-4">
-          <div className="w-full max-w-md border border-[#D7DEE8] bg-white p-8 text-center">
+          <div className="w-full max-w-md border border-[#CBD5E1] bg-white p-8 text-center">
             <div
-              className="mx-auto h-8 w-8 animate-spin border-2 border-[#D7DEE8] border-t-[#0F5FC5]"
+              className="mx-auto h-8 w-8 animate-spin border-2 border-[#D7DEE8] border-t-[#0077CC]"
               aria-hidden="true"
             />
 
-            <p className="mt-5 text-sm font-semibold text-[#111827]">
-              Loading calculator...
+            <p className="mt-5 text-sm font-bold text-[#002244]">
+              Loading financial calculator
             </p>
 
-            <p className="mt-2 text-xs font-normal text-[#687587]">
-              Preparing your financing calculator.
+            <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+              Preparing your financing options.
             </p>
           </div>
         </div>
@@ -37,66 +35,57 @@ export default function CalculatorPage() {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#F7F9FC] text-[#111827]">
-
-      {/* =====================================================
-          PAGE HEADER
-          ===================================================== */}
-
-      <section className="border-b border-[#D7DEE8] bg-white">
-        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
-
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-
+    <main className="min-h-screen overflow-x-hidden bg-[#F7F9FB] text-[#111827]">
+      {/* PAGE HEADER */}
+      <section className="border-b border-[#D9E0E7] bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-9 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#0F5FC5]">
-                NIRVAAN
-              </p>
+              <div className="flex items-center gap-3">
+                <span className="h-[3px] w-10 bg-[#0077CC]" />
 
-              <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#111827] sm:text-3xl md:text-4xl">
-                {t("calc_title")}
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#0077CC]">
+                  NIRVAAN
+                </p>
+              </div>
+
+              <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-[#002244] sm:text-4xl">
+                Financial Calculator
               </h1>
 
               {recommendation ? (
-                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#687587] sm:text-sm">
-                  {t("calc_sub_rec")}{" "}
-                  <strong className="font-bold text-[#0F5FC5]">
+                <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#667085]">
+                  Choose the loan amount you need within your
+                  recommended maximum and estimate your repayment.
+                  Recommended scheme:{" "}
+                  <strong className="font-extrabold text-[#0077CC]">
                     {recommendation.schemeName}
                   </strong>
+                  .
                 </p>
               ) : (
-                <p className="mt-3 max-w-2xl border-l-4 border-[#E87512] bg-[#FFF7ED] px-4 py-3 text-xs font-medium leading-5 text-[#7C4A18] sm:text-sm">
-                  {t("calc_sub_rec")}{" "}
-                  <Link
-                    href="/wizard"
-                    className="font-bold text-[#0F5FC5] underline underline-offset-2 hover:text-[#0B4FA7]"
-                  >
-                    {t("nav_wizard")}
-                  </Link>
+                <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#667085]">
+                  Estimate monthly repayment, total interest and
+                  the repayment schedule for a planned loan.
                 </p>
               )}
             </div>
 
-            <div className="w-fit border border-[#D7DEE8] bg-[#F8FAFC] px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#687587]">
+            <div className="w-fit border border-[#CBD5E1] bg-[#F7F9FB] px-5 py-4">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                Step 04
+              </p>
+
+              <p className="mt-1 text-sm font-extrabold text-[#002244]">
                 Financial planning
               </p>
-
-              <p className="mt-1 text-xs font-semibold text-[#111827]">
-                Indicative EMI estimate
-              </p>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* =====================================================
-          CONTENT
-          ===================================================== */}
-
-      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
-
+      {/* CONTENT */}
+      <div className="mx-auto max-w-6xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
         {recommendation ? (
           <CalculatorForm
             key={`${recommendation.schemeId}-${recommendation.eligibleAmount}-${recommendation.interestRate}`}
@@ -105,7 +94,6 @@ export default function CalculatorPage() {
         ) : (
           <CalculatorForm />
         )}
-
       </div>
     </main>
   );
@@ -115,12 +103,21 @@ export default function CalculatorPage() {
    CALCULATOR
    ========================================================= */
 
-function CalculatorForm({ rec }: { rec?: Recommendation }) {
-  const { t } = useTranslation();
+function CalculatorForm({
+  rec,
+}: {
+  rec?: Recommendation;
+}) {
+  const maximumAmount = rec?.eligibleAmount ?? 500000;
 
-  const [amount, setAmount] = useState(
-    rec?.eligibleAmount ?? 500000
-  );
+  const [amount, setAmount] = useState(() => {
+    const initial = Math.min(
+      maximumAmount,
+      Math.max(50000, Math.floor(maximumAmount / 50000) * 50000)
+    );
+
+    return initial;
+  });
 
   const [rate, setRate] = useState(
     rec?.interestRate ?? 8
@@ -140,7 +137,7 @@ function CalculatorForm({ rec }: { rec?: Recommendation }) {
   const [expanded, setExpanded] = useState(false);
 
   /* =======================================================
-     EXISTING EMI CALCULATION LOGIC
+     EMI CALCULATION
      ======================================================= */
 
   const rows = useMemo(
@@ -184,328 +181,461 @@ function CalculatorForm({ rec }: { rec?: Recommendation }) {
     : rows.slice(0, 12);
 
   /* =======================================================
-     CONTROL DATA
+     LOAN AMOUNT OPTIONS
      ======================================================= */
 
-  const controls = [
-    {
-      id: "loan-amount",
-      label: t("calc_loan_amt"),
-      value: formatINR(amount),
-      min: 10000,
-      max: 5000000,
-      step: 10000,
-      val: amount,
-      set: setAmount,
-    },
-    {
-      id: "interest-rate",
-      label: t("calc_rate"),
-      value: `${rate}% p.a.`,
-      min: 4,
-      max: 18,
-      step: 0.5,
-      val: rate,
-      set: setRate,
-    },
-    {
-      id: "tenure",
-      label: t("calc_tenure"),
-      value: `${tenureMonths} mo (${(
-        tenureMonths / 12
-      ).toFixed(1)} yr)`,
-      min: 12,
-      max: 180,
-      step: 6,
-      val: tenureMonths,
-      set: setTenureMonths,
-    },
-    {
-      id: "moratorium",
-      label: t("calc_moratorium"),
-      value: `${moratorium} months`,
-      min: 0,
-      max: 36,
-      step: 3,
-      val: moratorium,
-      set: setMoratorium,
-    },
-  ];
+  const loanOptions = useMemo(() => {
+    const options: number[] = [];
+
+    for (
+      let value = 50000;
+      value <= maximumAmount;
+      value += 50000
+    ) {
+      options.push(value);
+    }
+
+    return options;
+  }, [maximumAmount]);
+
+  const hasLoanOptions = loanOptions.length > 0;
+
+  /* =======================================================
+     CONTROLS
+     ======================================================= */
+
+  const tenureMinimum = 12;
+  const tenureMaximum = Math.max(
+    tenureMinimum,
+    rec?.maxTenureMonths ?? 180
+  );
+
+  const moratoriumMaximum = Math.max(
+    0,
+    Math.min(36, rec?.moratoriumMonths ?? 36)
+  );
 
   return (
     <div className="space-y-6">
-
-      {/* ===================================================
-          TOP CALCULATOR GRID
-          =================================================== */}
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-
-        {/* =================================================
-            CONTROLS
-            ================================================= */}
-
+      {/* RECOMMENDED LOAN LIMIT */}
+      {rec && (
         <section className="border border-[#CBD5E1] bg-white">
+          <div className="grid gap-px bg-[#CBD5E1] sm:grid-cols-3">
+            <div className="bg-[#002244] px-6 py-6 sm:px-7">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#9CC8EA]">
+                Recommended scheme
+              </p>
 
-          <div className="border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-5 sm:px-7">
+              <p className="mt-2 text-base font-extrabold leading-6 text-white">
+                {rec.schemeName}
+              </p>
+            </div>
 
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0F5FC5]">
+            <div className="bg-white px-6 py-6 sm:px-7">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                Maximum loan amount
+              </p>
+
+              <p className="mt-2 text-2xl font-extrabold tabular-nums text-[#0077CC]">
+                {formatINR(maximumAmount)}
+              </p>
+            </div>
+
+            <div className="bg-white px-6 py-6 sm:px-7">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                Planning rate
+              </p>
+
+              <p className="mt-2 text-2xl font-extrabold tabular-nums text-[#002244]">
+                {rate}%
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* MAIN CALCULATOR */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_390px]">
+        {/* CONTROLS */}
+        <section className="border border-[#CBD5E1] bg-white">
+          <div className="border-b border-[#CBD5E1] bg-[#F7F9FB] px-6 py-6 sm:px-8">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
               Loan parameters
             </p>
 
-            <h2 className="mt-1 text-lg font-bold text-[#111827]">
-              Configure your loan
+            <h2 className="mt-1 text-xl font-extrabold text-[#002244]">
+              Choose your loan amount
             </h2>
 
-            <p className="mt-1 text-xs leading-5 text-[#687587]">
-              Adjust the values to estimate your repayment.
+            <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+              Loan amounts are available in ₹50,000
+              increments up to your recommended maximum.
             </p>
-
           </div>
 
-          <div className="space-y-7 p-5 sm:p-7">
-
-            {controls.map((ctrl) => (
-              <div
-                key={ctrl.id}
-                className="space-y-3"
-              >
-
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-
+          <div className="space-y-8 p-6 sm:p-8">
+            {/* LOAN AMOUNT */}
+            <div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
                   <label
-                    htmlFor={ctrl.id}
-                    className="text-sm font-semibold text-[#111827]"
+                    htmlFor="loan-amount"
+                    className="text-sm font-extrabold text-[#002244]"
                   >
-                    {ctrl.label}
+                    Loan Amount
                   </label>
 
-                  <span className="w-fit border border-[#D7DEE8] bg-white px-3 py-1.5 text-sm font-bold tabular-nums text-[#0F5FC5]">
-                    {ctrl.value}
-                  </span>
-
+                  <p className="mt-1 text-[11px] font-medium leading-5 text-[#7A8797]">
+                    Select an amount within your approved maximum.
+                  </p>
                 </div>
 
-                <input
-                  id={ctrl.id}
-                  type="range"
-                  min={ctrl.min}
-                  max={ctrl.max}
-                  step={ctrl.step}
-                  value={ctrl.val}
-                  onChange={(e) =>
-                    ctrl.set(
-                      Number(e.target.value)
-                    )
-                  }
-                  className="h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0F5FC5]"
-                  aria-label={ctrl.label}
-                />
-
-                <div className="flex justify-between text-[10px] font-medium text-[#8A96A6]">
-
-                  <span>
-                    {ctrl.id === "loan-amount"
-                      ? formatINR(ctrl.min)
-                      : ctrl.id === "interest-rate"
-                      ? `${ctrl.min}%`
-                      : `${ctrl.min} mo`}
+                <div className="w-fit border border-[#0077CC] bg-[#F0F7FC] px-4 py-2">
+                  <span className="text-base font-extrabold tabular-nums text-[#0077CC]">
+                    {formatINR(amount)}
                   </span>
-
-                  <span>
-                    {ctrl.id === "loan-amount"
-                      ? formatINR(ctrl.max)
-                      : ctrl.id === "interest-rate"
-                      ? `${ctrl.max}%`
-                      : `${ctrl.max} mo`}
-                  </span>
-
                 </div>
-
               </div>
-            ))}
 
-            {/* =================================================
-                MORATORIUM OPTION
-                ================================================= */}
+              {hasLoanOptions ? (
+                <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {loanOptions.map((option) => {
+                    const selected = amount === option;
 
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setAmount(option)}
+                        aria-pressed={selected}
+                        className={`min-h-[46px] border px-3 text-xs font-extrabold transition-colors ${
+                          selected
+                            ? "border-[#0077CC] bg-[#0077CC] text-white"
+                            : "border-[#CBD5E1] bg-white text-[#374151] hover:border-[#0077CC] hover:text-[#0077CC]"
+                        }`}
+                      >
+                        {formatINR(option)}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-5 border border-[#D97706] bg-[#FFFBEB] px-4 py-4">
+                  <p className="text-xs font-bold text-[#92400E]">
+                    No ₹50,000 loan option is available within
+                    the current maximum.
+                  </p>
+                </div>
+              )}
+
+              <input
+                id="loan-amount"
+                type="range"
+                min={hasLoanOptions ? 50000 : 0}
+                max={
+                  hasLoanOptions
+                    ? Math.max(50000, maximumAmount)
+                    : 0
+                }
+                step={50000}
+                value={amount}
+                onChange={(event) => {
+                  const next = Number(event.target.value);
+
+                  if (
+                    next >= 50000 &&
+                    next <= maximumAmount
+                  ) {
+                    setAmount(next);
+                  }
+                }}
+                className="mt-6 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0077CC]"
+                aria-label="Loan Amount"
+                disabled={!hasLoanOptions}
+              />
+
+              <div className="mt-2 flex justify-between text-[10px] font-semibold text-[#8A96A6]">
+                <span>
+                  {hasLoanOptions
+                    ? formatINR(50000)
+                    : "Not available"}
+                </span>
+
+                <span>
+                  {hasLoanOptions
+                    ? formatINR(maximumAmount)
+                    : ""}
+                </span>
+              </div>
+            </div>
+
+            {/* INTEREST RATE */}
+            <div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <label
+                  htmlFor="interest-rate"
+                  className="text-sm font-extrabold text-[#002244]"
+                >
+                  Interest Rate
+                </label>
+
+                <span className="w-fit border border-[#CBD5E1] bg-white px-3 py-2 text-sm font-extrabold tabular-nums text-[#0077CC]">
+                  {rate}% p.a.
+                </span>
+              </div>
+
+              <input
+                id="interest-rate"
+                type="range"
+                min={4}
+                max={18}
+                step={0.5}
+                value={rate}
+                onChange={(event) =>
+                  setRate(Number(event.target.value))
+                }
+                className="mt-4 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0077CC]"
+                aria-label="Interest Rate"
+              />
+
+              <div className="mt-2 flex justify-between text-[10px] font-semibold text-[#8A96A6]">
+                <span>4%</span>
+                <span>18%</span>
+              </div>
+            </div>
+                        {/* REPAYMENT TENURE */}
+            <div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <label
+                  htmlFor="tenure"
+                  className="text-sm font-extrabold text-[#002244]"
+                >
+                  Repayment Tenure
+                </label>
+
+                <span className="w-fit border border-[#CBD5E1] bg-white px-3 py-2 text-sm font-extrabold tabular-nums text-[#0077CC]">
+                  {tenureMonths} months (
+                  {(tenureMonths / 12).toFixed(1)} years)
+                </span>
+              </div>
+
+              <input
+                id="tenure"
+                type="range"
+                min={tenureMinimum}
+                max={tenureMaximum}
+                step={6}
+                value={tenureMonths}
+                onChange={(event) =>
+                  setTenureMonths(
+                    Number(event.target.value)
+                  )
+                }
+                className="mt-4 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0077CC]"
+                aria-label="Repayment Tenure"
+              />
+
+              <div className="mt-2 flex justify-between text-[10px] font-semibold text-[#8A96A6]">
+                <span>{tenureMinimum} months</span>
+                <span>{tenureMaximum} months</span>
+              </div>
+            </div>
+
+            {/* MORATORIUM */}
+            <div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <label
+                  htmlFor="moratorium"
+                  className="text-sm font-extrabold text-[#002244]"
+                >
+                  Moratorium / Grace Period
+                </label>
+
+                <span className="w-fit border border-[#CBD5E1] bg-white px-3 py-2 text-sm font-extrabold tabular-nums text-[#0077CC]">
+                  {moratorium} months
+                </span>
+              </div>
+
+              <p className="mt-1 text-[11px] font-medium leading-5 text-[#7A8797]">
+                A grace period may delay regular EMI
+                payments. Actual treatment depends on the
+                applicable financing terms.
+              </p>
+
+              <input
+                id="moratorium"
+                type="range"
+                min={0}
+                max={moratoriumMaximum}
+                step={3}
+                value={moratorium}
+                onChange={(event) =>
+                  setMoratorium(
+                    Number(event.target.value)
+                  )
+                }
+                className="mt-4 h-1.5 w-full cursor-pointer appearance-none bg-[#D7DEE8] accent-[#0077CC]"
+                aria-label="Moratorium or Grace Period"
+              />
+
+              <div className="mt-2 flex justify-between text-[10px] font-semibold text-[#8A96A6]">
+                <span>0 months</span>
+                <span>{moratoriumMaximum} months</span>
+              </div>
+            </div>
+
+            {/* MORATORIUM INTEREST OPTION */}
             {moratorium > 0 && (
               <label
                 htmlFor="pay-moratorium-interest"
-                className="flex cursor-pointer items-start gap-3 border border-[#D7DEE8] bg-[#F8FAFC] p-4 transition-colors hover:border-[#0F5FC5]"
+                className="flex cursor-pointer items-start gap-3 border border-[#CBD5E1] bg-[#F7F9FB] p-4 transition-colors hover:border-[#0077CC]"
               >
-
                 <input
                   id="pay-moratorium-interest"
                   type="checkbox"
                   checked={payMoratoriumInterest}
-                  onChange={(e) =>
+                  onChange={(event) =>
                     setPayMoratoriumInterest(
-                      e.target.checked
+                      event.target.checked
                     )
                   }
-                  className="mt-1 h-4 w-4 flex-none accent-[#0F5FC5]"
+                  className="mt-1 h-4 w-4 flex-none accent-[#0077CC]"
                 />
 
-                <div className="leading-snug">
-
-                  <p className="text-xs font-bold text-[#111827] sm:text-sm">
-                    {t("calc_moratorium_check")}
+                <div>
+                  <p className="text-xs font-extrabold text-[#002244] sm:text-sm">
+                    Pay simple interest during the grace period
                   </p>
 
-                  <p className="mt-1 text-[11px] font-medium leading-5 text-[#687587]">
-                    {t("calc_moratorium_hint")}
+                  <p className="mt-1 text-[11px] font-medium leading-5 text-[#667085]">
+                    Turn this on to include simple interest
+                    payments during the selected moratorium
+                    period.
                   </p>
-
                 </div>
-
               </label>
             )}
-
           </div>
         </section>
 
-        {/* =================================================
-            RESULTS
-            ================================================= */}
-
+        {/* RESULTS */}
         <section className="border border-[#CBD5E1] bg-white">
-
-          <div className="border-b border-[#CBD5E1] bg-[#0F294A] px-5 py-6 text-white sm:px-7">
-
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#BFD3EA]">
-              {t("calc_monthly_emi")}
+          <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-7 text-white sm:px-7">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#9CC8EA]">
+              Estimated monthly EMI
             </p>
 
             <p className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
               {formatINR(regularEmi)}
             </p>
 
-            <p className="mt-1 text-xs font-medium text-[#DCE7F5]">
-              estimated monthly repayment
+            <p className="mt-2 text-xs font-medium leading-5 text-[#D8E4F0]">
+              Indicative monthly repayment after the applicable
+              grace period.
             </p>
 
             {moratorium > 0 && (
-              <div className="mt-5 border-l-4 border-[#E87512] bg-[#183A60] px-4 py-3">
-
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-[#F7C38E]">
+              <div className="mt-5 border-l-[3px] border-[#E87512] bg-[#07345C] px-4 py-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#F7C38E]">
                   Grace period
                 </p>
 
-                <p className="mt-1 text-xs font-semibold text-white">
+                <p className="mt-1 text-sm font-extrabold text-white">
                   {moratorium} months
                 </p>
-
               </div>
             )}
-
           </div>
 
           <div className="divide-y divide-[#E5EAF0]">
-
-            {/* Principal */}
-
-            <div className="flex items-center justify-between gap-4 px-5 py-4 sm:px-7">
-
+            {/* PRINCIPAL */}
+            <div className="flex items-center justify-between gap-4 px-6 py-5 sm:px-7">
               <div>
-                <p className="text-[11px] font-medium text-[#687587]">
-                  {t("calc_principal")}
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#7A8797]">
+                  Principal loan
                 </p>
 
-                <p className="mt-1 text-sm font-bold tabular-nums text-[#111827]">
+                <p className="mt-1 text-base font-extrabold tabular-nums text-[#002244]">
                   {formatINR(amount)}
                 </p>
               </div>
 
-              <span className="border border-[#0F5FC5] bg-[#EFF6FF] px-2.5 py-1 text-[10px] font-bold text-[#0F5FC5]">
+              <span className="border border-[#0077CC] bg-[#F0F7FC] px-3 py-1.5 text-[10px] font-extrabold text-[#0077CC]">
                 {principalShare}%
               </span>
-
             </div>
 
-            {/* Interest */}
-
-            <div className="flex items-center justify-between gap-4 px-5 py-4 sm:px-7">
-
+            {/* INTEREST */}
+            <div className="flex items-center justify-between gap-4 px-6 py-5 sm:px-7">
               <div>
-                <p className="text-[11px] font-medium text-[#687587]">
-                  {t("calc_total_interest")}
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#7A8797]">
+                  Total interest
                 </p>
 
-                <p className="mt-1 text-sm font-bold tabular-nums text-[#111827]">
+                <p className="mt-1 text-base font-extrabold tabular-nums text-[#002244]">
                   {formatINR(totalInterest)}
                 </p>
               </div>
 
-              <span className="border border-[#E87512] bg-[#FFF7ED] px-2.5 py-1 text-[10px] font-bold text-[#B45309]">
+              <span className="border border-[#E87512] bg-[#FFF8F1] px-3 py-1.5 text-[10px] font-extrabold text-[#B45309]">
                 {interestShare}%
               </span>
-
             </div>
 
-            {/* Total */}
-
-            <div className="bg-[#F8FAFC] px-5 py-5 sm:px-7">
-
-              <p className="text-[11px] font-semibold text-[#526071]">
-                {t("calc_total_repayment")}
+            {/* TOTAL */}
+            <div className="bg-[#F7F9FB] px-6 py-6 sm:px-7">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#667085]">
+                Total repayment
               </p>
 
-              <p className="mt-1 text-xl font-extrabold tabular-nums text-[#111827]">
+              <p className="mt-2 text-2xl font-extrabold tabular-nums text-[#002244]">
                 {formatINR(totalPayment)}
               </p>
-
             </div>
-
           </div>
 
-          <div className="p-5 sm:p-7">
-
+          <div className="p-6 sm:p-7">
             <Link
               href="/locator"
-              className="flex min-h-12 w-full items-center justify-center border border-[#0F5FC5] bg-[#0F5FC5] px-5 text-xs font-bold text-white transition-colors hover:bg-[#0B4FA7] sm:text-sm"
+              className="flex min-h-[48px] w-full items-center justify-center border border-[#0077CC] bg-[#0077CC] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#005FA3] sm:text-sm"
             >
-              {t("calc_find_apply")} →
+              Continue to Partner Locator
+              <span className="ml-3" aria-hidden="true">
+                →
+              </span>
             </Link>
 
-            <p className="mt-3 text-center text-[10px] leading-4 text-[#8A96A6]">
-              This is an indicative estimate. Final terms are
-              determined by the authorised financial institution.
+            <p className="mt-3 text-center text-[10px] font-medium leading-4 text-[#8A96A6]">
+              The calculator is for financial planning only.
+              Final loan terms are determined by the applicable
+              financial institution and scheme rules.
             </p>
-
           </div>
-
         </section>
-
       </div>
 
-      {/* =====================================================
-          FINANCIAL BREAKDOWN
-          ===================================================== */}
-
+      {/* REPAYMENT COMPOSITION */}
       <section className="border border-[#CBD5E1] bg-white">
-
-        <div className="border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-5 sm:px-7">
-
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#E87512]">
+        <div className="border-b border-[#CBD5E1] bg-[#F7F9FB] px-6 py-6 sm:px-8">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#E87512]">
             Repayment composition
           </p>
 
-          <h2 className="mt-1 text-lg font-bold text-[#111827]">
+          <h2 className="mt-1 text-xl font-extrabold text-[#002244]">
             Principal and interest
           </h2>
 
+          <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+            See how the estimated total repayment is divided
+            between the amount borrowed and interest.
+          </p>
         </div>
 
-        <div className="p-5 sm:p-7">
-
-          {/* Rectangular composition bar */}
-
-          <div className="flex h-8 w-full border border-[#CBD5E1] bg-[#F8FAFC]">
-
+        <div className="p-6 sm:p-8">
+          <div className="flex h-9 w-full border border-[#CBD5E1] bg-[#F7F9FB]">
             {principalShare > 0 && (
               <div
-                className="flex items-center justify-center bg-[#0F5FC5] text-[10px] font-bold text-white"
+                className="flex items-center justify-center bg-[#0077CC] text-[10px] font-extrabold text-white"
                 style={{
                   width: `${principalShare}%`,
                 }}
@@ -518,7 +648,7 @@ function CalculatorForm({ rec }: { rec?: Recommendation }) {
 
             {interestShare > 0 && (
               <div
-                className="flex items-center justify-center bg-[#E87512] text-[10px] font-bold text-white"
+                className="flex items-center justify-center bg-[#E87512] text-[10px] font-extrabold text-white"
                 style={{
                   width: `${interestShare}%`,
                 }}
@@ -528,217 +658,248 @@ function CalculatorForm({ rec }: { rec?: Recommendation }) {
                   : ""}
               </div>
             )}
-
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-
-            <div className="border-l-4 border-[#0F5FC5] bg-[#F8FAFC] px-4 py-3">
-
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[#687587]">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="border-l-[3px] border-[#0077CC] bg-[#F7F9FB] px-5 py-4">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#667085]">
                 Principal
               </p>
 
-              <p className="mt-1 text-base font-bold tabular-nums text-[#111827]">
+              <p className="mt-1 text-lg font-extrabold tabular-nums text-[#002244]">
                 {formatINR(amount)}
               </p>
-
             </div>
 
-            <div className="border-l-4 border-[#E87512] bg-[#F8FAFC] px-4 py-3">
-
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[#687587]">
+            <div className="border-l-[3px] border-[#E87512] bg-[#F7F9FB] px-5 py-4">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#667085]">
                 Interest
               </p>
 
-              <p className="mt-1 text-base font-bold tabular-nums text-[#111827]">
+              <p className="mt-1 text-lg font-extrabold tabular-nums text-[#002244]">
                 {formatINR(totalInterest)}
               </p>
-
             </div>
-
           </div>
-
         </div>
-
       </section>
-
-      {/* =====================================================
-          AMORTIZATION SCHEDULE
-          ===================================================== */}
-
+            {/* AMORTIZATION SCHEDULE */}
       <section className="border border-[#CBD5E1] bg-white">
-
         <button
           type="button"
-          onClick={() =>
-            setExpanded(!expanded)
-          }
-          className="flex min-h-[70px] w-full items-center justify-between gap-4 px-5 text-left transition-colors hover:bg-[#F8FAFC] sm:px-7"
+          onClick={() => setExpanded(!expanded)}
+          className="flex min-h-[74px] w-full items-center justify-between gap-4 px-6 text-left transition-colors hover:bg-[#F7F9FB] sm:px-8"
+          aria-expanded={expanded}
         >
-
           <div>
-
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0F5FC5]">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
               Repayment details
             </p>
 
-            <p className="mt-1 text-sm font-bold text-[#111827] sm:text-base">
-              {t("calc_repay_sched")}{" "}
-              <span className="font-medium text-[#687587]">
+            <p className="mt-1 text-base font-extrabold text-[#002244] sm:text-lg">
+              Repayment schedule{" "}
+              <span className="font-medium text-[#667085]">
                 ({rows.length} months)
               </span>
             </p>
-
           </div>
 
-          <span className="flex-none border border-[#D7DEE8] bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-[#0F5FC5]">
-            {expanded
-              ? t("calc_less")
-              : t("calc_expand")}
+          <span className="flex-none border border-[#CBD5E1] bg-white px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#0077CC]">
+            {expanded ? "Show less" : "View schedule"}
           </span>
-
         </button>
 
         {expanded && (
           <div className="border-t border-[#CBD5E1]">
-
-            <div className="max-h-96 overflow-x-auto overflow-y-auto scrollable-touch">
-
-              <table className="min-w-[720px] w-full border-collapse text-left text-xs">
-
-                <thead className="sticky top-0 z-10 bg-[#0F294A] text-white">
-
+            <div className="max-h-[460px] overflow-x-auto overflow-y-auto">
+              <table className="min-w-[760px] w-full border-collapse text-left text-xs">
+                <thead className="sticky top-0 z-10 bg-[#002244] text-white">
                   <tr>
-
-                    <th className="border-r border-[#365679] px-3 py-3 font-semibold">
-                      Mo
+                    <th className="border-r border-[#365679] px-4 py-3 font-extrabold">
+                      Month
                     </th>
 
-                    <th className="border-r border-[#365679] px-3 py-3 font-semibold">
-                      Opening
+                    <th className="border-r border-[#365679] px-4 py-3 font-extrabold">
+                      Opening Balance
                     </th>
 
-                    <th className="border-r border-[#365679] px-3 py-3 font-semibold">
+                    <th className="border-r border-[#365679] px-4 py-3 font-extrabold">
                       Payment
                     </th>
 
-                    <th className="border-r border-[#365679] px-3 py-3 font-semibold">
+                    <th className="border-r border-[#365679] px-4 py-3 font-extrabold">
                       Principal
                     </th>
 
-                    <th className="border-r border-[#365679] px-3 py-3 font-semibold">
+                    <th className="border-r border-[#365679] px-4 py-3 font-extrabold">
                       Interest
                     </th>
 
-                    <th className="px-3 py-3 font-semibold">
-                      Closing
+                    <th className="px-4 py-3 font-extrabold">
+                      Closing Balance
                     </th>
-
                   </tr>
-
                 </thead>
 
                 <tbody className="divide-y divide-[#E5EAF0]">
-
-                  {visibleRows.map((r) => (
+                  {visibleRows.map((row) => (
                     <tr
-                      key={r.month}
-                      className="bg-white transition-colors hover:bg-[#F8FAFC]"
+                      key={row.month}
+                      className="bg-white transition-colors hover:bg-[#F7F9FB]"
                     >
-
-                      <td className="px-3 py-3 font-bold tabular-nums text-[#111827]">
-                        {r.month}
+                      <td className="px-4 py-3 font-extrabold tabular-nums text-[#002244]">
+                        {row.month}
                       </td>
 
-                      <td className="px-3 py-3 tabular-nums text-[#526071]">
+                      <td className="px-4 py-3 tabular-nums text-[#526071]">
                         {formatINR(
-                          r.openingBalance
+                          row.openingBalance
                         )}
                       </td>
 
-                      <td className="px-3 py-3 font-bold tabular-nums text-[#0F5FC5]">
-                        {formatINR(r.emi)}
+                      <td className="px-4 py-3 font-extrabold tabular-nums text-[#0077CC]">
+                        {formatINR(row.emi)}
                       </td>
 
-                      <td className="px-3 py-3 tabular-nums text-[#526071]">
+                      <td className="px-4 py-3 tabular-nums text-[#526071]">
+                        {formatINR(row.principal)}
+                      </td>
+
+                      <td className="px-4 py-3 tabular-nums text-[#526071]">
+                        {formatINR(row.interest)}
+                      </td>
+
+                      <td className="px-4 py-3 font-extrabold tabular-nums text-[#002244]">
                         {formatINR(
-                          r.principal
+                          row.closingBalance
                         )}
                       </td>
-
-                      <td className="px-3 py-3 tabular-nums text-[#526071]">
-                        {formatINR(
-                          r.interest
-                        )}
-                      </td>
-
-                      <td className="px-3 py-3 font-bold tabular-nums text-[#111827]">
-                        {formatINR(
-                          r.closingBalance
-                        )}
-                      </td>
-
                     </tr>
                   ))}
-
                 </tbody>
-
               </table>
-
             </div>
-
           </div>
         )}
-
       </section>
 
-      {/* =====================================================
-          INFORMATION
-          ===================================================== */}
-
+      {/* HOW TO READ THE CALCULATOR */}
       <section className="border border-[#CBD5E1] bg-white">
+        <div className="border-b border-[#CBD5E1] bg-[#F7F9FB] px-6 py-6 sm:px-8">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
+            Planning guide
+          </p>
 
-        <div className="border-l-4 border-[#E87512] px-5 py-5 sm:px-7">
+          <h2 className="mt-1 text-xl font-extrabold text-[#002244]">
+            How to use this calculator
+          </h2>
+        </div>
 
-          <p className="text-xs font-bold text-[#111827]">
+        <div className="grid gap-px bg-[#CBD5E1] sm:grid-cols-3">
+          <div className="bg-white p-6 sm:p-7">
+            <div className="flex items-start gap-4">
+              <span className="flex h-8 w-8 flex-none items-center justify-center border border-[#0077CC] bg-[#F0F7FC] text-xs font-extrabold text-[#0077CC]">
+                01
+              </span>
+
+              <div>
+                <h3 className="text-sm font-extrabold text-[#002244]">
+                  Select the amount
+                </h3>
+
+                <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                  Choose the amount you actually need from
+                  the available ₹50,000 increments.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 sm:p-7">
+            <div className="flex items-start gap-4">
+              <span className="flex h-8 w-8 flex-none items-center justify-center border border-[#0077CC] bg-[#F0F7FC] text-xs font-extrabold text-[#0077CC]">
+                02
+              </span>
+
+              <div>
+                <h3 className="text-sm font-extrabold text-[#002244]">
+                  Review repayment
+                </h3>
+
+                <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                  Adjust the rate, tenure and grace period to
+                  understand the estimated repayment burden.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 sm:p-7">
+            <div className="flex items-start gap-4">
+              <span className="flex h-8 w-8 flex-none items-center justify-center border border-[#0077CC] bg-[#F0F7FC] text-xs font-extrabold text-[#0077CC]">
+                03
+              </span>
+
+              <div>
+                <h3 className="text-sm font-extrabold text-[#002244]">
+                  Find a partner
+                </h3>
+
+                <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                  Continue to the partner locator to explore
+                  nearby financing partners and plan your next
+                  step.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* IMPORTANT INFORMATION */}
+      <section className="border border-[#CBD5E1] bg-white">
+        <div className="border-l-[3px] border-[#E87512] bg-[#FFF8F1] px-6 py-6 sm:px-8">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
             Important information
           </p>
 
-          <p className="mt-1 text-xs leading-5 text-[#687587]">
-            The calculator provides an indicative repayment
-            estimate. Actual interest, processing charges,
-            moratorium treatment and repayment conditions are
-            determined by the authorised financial institution
-            under the applicable scheme.
+          <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+            This calculator provides an indicative financial
+            estimate based on the values entered. Actual interest,
+            processing charges, moratorium treatment, repayment
+            schedule and final loan terms may differ according to
+            the applicable scheme and the concerned financial
+            institution.
           </p>
 
+          <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+            NIRVAAN is an independent platform for scheme
+            discovery and application assistance. An AI-assisted
+            calculation does not constitute loan approval,
+            sanction or a financial guarantee.
+          </p>
         </div>
-
       </section>
 
-      {/* =====================================================
-          NAVIGATION
-          ===================================================== */}
-
-      <div className="flex flex-col gap-3 py-2 sm:flex-row sm:justify-between">
-
+      {/* NAVIGATION */}
+      <div className="flex flex-col gap-3 py-2 sm:flex-row sm:items-center sm:justify-between">
         <Link
-          href="/wizard"
-          className="inline-flex min-h-11 items-center justify-center border border-[#B9C4D1] bg-white px-6 text-sm font-semibold text-[#374151] transition-colors hover:border-[#0F5FC5] hover:bg-[#F8FAFC] hover:text-[#0F5FC5]"
+          href="/recommendation"
+          className="inline-flex min-h-[46px] items-center justify-center border border-[#B9C4D1] bg-white px-6 text-xs font-extrabold text-[#374151] transition-colors hover:border-[#0077CC] hover:text-[#0077CC] sm:text-sm"
         >
-          ← Reassess eligibility
+          ← Back to Recommendation
         </Link>
 
         <Link
           href="/locator"
-          className="inline-flex min-h-11 items-center justify-center border border-[#0F5FC5] bg-[#0F5FC5] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#0B4FA7]"
+          className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-extrabold text-white transition-colors hover:bg-[#005FA3] sm:text-sm"
         >
-          Find where to apply →
+          Continue to Partner Locator
+          <span className="ml-3" aria-hidden="true">
+            →
+          </span>
         </Link>
-
       </div>
-
     </div>
   );
 }
