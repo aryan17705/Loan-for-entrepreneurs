@@ -635,13 +635,7 @@ export default function LocatorPage() {
                 Applicant route
               </p>
 
-              <p className="mt-1 text-sm font-extrabold text-[#111827]">
-                {profile?.earningStatus === "earning"
-                  ? "Earning"
-                  : profile?.earningStatus === "non-earning"
-                    ? "Non-Earning"
-                    : "Application journey"}
-              </p>
+      
             </div>
 
             <div className="p-4">
