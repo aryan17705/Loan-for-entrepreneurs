@@ -1374,20 +1374,20 @@ export default function LocatorPage() {
             </div>
 
             <div className="p-5 sm:p-6">
-              <h3 className="text-sm font-extrabold text-[#111827]">
-                Before you visit
-              </h3>
+  <h3 className="text-sm font-extrabold text-[#111827]">
+    Before you visit
+  </h3>
 
-              <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                Carry the documents identified for your
-                application and confirm the partner's current
-                requirements before making a visit. NIRVAAN
-                does not guarantee approval, sanction or
-                disbursement of any loan.
-              </p>
-            </div>
-          </div>
-        </section>
+  <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+    Carry the documents identified for your
+    application and confirm the partner&apos;s current
+    requirements before making a visit. NIRVAAN
+    does not guarantee approval, sanction or
+    disbursement of any loan.
+  </p>
+</div>
+</div>
+</section>
 
         {/* =========================================================
             INDEPENDENT PLATFORM NOTICE
