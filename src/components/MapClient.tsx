@@ -2,11 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
-
 import type { PartnerWithMeta } from "@/lib/types";
 
-type MapClientProps = {
+import "mapbox-gl/dist/mapbox-gl.css";
+
+interface MapClientProps {
   partners: PartnerWithMeta[];
   center: [number, number];
   zoom: number;
@@ -16,59 +16,58 @@ type MapClientProps = {
     lng: number;
   } | null;
   onSelect: (id: string | null) => void;
-};
+}
 
-const MAPBOX_TOKEN =
-  process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+const INDIA_CENTER: [number, number] = [
+  78.9629,
+  20.5937,
+];
 
-function getHealthColor(
-  status: PartnerWithMeta["healthStatus"]
+function createMarkerElement(
+  selected: boolean,
+  color: string
 ) {
-  if (status === "green") {
-    return "#16A34A";
+  const marker = document.createElement("button");
+
+  marker.type = "button";
+  marker.setAttribute(
+    "aria-label",
+    selected ? "Selected partner" : "Partner location"
+  );
+
+  marker.style.width = selected ? "22px" : "16px";
+  marker.style.height = selected ? "22px" : "16px";
+  marker.style.padding = "0";
+  marker.style.border = "2px solid #FFFFFF";
+  marker.style.background = color;
+  marker.style.borderRadius = "50%";
+  marker.style.boxSizing = "border-box";
+  marker.style.cursor = "pointer";
+  marker.style.boxShadow = selected
+    ? "0 0 0 3px rgba(0,119,204,0.28), 0 2px 8px rgba(0,0,0,0.35)"
+    : "0 2px 7px rgba(0,0,0,0.35)";
+
+  marker.style.setProperty(
+    "border-radius",
+    "50%",
+    "important"
+  );
+
+  return marker;
+}
+
+function getPartnerColor(
+  partner: PartnerWithMeta
+) {
+  if (partner.healthStatus === "red") {
+    return "#C62828";
   }
 
-  if (status === "yellow") {
+  if (partner.healthStatus === "yellow") {
     return "#D97706";
   }
 
-  return "#DC2626";
-}
-
-function getHealthLabel(
-  status: PartnerWithMeta["healthStatus"]
-) {
-  if (status === "green") {
-    return "Healthy";
-  }
-
-  if (status === "yellow") {
-    return "Watchlist";
-  }
-
-  return "High NPA";
-}
-
-function getTypeLabel(
-  type: PartnerWithMeta["type"]
-) {
-  if (type === "public-sector-bank") {
-    return "PSU Bank";
-  }
-
-  if (type === "private-bank") {
-    return "Private Bank";
-  }
-
-  if (type === "nbfc") {
-    return "NBFC";
-  }
-
-  if (type === "regional-agency") {
-    return "Govt. Agency";
-  }
-
-  return "Co-op Bank";
+  return "#0077CC";
 }
 
 export default function MapClient({
@@ -82,159 +81,117 @@ export default function MapClient({
   const mapContainerRef =
     useRef<HTMLDivElement | null>(null);
 
-  const mapRef =
-    useRef<mapboxgl.Map | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  const markersRef =
-    useRef<
-      Record<
-        string,
-        mapboxgl.Marker
-      >
-    >({});
+  const markersRef = useRef<
+    Record<string, mapboxgl.Marker>
+  >({});
 
   const userMarkerRef =
-    useRef<mapboxgl.Marker | null>(
-      null
-    );
+    useRef<mapboxgl.Marker | null>(null);
 
-  const initializedRef =
-    useRef(false);
+  const popupRef =
+    useRef<mapboxgl.Popup | null>(null);
 
-  /*
-   * Keep the latest selection callback
-   * available to marker click handlers.
-   */
   const onSelectRef =
     useRef(onSelect);
 
+  const initialCenterRef =
+    useRef<[number, number]>(
+      center?.length === 2
+        ? [center[1], center[0]]
+        : INDIA_CENTER
+    );
+
+  const initialZoomRef = useRef(
+    typeof zoom === "number" ? zoom : 5
+  );
+
   useEffect(() => {
-    onSelectRef.current =
-      onSelect;
+    onSelectRef.current = onSelect;
   }, [onSelect]);
 
-  /*
-   * Create the Mapbox map once.
-   */
   useEffect(() => {
-    if (
-      !mapContainerRef.current ||
-      mapRef.current
-    ) {
+    const token =
+      process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
+    if (!token || !mapContainerRef.current) {
       return;
     }
 
-    if (!MAPBOX_TOKEN) {
-      return;
-    }
+    mapboxgl.accessToken = token;
 
-    mapboxgl.accessToken =
-      MAPBOX_TOKEN;
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: "mapbox://styles/mapbox/satellite-streets-v12",
+      center: initialCenterRef.current,
+      zoom: initialZoomRef.current,
+      minZoom: 3,
+      maxZoom: 18,
+      attributionControl: true,
+      cooperativeGestures: true,
+    });
 
-    const map =
-      new mapboxgl.Map({
-        container:
-          mapContainerRef.current,
-        style:
-          "mapbox://styles/mapbox/satellite-streets-v12",
-        center: [
-          center[1],
-          center[0],
-        ],
-        zoom,
-        attributionControl: true,
-      });
+    mapRef.current = map;
 
     map.addControl(
       new mapboxgl.NavigationControl({
-        showCompass: false,
+        showCompass: true,
+        showZoom: true,
+        visualizePitch: false,
       }),
       "top-right"
     );
 
-    mapRef.current = map;
+    map.addControl(
+      new mapboxgl.FullscreenControl(),
+      "top-right"
+    );
 
     map.on("load", () => {
-      initializedRef.current =
-        true;
+      map.resize();
     });
 
     return () => {
-      initializedRef.current =
-        false;
+      popupRef.current?.remove();
+      popupRef.current = null;
 
-      Object.values(
-        markersRef.current
-      ).forEach((marker) => {
-        marker.remove();
-      });
+      Object.values(markersRef.current).forEach(
+        (marker) => marker.remove()
+      );
 
       markersRef.current = {};
 
-      if (userMarkerRef.current) {
-        userMarkerRef.current.remove();
-        userMarkerRef.current =
-          null;
-      }
+      userMarkerRef.current?.remove();
+      userMarkerRef.current = null;
 
       map.remove();
       mapRef.current = null;
     };
   }, []);
-
-  /*
-   * Update map camera when the locator
-   * changes district, user location or
-   * selected partner.
-   */
-  useEffect(() => {
+    useEffect(() => {
     const map = mapRef.current;
 
     if (!map) {
       return;
     }
 
-    if (selectedId) {
-      const selected =
-        partners.find(
-          (partner) =>
-            partner.id === selectedId
-        );
+    const targetCenter: [number, number] =
+      center?.length === 2
+        ? [center[1], center[0]]
+        : INDIA_CENTER;
 
-      if (selected) {
-        map.flyTo({
-          center: [
-            selected.lng,
-            selected.lat,
-          ],
-          zoom: 14,
-          duration: 900,
-          essential: true,
-        });
-
-        return;
-      }
-    }
+    const targetZoom =
+      typeof zoom === "number" ? zoom : 5;
 
     map.flyTo({
-      center: [
-        center[1],
-        center[0],
-      ],
-      zoom,
-      duration: 700,
+      center: targetCenter,
+      zoom: targetZoom,
+      duration: 900,
       essential: true,
     });
-  }, [
-    center,
-    zoom,
-    selectedId,
-    partners,
-  ]);
+  }, [center, zoom]);
 
-  /*
-   * Render all partner markers.
-   */
   useEffect(() => {
     const map = mapRef.current;
 
@@ -242,198 +199,153 @@ export default function MapClient({
       return;
     }
 
-    /*
-     * Remove markers that no longer exist
-     * in the current partner response.
-     */
-    const currentIds =
-      new Set(
-        partners.map(
-          (partner) => partner.id
-        )
-      );
+    Object.entries(markersRef.current).forEach(
+      ([id, marker]) => {
+        if (id !== selectedId) {
+          marker
+            .getElement()
+            .style.setProperty(
+              "width",
+              "16px",
+              "important"
+            );
 
-    Object.entries(
-      markersRef.current
-    ).forEach(([id, marker]) => {
-      if (!currentIds.has(id)) {
-        marker.remove();
-        delete markersRef.current[id];
+          marker
+            .getElement()
+            .style.setProperty(
+              "height",
+              "16px",
+              "important"
+            );
+
+          marker
+            .getElement()
+            .style.setProperty(
+              "box-shadow",
+              "0 2px 7px rgba(0,0,0,0.35)",
+              "important"
+            );
+        }
       }
-    });
+    );
+
+    if (selectedId) {
+      const selectedMarker =
+        markersRef.current[selectedId];
+
+      if (selectedMarker) {
+        const element = selectedMarker.getElement();
+
+        element.style.setProperty(
+          "width",
+          "22px",
+          "important"
+        );
+
+        element.style.setProperty(
+          "height",
+          "22px",
+          "important"
+        );
+
+        element.style.setProperty(
+          "box-shadow",
+          "0 0 0 3px rgba(0,119,204,0.28), 0 2px 8px rgba(0,0,0,0.35)",
+          "important"
+        );
+      }
+    }
+  }, [selectedId]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map) {
+      return;
+    }
+
+    Object.values(markersRef.current).forEach(
+      (marker) => marker.remove()
+    );
+
+    markersRef.current = {};
+
+    popupRef.current?.remove();
+    popupRef.current = null;
 
     partners.forEach((partner) => {
-      const existing =
-        markersRef.current[
-          partner.id
-        ];
+      if (
+        typeof partner.lat !== "number" ||
+        typeof partner.lng !== "number" ||
+        !Number.isFinite(partner.lat) ||
+        !Number.isFinite(partner.lng)
+      ) {
+        return;
+      }
 
       const isSelected =
         partner.id === selectedId;
 
-      const healthColor =
-        getHealthColor(
-          partner.healthStatus
+      const markerElement =
+        createMarkerElement(
+          isSelected,
+          getPartnerColor(partner)
         );
 
-      /*
-       * Update an existing marker.
-       */
-      if (existing) {
-        const element =
-          existing.getElement();
-
-        element.style.width =
-          isSelected
-            ? "34px"
-            : "26px";
-
-        element.style.height =
-          isSelected
-            ? "34px"
-            : "26px";
-
-        element.style.background =
-          isSelected
-            ? "#E87512"
-            : healthColor;
-
-        element.style.borderColor =
-          isSelected
-            ? "#FFFFFF"
-            : "#FFFFFF";
-
-        element.style.boxShadow =
-          isSelected
-            ? "0 0 0 3px rgba(232,117,18,0.35), 0 4px 12px rgba(0,0,0,0.35)"
-            : "0 2px 8px rgba(0,0,0,0.35)";
-
-        existing.setLngLat([
+      const marker = new mapboxgl.Marker({
+        element: markerElement,
+        anchor: "center",
+      })
+        .setLngLat([
           partner.lng,
           partner.lat,
-        ]);
-
-        const popup =
-          existing.getPopup();
-
-        if (popup) {
-          popup.setHTML(
-            createPopupHtml(
-              partner
-            )
-          );
-        }
-
-        return;
-      }
-
-      /*
-       * Create a new rectangular marker
-       * container with a circular location
-       * point inside it.
-       *
-       * The marker itself is intentionally
-       * circular because it is a geographic
-       * map-location symbol, not UI chrome.
-       */
-      const markerElement =
-        document.createElement(
-          "button"
-        );
-
-      markerElement.type =
-        "button";
-
-      markerElement.setAttribute(
-        "aria-label",
-        `Select ${partner.name}`
-      );
-
-      markerElement.style.width =
-        isSelected
-          ? "34px"
-          : "26px";
-
-      markerElement.style.height =
-        isSelected
-          ? "34px"
-          : "26px";
-
-      markerElement.style.borderRadius =
-        "50%";
-
-      markerElement.style.border =
-        "3px solid #FFFFFF";
-
-      markerElement.style.background =
-        isSelected
-          ? "#E87512"
-          : healthColor;
-
-      markerElement.style.boxShadow =
-        isSelected
-          ? "0 0 0 3px rgba(232,117,18,0.35), 0 4px 12px rgba(0,0,0,0.35)"
-          : "0 2px 8px rgba(0,0,0,0.35)";
-
-      markerElement.style.cursor =
-        "pointer";
-
-      markerElement.style.padding =
-        "0";
-
-      markerElement.style.margin =
-        "0";
-
-      markerElement.style.display =
-        "block";
-
-      markerElement.style.transition =
-        "all 160ms ease";
+        ])
+        .addTo(map);
 
       markerElement.addEventListener(
         "click",
         (event) => {
           event.stopPropagation();
 
-          onSelectRef.current(
-            partner.id
+          onSelectRef.current(partner.id);
+        }
+      );
+
+      markerElement.addEventListener(
+        "mouseenter",
+        () => {
+          markerElement.style.setProperty(
+            "transform",
+            "scale(1.15)",
+            "important"
           );
         }
       );
 
-      const popup =
-        new mapboxgl.Popup({
-          offset: 18,
-          closeButton: true,
-          closeOnClick: false,
-          maxWidth: "320px",
-        }).setHTML(
-          createPopupHtml(
-            partner
-          )
-        );
+      markerElement.addEventListener(
+        "mouseleave",
+        () => {
+          markerElement.style.setProperty(
+            "transform",
+            "scale(1)",
+            "important"
+          );
+        }
+      );
 
-      const marker =
-        new mapboxgl.Marker({
-          element: markerElement,
-          anchor: "center",
-        })
-          .setLngLat([
-            partner.lng,
-            partner.lat,
-          ])
-          .setPopup(popup)
-          .addTo(map);
-
-      markersRef.current[
-        partner.id
-      ] = marker;
+      markersRef.current[partner.id] =
+        marker;
     });
+
+    return () => {
+      Object.values(markersRef.current).forEach(
+        (marker) => marker.remove()
+      );
+
+      markersRef.current = {};
+    };
   }, [partners, selectedId]);
 
-  /*
-   * Show the user's current location.
-   */
   useEffect(() => {
     const map = mapRef.current;
 
@@ -441,51 +353,36 @@ export default function MapClient({
       return;
     }
 
-    if (!userLocation) {
-      if (userMarkerRef.current) {
-        userMarkerRef.current.remove();
-        userMarkerRef.current =
-          null;
-      }
+    userMarkerRef.current?.remove();
+    userMarkerRef.current = null;
 
+    if (
+      !userLocation ||
+      !Number.isFinite(userLocation.lat) ||
+      !Number.isFinite(userLocation.lng)
+    ) {
       return;
     }
 
-    if (userMarkerRef.current) {
-      userMarkerRef.current.setLngLat([
-        userLocation.lng,
-        userLocation.lat,
-      ]);
+    const element =
+      document.createElement("div");
 
-      return;
-    }
-
-    const userElement =
-      document.createElement(
-        "div"
-      );
-
-    userElement.style.width =
-      "18px";
-
-    userElement.style.height =
-      "18px";
-
-    userElement.style.borderRadius =
-      "50%";
-
-    userElement.style.background =
-      "#2563EB";
-
-    userElement.style.border =
-      "3px solid #FFFFFF";
-
-    userElement.style.boxShadow =
-      "0 0 0 5px rgba(37,99,235,0.25), 0 2px 8px rgba(0,0,0,0.35)";
+    element.style.width = "18px";
+    element.style.height = "18px";
+    element.style.border = "3px solid #FFFFFF";
+    element.style.background = "#111827";
+    element.style.borderRadius = "50%";
+    element.style.boxShadow =
+      "0 0 0 4px rgba(17,24,39,0.22), 0 2px 8px rgba(0,0,0,0.35)";
+    element.style.setProperty(
+      "border-radius",
+      "50%",
+      "important"
+    );
 
     userMarkerRef.current =
       new mapboxgl.Marker({
-        element: userElement,
+        element,
         anchor: "center",
       })
         .setLngLat([
@@ -495,40 +392,24 @@ export default function MapClient({
         .setPopup(
           new mapboxgl.Popup({
             offset: 12,
-            closeButton: true,
-          }).setHTML(
-            `
-              <div style="font-family: Arial, sans-serif; padding: 2px;">
-                <div style="font-size:12px; font-weight:700; color:#111827;">
-                  Your location
-                </div>
-              </div>
-            `
-          )
+            closeButton: false,
+          }).setText("Your location")
         )
         .addTo(map);
   }, [userLocation]);
 
-  if (!MAPBOX_TOKEN) {
+  if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN) {
     return (
-      <div
-        ref={mapContainerRef}
-        className="flex h-full items-center justify-center bg-[#F8FAFC] p-6"
-      >
-        <div className="w-full max-w-md border border-[#CBD5E1] bg-white p-6 text-center">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#E87512]">
-            Map configuration required
+      <div className="flex h-full min-h-[480px] items-center justify-center border border-[#CBD5E1] bg-[#F8FAFC] p-6 text-center">
+        <div className="max-w-md">
+          <p className="text-sm font-extrabold text-[#002244]">
+            Satellite map is not configured
           </p>
 
-          <h3 className="mt-2 text-lg font-extrabold text-[#111827]">
-            Satellite map is not configured
-          </h3>
-
           <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-            Add your Mapbox public access token
-            as NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
-            in the local environment and Vercel
-            project settings.
+            Add the Mapbox public access token to
+            NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to
+            enable the interactive satellite map.
           </p>
         </div>
       </div>
@@ -538,191 +419,8 @@ export default function MapClient({
   return (
     <div
       ref={mapContainerRef}
-      className="h-full w-full"
+      className="h-full min-h-[480px] w-full bg-[#E5E7EB]"
+      aria-label="India partner network satellite map"
     />
   );
-}
-
-function createPopupHtml(
-  partner: PartnerWithMeta
-) {
-  const healthLabel =
-    getHealthLabel(
-      partner.healthStatus
-    );
-
-  const healthColor =
-    getHealthColor(
-      partner.healthStatus
-    );
-
-  const typeLabel =
-    getTypeLabel(
-      partner.type
-    );
-
-  const distance =
-    typeof partner.distanceKm ===
-      "number" &&
-    partner.distanceKm >= 0
-      ? `${partner.distanceKm.toFixed(
-          1
-        )} km away`
-      : "Distance unavailable";
-
-  const directionsUrl =
-    `https://www.google.com/maps/dir/?api=1&destination=${partner.lat},${partner.lng}`;
-
-  const phoneHtml =
-    partner.phone
-      ? `
-          <a
-            href="tel:${escapeHtml(
-              partner.phone
-            )}"
-            style="
-              display:inline-block;
-              padding:7px 10px;
-              border:1px solid #0F5FC5;
-              color:#0F5FC5;
-              background:#FFFFFF;
-              text-decoration:none;
-              font-size:11px;
-              font-weight:700;
-            "
-          >
-            Call
-          </a>
-        `
-      : "";
-
-  return `
-    <div
-      style="
-        width:100%;
-        font-family:Arial,sans-serif;
-        color:#111827;
-        padding:2px;
-      "
-    >
-      <div
-        style="
-          font-size:15px;
-          line-height:20px;
-          font-weight:800;
-          margin-bottom:6px;
-        "
-      >
-        ${escapeHtml(
-          partner.name
-        )}
-      </div>
-
-      <div
-        style="
-          font-size:11px;
-          line-height:17px;
-          color:#64748B;
-          font-weight:600;
-          margin-bottom:9px;
-        "
-      >
-        ${escapeHtml(
-          partner.city
-        )}, ${escapeHtml(
-          partner.district
-        )}, ${escapeHtml(
-          partner.state
-        )}
-      </div>
-
-      <div
-        style="
-          display:inline-block;
-          border:1px solid ${healthColor};
-          color:${healthColor};
-          padding:4px 7px;
-          font-size:10px;
-          font-weight:800;
-          margin-bottom:9px;
-        "
-      >
-        ${healthLabel} · ${
-          partner.npaPercent
-        }% NPA
-      </div>
-
-      <div
-        style="
-          font-size:11px;
-          line-height:17px;
-          color:#475569;
-          margin-bottom:8px;
-        "
-      >
-        ${escapeHtml(
-          partner.address
-        )}
-        ${
-          partner.pincode
-            ? ` - ${escapeHtml(
-                partner.pincode
-              )}`
-            : ""
-        }
-      </div>
-
-      <div
-        style="
-          font-size:10px;
-          color:#64748B;
-          font-weight:700;
-          margin-bottom:10px;
-        "
-      >
-        ${escapeHtml(
-          typeLabel
-        )} · ${distance}
-      </div>
-
-      <div
-        style="
-          display:flex;
-          gap:7px;
-          align-items:center;
-        "
-      >
-        ${phoneHtml}
-
-        <a
-          href="${directionsUrl}"
-          target="_blank"
-          rel="noreferrer"
-          style="
-            display:inline-block;
-            padding:7px 10px;
-            border:1px solid #E87512;
-            color:#FFFFFF;
-            background:#E87512;
-            text-decoration:none;
-            font-size:11px;
-            font-weight:700;
-          "
-        >
-          Directions
-        </a>
-      </div>
-    </div>
-  `;
-}
-
-function escapeHtml(
-  value: string
-) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+      }
