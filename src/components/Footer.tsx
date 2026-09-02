@@ -1,140 +1,130 @@
-import Link from "next/link";
+"use client";
 
-const FOOTER_LINKS = [
-  {
-    title: "NIRVAAN",
-    links: [
-      { label: "How It Works", href: "/#how-it-works" },
-      { label: "Start Application", href: "/wizard" },
-      { label: "Scheme Recommender", href: "/recommendation" },
-    ],
-  },
-  {
-    title: "Tools",
-    links: [
-      { label: "Financial Calculator", href: "/calculator" },
-      { label: "Partner Locator", href: "/locator" },
-      { label: "Document Checklist", href: "/checklist" },
-    ],
-  },
-];
+import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[#D9E0E7] bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 border-b border-[#D9E0E7] pb-10 md:grid-cols-[1.4fr_1fr_1fr]">
+    <footer
+      id="help"
+      className="border-t border-[#DCE4EC] bg-[#0E2A4A] text-white print:hidden"
+    >
+      <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
+        <div className="grid gap-10 lg:grid-cols-[1.25fr_0.85fr_0.85fr]">
+          {/* Brand */}
           <div>
             <Link
               href="/"
-              aria-label="NIRVAAN home"
               className="inline-flex items-center"
+              aria-label="NIRVAAN Home"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 460 70"
-                width="184"
-                height="28"
-                role="img"
-                aria-label="NIRVAAN"
-                className="block h-8 w-auto"
-              >
-                <text
-                  x="0"
-                  y="44"
-                  fontFamily="system-ui, -apple-system, Inter, Segoe UI, Roboto, sans-serif"
-                  fontSize="44"
-                  fontWeight="700"
-                  letterSpacing="1.5px"
-                  fill="#002244"
-                >
+              <span className="relative inline-flex">
+                <span className="nirvaan-wordmark text-2xl font-extrabold tracking-[0.08em] text-white sm:text-[28px]">
                   NIRVAAN
-                </text>
+                </span>
 
-                <circle
-                  cx="232"
-                  cy="18"
-                  r="4.5"
-                  fill="#0077CC"
-                  style={{ borderRadius: "50%" }}
+                <span
+                  aria-hidden="true"
+                  className="absolute -right-2 -top-1 h-2.5 w-2.5 bg-[#F47B20]"
                 />
-              </svg>
+              </span>
             </Link>
 
-            <p className="mt-4 max-w-md text-sm font-medium leading-6 text-[#667085]">
-              Government Scheme Assistance Portal
+            <p className="mt-4 max-w-md text-sm font-medium leading-6 text-[#B9CDE1]">
+              An independent platform for discovering government
+              schemes, understanding financing options and preparing
+              applications.
             </p>
 
-            <p className="mt-3 max-w-md text-sm leading-6 text-[#667085]">
-              An independent platform for scheme discovery, financing
-              guidance, partner location, and application preparation.
-            </p>
-          </div>
+            <div className="mt-6 border-l-2 border-[#F47B20] pl-4">
+              <p className="text-xs font-bold leading-5 text-[#D9E6F2]">
+                NIRVAAN is not a government department, bank or
+                lending institution.
+              </p>
 
-          {FOOTER_LINKS.map((group) => (
-            <div key={group.title}>
-              <h2 className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#002244]">
-                {group.title}
-              </h2>
-
-              <nav className="mt-4 flex flex-col items-start">
-                {group.links.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="border-b border-transparent py-2 text-sm font-semibold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
+              <p className="mt-1 text-[11px] font-medium leading-5 text-[#9FB5CA]">
+                Scheme eligibility, final approval, sanction and
+                disbursement are determined by the relevant
+                institutions and applicable rules.
+              </p>
             </div>
-          ))}
-        </div>
-                <div className="grid gap-6 py-8 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr]">
-          <div className="border-l-[3px] border-[#0077CC] pl-4">
-            <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#002244]">
-              Important
-            </p>
-
-            <p className="mt-2 max-w-xl text-xs leading-5 text-[#667085]">
-              NIRVAAN is an independent assistance platform. It does not
-              represent, operate, or speak on behalf of any government
-              department, bank, financial institution, or scheme authority.
-            </p>
           </div>
 
+          {/* Help Portal */}
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#002244]">
-              Information
+            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#F47B20]">
+              Help Portal
             </p>
 
-            <p className="mt-2 text-xs leading-5 text-[#667085]">
-              Scheme eligibility, loan limits, interest rates, and approval
-              decisions are subject to the applicable scheme rules and the
-              concerned financial institution.
+            <h2 className="mt-3 text-xl font-extrabold text-white">
+              Need assistance?
+            </h2>
+
+            <p className="mt-2 text-xs font-medium leading-5 text-[#B9CDE1]">
+              Contact the NIRVAAN assistance team for help
+              understanding the platform and preparing your
+              journey.
             </p>
           </div>
 
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#002244]">
-              Assistance
-            </p>
+          {/* Contact */}
+          <div className="space-y-3">
+            <a
+              href="tel:+918888565758"
+              className="flex items-center gap-4 border border-[#385674] bg-[#143554] px-4 py-4 transition-colors hover:border-[#6D91B3]"
+            >
+              <span
+                aria-hidden="true"
+                className="flex h-10 w-10 flex-none items-center justify-center bg-[#1B68C7] text-white"
+              >
+                ☎
+              </span>
 
-            <p className="mt-2 text-xs leading-5 text-[#667085]">
-              Use NIRVAAN to understand your options, prepare information,
-              and identify suitable next steps before approaching a partner.
-            </p>
+              <span>
+                <span className="block text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#9FB5CA]">
+                  Phone
+                </span>
+
+                <span className="mt-1 block text-sm font-extrabold text-white">
+                  +91 8888565758
+                </span>
+              </span>
+            </a>
+
+            <a
+              href="mailto:nirvaanscheme@gmail.com"
+              className="flex items-center gap-4 border border-[#385674] bg-[#143554] px-4 py-4 transition-colors hover:border-[#6D91B3]"
+            >
+              <span
+                aria-hidden="true"
+                className="flex h-10 w-10 flex-none items-center justify-center bg-[#1B68C7] text-white"
+              >
+                @
+              </span>
+
+              <span className="min-w-0">
+                <span className="block text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#9FB5CA]">
+                  Email
+                </span>
+
+                <span className="mt-1 block truncate text-sm font-extrabold text-white">
+                  nirvaanscheme@gmail.com
+                </span>
+              </span>
+            </a>
           </div>
         </div>
-                <div className="flex flex-col gap-3 border-t border-[#D9E0E7] pt-6 text-xs text-[#667085] sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © {new Date().getFullYear()} NIRVAAN. All rights reserved.
-          </p>
 
-          <p className="font-medium">
-            NIRVAAN · Government Scheme Assistance Portal
-          </p>
+        {/* Footer bottom */}
+        <div className="mt-10 border-t border-[#294766] pt-6">
+          <div className="flex flex-col gap-3 text-[11px] font-medium text-[#91A8BE] sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              © 2026 NIRVAAN · Government Scheme Assistance Portal
+            </p>
+
+            <p>
+              Independent platform · English only
+            </p>
+          </div>
         </div>
       </div>
     </footer>
