@@ -2,379 +2,902 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================
+   NIRVAAN DESIGN SYSTEM
+   White-first government-service aesthetic
+   Raleway typography
+   Sharp rectangular UI
+   ========================================================= */
+
 :root {
-  --color-base: #ffffff;
-  --color-surface: #f8fafc;
-  --color-primary: #0f5fc5;
-  --color-secondary: #1e3a5f;
-  --color-accent-orange: #e87512;
-
-  --color-accent-green: #16a34a;
-  --color-success: #16a34a;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
-
-  --color-text-primary: #111827;
-  --color-text-secondary: #334155;
-  --color-text-muted: #64748b;
-
   --background: #ffffff;
   --foreground: #111827;
+
+  --nirvaan-navy: #002244;
+  --nirvaan-navy-dark: #001a33;
+
+  --nirvaan-blue: #0077cc;
+  --nirvaan-blue-dark: #005fa3;
+  --nirvaan-blue-light: #eaf4fb;
+
+  --nirvaan-orange: #e87512;
+  --nirvaan-orange-dark: #c85f08;
+  --nirvaan-orange-light: #fff3e8;
+
+  --nirvaan-black: #111827;
+  --nirvaan-text: #374151;
+  --nirvaan-muted: #667085;
+
+  --nirvaan-border: #d9e0e7;
+  --nirvaan-border-dark: #b8c2ce;
+
+  --nirvaan-surface: #f7f9fb;
+  --nirvaan-surface-dark: #eef2f6;
+
+  --nirvaan-success: #167a45;
+  --nirvaan-danger: #b42318;
+  --nirvaan-warning: #a15c00;
+
+  --shadow-sm: 0 1px 4px rgba(0, 34, 68, 0.08);
+  --shadow-md: 0 4px 14px rgba(0, 34, 68, 0.1);
+  --shadow-lg: 0 10px 28px rgba(0, 34, 68, 0.14);
 }
 
-html,
-body {
+/* =========================================================
+   GLOBAL FOUNDATION
+   ========================================================= */
+
+html {
   margin: 0;
   padding: 0;
+
   width: 100%;
   max-width: 100vw;
   min-height: 100%;
-  overflow-x: hidden;
 
-  background: var(--background);
-  color: var(--foreground);
+  background: #ffffff;
+
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+
+  background: #ffffff;
+  color: var(--nirvaan-black);
 
   font-family:
     var(--font-raleway),
     "Raleway",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
     sans-serif;
 
+  overflow-x: hidden;
+
   text-rendering: optimizeLegibility;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  -webkit-tap-highlight-color: transparent;
 }
 
-* {
+/* =========================================================
+   UNIVERSAL BOX MODEL
+   ========================================================= */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif;
+
   border-radius: 0 !important;
 }
+
+/* =========================================================
+   STRICT SHARP RECTANGLE SYSTEM
+   ========================================================= */
 
 button,
 input,
 select,
-textarea {
-  font: inherit;
+textarea,
+a,
+div,
+section,
+article,
+aside,
+header,
+footer,
+nav,
+main,
+form,
+fieldset,
+table,
+td,
+th {
+  border-radius: 0 !important;
 }
 
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
+/* =========================================================
+   REMOVE LEGACY ROUNDED TAILWIND CLASSES
+   ========================================================= */
+
+.rounded,
+.rounded-sm,
+.rounded-md,
+.rounded-lg,
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl,
+.rounded-full {
+  border-radius: 0 !important;
 }
+
+/* =========================================================
+   TYPOGRAPHY
+   ========================================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif;
+
+  color: var(--nirvaan-navy);
+
+  line-height: 1.15;
+}
+
+h1 {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-weight: 800;
+  letter-spacing: -0.018em;
+}
+
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+
+h4,
+h5,
+h6 {
+  font-weight: 700;
+}
+
+p {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif;
+
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+strong,
+b {
+  font-weight: 700;
+}
+
+small {
+  font-weight: 400;
+}
+
+/* =========================================================
+   NIRVAAN WORDMARK
+   ========================================================= */
+
+.nirvaan-wordmark {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif !important;
+
+  font-weight: 800 !important;
+
+  letter-spacing: 0.055em;
+
+  color: var(--nirvaan-navy);
+}
+
+/* =========================================================
+   LINKS
+   ========================================================= */
+
+a {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif;
+
+  color: inherit;
+
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+nav,
+nav a,
+nav button {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif !important;
+
+  font-weight: 600;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
 
 button {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif !important;
+
+  font-weight: 700;
+
   cursor: pointer;
+
+  border-radius: 0 !important;
+
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 button:disabled {
   cursor: not-allowed;
+  opacity: 0.55;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+/* =========================================================
+   FORM LABELS
+   ========================================================= */
 
-::selection {
-  background: #0f5fc5;
-  color: #ffffff;
-}
+label {
+  display: block;
 
-/* ---------------------------------------------
-   Global scrollbars
---------------------------------------------- */
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #94a3b8 #f1f5f9;
-}
-
-*::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-
-*::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-*::-webkit-scrollbar-thumb {
-  background: #94a3b8;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-/* ---------------------------------------------
-   Legacy glass classes
-   Kept for compatibility with existing pages,
-   but converted to the new white rectangular
-   visual system.
---------------------------------------------- */
-
-.liquid-glass {
-  background: #ffffff !important;
-  border: 1px solid #d7dee8 !important;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  transform: none !important;
-}
-
-.liquid-glass-inner {
-  background: #f8fafc !important;
-  border: 1px solid #d7dee8 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  transform: none !important;
-}
-
-.liquid-glass-active {
-  background: #eff6ff !important;
-  border: 1px solid #0f5fc5 !important;
-  box-shadow: 0 8px 24px rgba(15, 95, 197, 0.1) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  transform: none !important;
-}
-
-/* ---------------------------------------------
-   Range inputs
---------------------------------------------- */
-
-input[type="range"] {
-  width: 100%;
-  accent-color: #0f5fc5;
-  touch-action: pan-y;
-  cursor: pointer;
-}
-
-/* ---------------------------------------------
-   Touch scrolling
---------------------------------------------- */
-
-.scrollable-touch {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* ---------------------------------------------
-   Recharts
---------------------------------------------- */
-
-.recharts-tooltip-wrapper {
-  z-index: 1000 !important;
-  pointer-events: none !important;
-}
-
-.recharts-default-tooltip {
-  background: #ffffff !important;
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 0 !important;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12) !important;
-  color: #111827 !important;
-  padding: 8px 12px !important;
-}
-
-.recharts-default-tooltip * {
-  color: #111827 !important;
-  font-weight: 600 !important;
-}
-
-.recharts-tooltip-item {
-  color: #334155 !important;
-}
-
-.recharts-tooltip-item-name {
-  color: #0f5fc5 !important;
-  font-weight: 600 !important;
-}
-
-.recharts-tooltip-item-value {
-  color: #111827 !important;
-  font-weight: 800 !important;
-  font-size: 15px !important;
-}
-
-.recharts-tooltip-label {
-  color: #475569 !important;
-  font-weight: 700 !important;
-}
-
-/* ---------------------------------------------
-   Mapbox
---------------------------------------------- */
-
-.mapboxgl-map {
   font-family:
     var(--font-raleway),
     "Raleway",
-    system-ui,
-    sans-serif;
+    sans-serif !important;
+
+  font-weight: 600;
+
+  color: var(--nirvaan-navy);
 }
 
-.mapboxgl-canvas {
-  outline: none !important;
-}
+/* =========================================================
+   FORM ELEMENTS
+   ========================================================= */
 
-.mapboxgl-ctrl-group {
-  overflow: hidden !important;
-  border: 1px solid #cbd5e1 !important;
+input,
+select,
+textarea {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif !important;
+
+  font-weight: 400;
+
+  background: #ffffff;
+  color: var(--nirvaan-black);
+
+  border: 1px solid var(--nirvaan-border-dark);
+
   border-radius: 0 !important;
-  background: #ffffff !important;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16) !important;
+
+  box-shadow: none;
+
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.mapboxgl-ctrl-group button {
-  width: 32px !important;
-  height: 32px !important;
-  background-color: #ffffff !important;
+input:not([type="range"]),
+select,
+textarea {
+  min-height: 44px;
 }
 
-.mapboxgl-ctrl-group button:hover {
-  background-color: #eff6ff !important;
+textarea {
+  resize: vertical;
 }
 
-.mapboxgl-ctrl-icon {
-  filter: none !important;
+input:not([type="range"]):focus,
+select:focus,
+textarea:focus {
+  outline: none;
+
+  border-color: var(--nirvaan-blue);
+
+  box-shadow:
+    0 0 0 2px rgba(0, 119, 204, 0.14);
 }
 
-.mapboxgl-ctrl-attrib {
-  background: rgba(255, 255, 255, 0.9) !important;
-  color: #475569 !important;
-  font-size: 9px !important;
+input::placeholder,
+textarea::placeholder {
+  color: #7a8795;
+
+  opacity: 1;
 }
 
-.mapboxgl-ctrl-attrib a {
-  color: #0f5fc5 !important;
+/* =========================================================
+   SELECT
+   ========================================================= */
+
+select {
+  appearance: auto;
+  -webkit-appearance: auto;
+
+  background-color: #ffffff;
 }
 
-.mapboxgl-popup {
-  max-width: 320px !important;
+/* =========================================================
+   RANGE INPUT
+   ========================================================= */
+
+input[type="range"] {
+  width: 100%;
+
+  accent-color: var(--nirvaan-blue);
+
+  cursor: pointer;
+
+  touch-action: pan-y;
 }
 
-.mapboxgl-popup-content {
-  padding: 14px !important;
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 0 !important;
-  background: #ffffff !important;
-  color: #111827 !important;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2) !important;
+/* =========================================================
+   CHECKBOX / RADIO
+   ========================================================= */
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--nirvaan-blue);
 }
 
-.mapboxgl-popup-tip {
-  border-top-color: #ffffff !important;
+/* =========================================================
+   TEXT SELECTION
+   ========================================================= */
+
+::selection {
+  background: var(--nirvaan-blue);
+  color: #ffffff;
 }
 
-.mapboxgl-popup-close-button {
-  width: 28px !important;
-  height: 28px !important;
-  padding: 0 !important;
-  color: #64748b !important;
-  font-size: 18px !important;
-  font-weight: 700 !important;
-}
-
-.mapboxgl-popup-close-button:hover {
-  background: #f1f5f9 !important;
-  color: #111827 !important;
-}
-.mapboxgl-ctrl-logo {
-  opacity: 0.9;
-}
-
-/* ---------------------------------------------
-   Map isolation
---------------------------------------------- */
-
-.map-isolate-box {
-  isolation: isolate !important;
-  position: relative !important;
-  z-index: 0 !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-/* ---------------------------------------------
-   Focus states
---------------------------------------------- */
+/* =========================================================
+   FOCUS ACCESSIBILITY
+   ========================================================= */
 
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #0f5fc5;
+  outline: 2px solid var(--nirvaan-blue);
+
   outline-offset: 2px;
 }
 
-/* ---------------------------------------------
-   Form controls
---------------------------------------------- */
+/* =========================================================
+   SCROLLING
+   ========================================================= */
 
-input,
-select,
-textarea {
+.scrollable-touch {
+  -webkit-overflow-scrolling: touch;
+
+  overscroll-behavior: contain;
+}
+
+/* =========================================================
+   STANDARD NIRVAAN SURFACES
+   ========================================================= */
+
+.nirvaan-surface {
+  background: #ffffff;
+
+  border: 1px solid var(--nirvaan-border);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.nirvaan-section {
+  background: #ffffff;
+}
+
+.nirvaan-muted-surface {
+  background: var(--nirvaan-surface);
+
+  border: 1px solid var(--nirvaan-border);
+}
+
+/* =========================================================
+   BLUE ACTION SURFACES
+   ========================================================= */
+
+.nirvaan-primary {
+  background: var(--nirvaan-blue);
+
+  color: #ffffff;
+
+  border: 1px solid var(--nirvaan-blue);
+}
+
+.nirvaan-primary:hover {
+  background: var(--nirvaan-blue-dark);
+
+  border-color: var(--nirvaan-blue-dark);
+}
+
+.nirvaan-secondary {
+  background: #ffffff;
+
+  color: var(--nirvaan-blue);
+
+  border: 1px solid var(--nirvaan-blue);
+}
+
+.nirvaan-secondary:hover {
+  background: var(--nirvaan-blue-light);
+}
+
+/* =========================================================
+   ORANGE ACCENT
+   ========================================================= */
+
+.nirvaan-accent {
+  color: var(--nirvaan-orange);
+}
+
+.nirvaan-accent-border {
+  border-color: var(--nirvaan-orange);
+}
+
+.nirvaan-accent-surface {
+  background: var(--nirvaan-orange-light);
+
+  border: 1px solid #f0c49f;
+}
+
+/* =========================================================
+   LEGACY GLASSMORPHISM RESET
+   ========================================================= */
+
+.liquid-glass,
+.liquid-glass-inner,
+.liquid-glass-active {
+  background: #ffffff !important;
+
+  backdrop-filter: none !important;
+
+  -webkit-backdrop-filter: none !important;
+
+  border: 1px solid var(--nirvaan-border) !important;
+
+  box-shadow: var(--shadow-sm) !important;
+
+  transform: none !important;
+
   border-radius: 0 !important;
 }
 
-input::placeholder,
-textarea::placeholder {
-  color: #94a3b8;
+.liquid-glass-active {
+  border-color: var(--nirvaan-blue) !important;
+
+  box-shadow:
+    inset 4px 0 0 var(--nirvaan-blue),
+    var(--shadow-sm) !important;
 }
 
-/* ---------------------------------------------
-   Utility helpers
---------------------------------------------- */
+/* =========================================================
+   LEGACY DARK BACKGROUND RESET
+   ========================================================= */
 
-.text-balance {
-  text-wrap: balance;
+[class*="bg-[#0B0F19]"],
+[class*="bg-[#131B2E]"],
+[class*="bg-[#1E3A5F]"],
+[class*="bg-[#0B0F19]/"],
+[class*="bg-[#131B2E]/"],
+[class*="bg-[#1E3A5F]/"] {
+  background-color: #ffffff !important;
 }
 
-.text-pretty {
-  text-wrap: pretty;
+/* =========================================================
+   LEGACY GRADIENT RESET
+   ========================================================= */
+
+[class*="bg-gradient-"] {
+  background-image: none !important;
+}
+/* =========================================================
+   WHITE TEXT NORMALIZATION
+   ========================================================= */
+
+[class*="text-white"] {
+  color: var(--nirvaan-black);
 }
 
-/* ---------------------------------------------
-   Reduced motion
---------------------------------------------- */
+/*
+   Preserve white text on explicit blue/orange
+   action surfaces.
+*/
+
+[class*="bg-[#0077CC]"],
+[class*="bg-[#0077CC] *"],
+[class*="bg-[#0F5FC5]"],
+[class*="bg-[#0F5FC5] *"],
+[class*="bg-[#E87512]"],
+[class*="bg-[#E87512] *"],
+[class*="bg-[#F97316]"],
+[class*="bg-[#F97316] *"],
+[class*="bg-[#EA580C]"],
+[class*="bg-[#EA580C] *"] {
+  color: #ffffff !important;
+}
+
+/* =========================================================
+   BLUE LEGACY CLASS SUPPORT
+   ========================================================= */
+
+[class*="text-[#0077CC]"],
+[class*="text-[#0F5FC5]"] {
+  color: var(--nirvaan-blue) !important;
+}
+
+[class*="border-[#0077CC]"],
+[class*="border-[#0F5FC5]"] {
+  border-color: var(--nirvaan-blue) !important;
+}
+
+[class*="bg-[#0077CC]"] {
+  background-color: var(--nirvaan-blue) !important;
+}
+
+[class*="bg-[#0F5FC5]"] {
+  background-color: var(--nirvaan-blue) !important;
+}
+
+/* =========================================================
+   ORANGE LEGACY CLASS SUPPORT
+   ========================================================= */
+
+[class*="text-[#E87512]"],
+[class*="text-[#F97316]"],
+[class*="text-[#EA580C]"],
+[class*="text-[#FED7AA]"],
+[class*="text-orange-"] {
+  color: var(--nirvaan-orange-dark) !important;
+}
+
+[class*="bg-[#E87512]"],
+[class*="bg-[#F97316]"],
+[class*="bg-[#EA580C]"] {
+  background-color: var(--nirvaan-orange) !important;
+}
+
+[class*="border-[#E87512]"],
+[class*="border-[#F97316]"],
+[class*="border-[#EA580C]"] {
+  border-color: var(--nirvaan-orange) !important;
+}
+
+/* =========================================================
+   RECHARTS
+   ========================================================= */
+
+.recharts-tooltip-wrapper {
+  z-index: 1000 !important;
+
+  pointer-events: none !important;
+}
+
+.recharts-default-tooltip {
+  background: #ffffff !important;
+
+  border: 1px solid var(--nirvaan-border-dark) !important;
+
+  border-radius: 0 !important;
+
+  color: var(--nirvaan-black) !important;
+
+  padding: 8px 12px !important;
+
+  box-shadow: var(--shadow-md) !important;
+
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif !important;
+}
+
+.recharts-default-tooltip * {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif !important;
+
+  color: var(--nirvaan-black) !important;
+}
+
+.recharts-tooltip-item-name {
+  color: var(--nirvaan-blue) !important;
+
+  font-weight: 600 !important;
+}
+
+.recharts-tooltip-item-value {
+  color: var(--nirvaan-navy) !important;
+
+  font-weight: 800 !important;
+}
+
+/* =========================================================
+   MAPBOX
+   ========================================================= */
+
+.map-isolate-box {
+  isolation: isolate !important;
+
+  position: relative !important;
+
+  z-index: 0 !important;
+
+  overflow: hidden;
+}
+
+.mapboxgl-map,
+.mapboxgl-canvas-container,
+.mapboxgl-canvas {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif !important;
+}
+
+.mapboxgl-control-container {
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif !important;
+}
+
+.mapboxgl-ctrl-group {
+  border-radius: 0 !important;
+
+  border: 1px solid var(--nirvaan-border-dark) !important;
+
+  box-shadow: var(--shadow-md) !important;
+
+  overflow: hidden;
+}
+
+.mapboxgl-ctrl-group button {
+  background: #ffffff !important;
+
+  border-radius: 0 !important;
+}
+
+.mapboxgl-ctrl-group button:hover {
+  background: var(--nirvaan-blue-light) !important;
+}
+
+/* =========================================================
+   MAPBOX POPUP
+   ========================================================= */
+
+.mapboxgl-popup-content {
+  padding: 0 !important;
+
+  background: #ffffff !important;
+
+  border: 1px solid var(--nirvaan-border-dark) !important;
+
+  border-radius: 0 !important;
+
+  box-shadow: var(--shadow-lg) !important;
+
+  font-family:
+    var(--font-raleway),
+    "Raleway",
+    sans-serif !important;
+}
+
+.mapboxgl-popup-tip {
+  display: none !important;
+}
+
+.mapboxgl-popup-close-button {
+  width: 32px;
+  height: 32px;
+
+  right: 0;
+  top: 0;
+
+  color: var(--nirvaan-muted);
+
+  font-size: 20px;
+
+  font-weight: 700;
+
+  background: #ffffff;
+
+  border-left: 1px solid var(--nirvaan-border);
+
+  border-bottom: 1px solid var(--nirvaan-border);
+
+  border-radius: 0 !important;
+}
+
+.mapboxgl-popup-close-button:hover {
+  background: var(--nirvaan-blue-light);
+
+  color: var(--nirvaan-blue);
+}
+
+/* =========================================================
+   MAP MARKERS
+   ========================================================= */
+
+.nirvaan-map-marker {
+  width: 16px;
+  height: 16px;
+
+  border-radius: 50% !important;
+
+  border: 3px solid #ffffff;
+
+  background: var(--nirvaan-blue);
+
+  box-shadow:
+    0 2px 8px rgba(0, 34, 68, 0.35);
+}
+
+.nirvaan-map-marker.selected {
+  width: 20px;
+  height: 20px;
+
+  border-width: 3px;
+
+  background: var(--nirvaan-orange);
+}
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  background: #ffffff;
+}
+
+th {
+  background: var(--nirvaan-surface);
+
+  color: var(--nirvaan-navy);
+
+  font-weight: 700;
+
+  text-align: left;
+
+  border: 1px solid var(--nirvaan-border);
+}
+
+td {
+  border: 1px solid var(--nirvaan-border);
+
+  color: var(--nirvaan-text);
+}
+
+/* =========================================================
+   STATUS HELPERS
+   ========================================================= */
+
+.nirvaan-status-success {
+  color: var(--nirvaan-success);
+}
+
+.nirvaan-status-warning {
+  color: var(--nirvaan-warning);
+}
+
+.nirvaan-status-danger {
+  color: var(--nirvaan-danger);
+}
+/* =========================================================
+   RESPONSIVE HELPERS
+   ========================================================= */
+
+@media (max-width: 768px) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    font-size: 15px;
+  }
+
+  h1 {
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    letter-spacing: -0.015em;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+
     animation-iteration-count: 1 !important;
+
     transition-duration: 0.01ms !important;
+
     scroll-behavior: auto !important;
   }
 }
 
-/* ---------------------------------------------
-   Mobile adjustments
---------------------------------------------- */
+/* =========================================================
+   PRINT
+   ========================================================= */
 
-@media (max-width: 640px) {
-  .mapboxgl-ctrl-group button {
-    width: 34px !important;
-    height: 34px !important;
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+
+    color: var(--nirvaan-black) !important;
+
+    font-family:
+      var(--font-raleway),
+      "Raleway",
+      sans-serif !important;
   }
 
-  .mapboxgl-ctrl-attrib {
-    font-size: 8px !important;
-  }
-
-  .mapboxgl-popup {
-    max-width: 280px !important;
-  }
-
-  .mapboxgl-popup-content {
-    padding: 12px !important;
+  * {
+    box-shadow: none !important;
   }
 }
