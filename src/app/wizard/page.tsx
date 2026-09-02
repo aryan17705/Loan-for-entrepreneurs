@@ -738,11 +738,8 @@ export default function WizardPage() {
       <section className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[1fr_310px]">
-            <div className="border border-[#CBD5E1] bg-white">
-              {/* Main content continues in Part 2 */}
-            </div>
-
-            <aside className="hidden lg:block">
+  <div className="border border-[#CBD5E1] bg-white">
+    {/* Main content continues below */}
               <div className="border border-[#CBD5E1] bg-white">
                 <div className="border-b border-[#CBD5E1] bg-[#0E2A4A] px-5 py-4">
                   <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F47B20]">
@@ -795,13 +792,7 @@ export default function WizardPage() {
                   as part of the relevant assessment flow.
                 </p>
               </div>
-            </aside>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
-        }
+                        
                       {/* =====================================================
                   STEP 01: VERIFICATION
                   ===================================================== */}
@@ -1912,11 +1903,12 @@ export default function WizardPage() {
                         : "Run Smart Scheme Recommender →"}
                     </button>
                   </div>
-                </div>
-                            ) : null}
+                                </div>
+              ) : null}
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* =====================================================
           MOBILE JOURNEY SUMMARY
@@ -2068,7 +2060,7 @@ export default function WizardPage() {
             </p>
           </div>
         </div>
-      </section>
+            </section>
     </main>
   );
-    }
+        }
