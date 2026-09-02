@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+
 import { useJourney } from "@/context/JourneyContext";
 import { DISTRICT_COORDS, LOCATIONS } from "@/lib/locations";
 import type {
@@ -11,22 +12,14 @@ import type {
   SchemeId,
 } from "@/lib/types";
 
-const MapClient = dynamic(
-  () => import("@/components/MapClient"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center border border-[#CBD5E1] bg-[#F8FAFC]">
-        <div className="text-center">
-          <div className="mx-auto mb-3 h-7 w-7 animate-spin border-4 border-[#D7DEE8] border-t-[#0F5FC5]" />
-          <p className="text-xs font-bold text-[#0F5FC5]">
-            Loading satellite map...
-          </p>
-        </div>
-      </div>
-    ),
-  }
-);
+const MapClient = dynamic(() => import("@/components/MapClient"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center bg-[#F8FAFC] text-sm font-bold text-[#0F5FC5]">
+      Loading satellite map...
+    </div>
+  ),
+});
 
 const SCHEME_LABELS: Record<SchemeId, string> = {
   "micro-finance": "Micro Finance",
@@ -54,13 +47,10 @@ const HEALTH_STYLES: Record<
     "border-[#E5B7B7] bg-[#FEF2F2] text-[#991B1B]",
 };
 
-function getHealthLabel(
-  status: PartnerWithMeta["healthStatus"]
-) {
-  if (status === "green") return "Healthy";
-  if (status === "yellow") return "Watchlist";
-  return "High NPA";
-}
+const INDIA_CENTER: [number, number] = [
+  20.5937,
+  78.9629,
+];
 
 function LocatorDropdown({
   label,
@@ -75,21 +65,18 @@ function LocatorDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-
   const ref = useRef<HTMLDivElement>(null);
-  const searchInputRef =
-    useRef<HTMLInputElement>(null);
 
   const filteredItems = useMemo(() => {
-    const special = [
-      "All",
-      "All Schemes",
-      "All Types",
-    ];
-
     const sorted = [...items].sort((a, b) => {
-      if (special.includes(a)) return -1;
-      if (special.includes(b)) return 1;
+      const priority = [
+        "All",
+        "All Schemes",
+        "All Types",
+      ];
+
+      if (priority.includes(a)) return -1;
+      if (priority.includes(b)) return 1;
 
       return a.localeCompare(b);
     });
@@ -98,9 +85,7 @@ function LocatorDropdown({
       return sorted;
     }
 
-    const query = search
-      .trim()
-      .toLowerCase();
+    const query = search.trim().toLowerCase();
 
     return sorted.filter((item) =>
       item.toLowerCase().includes(query)
@@ -108,54 +93,41 @@ function LocatorDropdown({
   }, [items, search]);
 
   useEffect(() => {
-    const handleOutside = (event: MouseEvent) => {
+    const handleOutsideClick = (event: MouseEvent) => {
       if (
         ref.current &&
-        !ref.current.contains(
-          event.target as Node
-        )
+        !ref.current.contains(event.target as Node)
       ) {
         setOpen(false);
+        setSearch("");
       }
     };
 
     document.addEventListener(
       "mousedown",
-      handleOutside
+      handleOutsideClick
     );
 
     return () => {
       document.removeEventListener(
         "mousedown",
-        handleOutside
+        handleOutsideClick
       );
     };
   }, []);
 
-  useEffect(() => {
-    if (open) {
-      setSearch("");
-
-      window.setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 40);
-    }
-  }, [open]);
-
   return (
     <div
       ref={ref}
-      className="relative z-40"
+      className="relative z-30"
     >
       <button
         type="button"
-        onClick={() =>
-          setOpen((current) => !current)
-        }
-        className="flex min-h-10 items-center gap-2 border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-bold text-[#111827] transition-colors hover:border-[#0F5FC5] focus:border-[#0F5FC5] focus:outline-none"
+        onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
+        className="flex min-h-11 items-center gap-2 border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-bold text-[#111827] transition-colors hover:border-[#0F5FC5] focus:border-[#0F5FC5] focus:outline-none"
       >
-        <span className="font-extrabold text-[#0F5FC5]">
+        <span className="text-[#0F5FC5]">
           {label}
         </span>
 
@@ -163,7 +135,10 @@ function LocatorDropdown({
           {value}
         </span>
 
-        <span className="ml-1 text-[9px] font-extrabold text-[#E87512]">
+        <span
+          aria-hidden="true"
+          className="ml-1 text-[#E87512]"
+        >
           {open ? "▲" : "▼"}
         </span>
       </button>
@@ -172,7 +147,6 @@ function LocatorDropdown({
         <div className="absolute left-0 top-full mt-1 min-w-[250px] border border-[#CBD5E1] bg-white p-2 shadow-xl">
           <div className="mb-2 border border-[#D7DEE8] bg-[#F8FAFC]">
             <input
-              ref={searchInputRef}
               type="text"
               value={search}
               onChange={(event) =>
@@ -183,15 +157,14 @@ function LocatorDropdown({
             />
           </div>
 
-          <div className="max-h-56 overflow-y-auto">
+          <div className="max-h-60 overflow-y-auto">
             {filteredItems.length === 0 ? (
               <div className="px-3 py-4 text-center text-xs font-medium text-[#64748B]">
                 No results found.
               </div>
             ) : (
               filteredItems.map((item) => {
-                const selected =
-                  item === value;
+                const selected = item === value;
 
                 return (
                   <button
@@ -202,7 +175,7 @@ function LocatorDropdown({
                       setOpen(false);
                       setSearch("");
                     }}
-                    className={`flex w-full items-center justify-between border-b border-[#F1F5F9] px-3 py-2.5 text-left text-xs font-bold ${
+                    className={`flex w-full items-center justify-between border-b border-[#F1F5F9] px-3 py-2.5 text-left text-xs font-bold last:border-b-0 ${
                       selected
                         ? "bg-[#EFF6FF] text-[#0F5FC5]"
                         : "text-[#334155] hover:bg-[#F8FAFC]"
@@ -211,7 +184,7 @@ function LocatorDropdown({
                     <span>{item}</span>
 
                     {selected && (
-                      <span className="font-extrabold text-[#E87512]">
+                      <span className="text-[#E87512]">
                         ✓
                       </span>
                     )}
@@ -227,14 +200,16 @@ function LocatorDropdown({
 }
 
 export default function LocatorPage() {
-  const { recommendation } =
-    useJourney();
+  const {
+    profile,
+    recommendation,
+  } = useJourney();
 
-  const [partners, setPartners] =
-    useState<PartnerWithMeta[]>([]);
+  const [partners, setPartners] = useState<
+    PartnerWithMeta[]
+  >([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
   const [schemeFilter, setSchemeFilter] =
     useState<SchemeId | "all">(
@@ -244,31 +219,40 @@ export default function LocatorPage() {
   const [typeFilter, setTypeFilter] =
     useState<PartnerType | "all">("all");
 
+  // The complete partner network must be visible
+  // initially, so the default district is All.
   const [districtFilter, setDistrictFilter] =
-    useState<string>("All");
+    useState("All");
 
-  const [includeHighNpa, setIncludeHighNpa] =
-    useState(false);
+  const [
+    includeHighNpa,
+    setIncludeHighNpa,
+  ] = useState(false);
 
-  const [selectedId, setSelectedId] =
-    useState<string | null>(null);
+  const [
+    selectedId,
+    setSelectedId,
+  ] = useState<string | null>(null);
 
-  const [geoLocating, setGeoLocating] =
-    useState(false);
+  const [
+    geoLocating,
+    setGeoLocating,
+  ] = useState(false);
 
-  const [userLocation, setUserLocation] =
-    useState<{
-      lat: number;
-      lng: number;
-    } | null>(null);
+  const [
+    userLocation,
+    setUserLocation,
+  ] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const cardRefs = useRef<
-    Record<string, HTMLElement | null>
+    Record<string, HTMLDivElement | null>
   >({});
 
   const allDistricts = useMemo(() => {
-    const locations =
-      Object.values(LOCATIONS).flat();
+    const locations = Object.values(LOCATIONS).flat();
 
     return Array.from(
       new Set(locations)
@@ -326,8 +310,7 @@ export default function LocatorPage() {
       setLoading(true);
 
       try {
-        const query =
-          new URLSearchParams();
+        const query = new URLSearchParams();
 
         if (schemeFilter !== "all") {
           query.set(
@@ -371,7 +354,6 @@ export default function LocatorPage() {
             String(userLocation.lng)
           );
         } else if (
-          districtFilter &&
           districtFilter !== "All" &&
           DISTRICT_COORDS[districtFilter]
         ) {
@@ -450,7 +432,9 @@ export default function LocatorPage() {
             return current;
           }
 
-          return null;
+          return list.length > 0
+            ? list[0].id
+            : null;
         });
       } catch {
         if (!cancelled) {
@@ -510,7 +494,10 @@ export default function LocatorPage() {
     }
 
     return partners.slice(0, 30);
-  }, [partners, selectedId]);
+  }, [
+    partners,
+    selectedId,
+  ]);
 
   const mapCenter = useMemo(() => {
     if (selectedId) {
@@ -536,7 +523,6 @@ export default function LocatorPage() {
     }
 
     if (
-      districtFilter &&
       districtFilter !== "All" &&
       DISTRICT_COORDS[districtFilter]
     ) {
@@ -551,10 +537,7 @@ export default function LocatorPage() {
       ] as [number, number];
     }
 
-    return [
-      20.5937,
-      78.9629,
-    ] as [number, number];
+    return INDIA_CENTER;
   }, [
     selectedId,
     userLocation,
@@ -567,246 +550,352 @@ export default function LocatorPage() {
   ) => {
     setSelectedId(id);
 
-    if (!id) {
-      return;
-    }
-
-    window.setTimeout(() => {
+    if (
+      id &&
+      cardRefs.current[id]
+    ) {
       cardRefs.current[
         id
       ]?.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
       });
-    }, 50);
+    }
   };
 
-  return (
-    <main className="min-h-screen bg-white text-[#111827]">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-        <header className="border-b border-[#D7DEE8] pb-6">
-          <div className="border-l-4 border-[#0F5FC5] pl-4 sm:pl-5">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#0F5FC5]">
-              Partner Locator
+  const getHealthLabel = (
+    status: PartnerWithMeta["healthStatus"]
+  ) => {
+    if (status === "green") {
+      return "Healthy";
+    }
+
+    if (status === "yellow") {
+      return "Watchlist";
+    }
+
+    return "High NPA";
+  };
+
+  const selectedPartner = useMemo(
+    () =>
+      selectedId
+        ? partners.find(
+            (partner) =>
+              partner.id === selectedId
+          ) ?? null
+        : null,
+    [partners, selectedId]
+  );
+    return (
+    <div className="min-h-screen bg-white px-4 py-8 text-[#111827] sm:px-6 sm:py-12">
+      <div className="mx-auto max-w-7xl">
+        {/* =========================================================
+            PAGE HEADER
+            ========================================================= */}
+        <header className="border-b border-[#D7DEE8] pb-7">
+          <div className="border-l-4 border-[#0F5FC5] pl-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#0F5FC5]">
+              NIRVAAN
             </p>
 
-            <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#111827] sm:text-3xl lg:text-4xl">
-              Find a nearby partner
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#111827] sm:text-4xl">
+              Geo-Spatial Partner Locator &amp; Router
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-[#64748B]">
-              Locate partner offices, review available
-              information and get directions for your
-              application.
+            <p className="mt-3 max-w-3xl text-sm font-medium leading-6 text-[#64748B]">
+              Find partner locations, compare available offices,
+              select a partner and get directions for your
+              financing application.
             </p>
           </div>
         </header>
 
-        <section className="relative z-50 mt-6 border border-[#CBD5E1] bg-[#F8FAFC] p-4 sm:p-5">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#64748B]">
-                Search filters
+        {/* =========================================================
+            JOURNEY CONTEXT
+            ========================================================= */}
+        <section className="mt-6 border border-[#CBD5E1] bg-[#F8FAFC]">
+          <div className="grid grid-cols-1 sm:grid-cols-3">
+            <div className="border-b border-[#D7DEE8] p-4 sm:border-b-0 sm:border-r">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#64748B]">
+                Selected scheme
               </p>
 
-              <p className="mt-1 text-xs font-medium text-[#64748B]">
-                Refine the partner network by scheme,
-                type or district.
+              <p className="mt-1 text-sm font-extrabold text-[#111827]">
+                {recommendation
+                  ? SCHEME_LABELS[
+                      recommendation.schemeId
+                    ]
+                  : "All schemes"}
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <LocatorDropdown
-                label="Scheme"
-                value={
-                  schemeFilter === "all"
-                    ? "All Schemes"
-                    : SCHEME_LABELS[
-                        schemeFilter
-                      ]
-                }
-                items={schemeOptions}
-                onSelect={(value) => {
-                  if (
-                    value === "Micro Finance"
-                  ) {
-                    setSchemeFilter(
-                      "micro-finance"
-                    );
-                  } else if (
-                    value === "Term Loan"
-                  ) {
-                    setSchemeFilter(
-                      "term-loan"
-                    );
-                  } else if (
-                    value ===
-                    "Education Loan"
-                  ) {
-                    setSchemeFilter(
-                      "education-loan"
-                    );
-                  } else {
-                    setSchemeFilter("all");
-                  }
-                }}
-              />
+            <div className="border-b border-[#D7DEE8] p-4 sm:border-b-0 sm:border-r">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#64748B]">
+                Applicant route
+              </p>
 
-              <LocatorDropdown
-                label="Type"
-                value={
-                  typeFilter === "all"
-                    ? "All Types"
-                    : TYPE_LABELS[
-                        typeFilter
-                      ]
-                }
-                items={typeOptions}
-                onSelect={(value) => {
-                  if (
-                    value === "PSU Bank"
-                  ) {
-                    setTypeFilter(
-                      "public-sector-bank"
-                    );
-                  } else if (
-                    value ===
-                    "Private Bank"
-                  ) {
-                    setTypeFilter(
-                      "private-bank"
-                    );
-                  } else if (
-                    value === "NBFC"
-                  ) {
-                    setTypeFilter(
-                      "nbfc"
-                    );
-                  } else if (
-                    value ===
-                    "Govt. Agency"
-                  ) {
-                    setTypeFilter(
-                      "regional-agency"
-                    );
-                  } else if (
-                    value ===
-                    "Co-op Bank"
-                  ) {
-                    setTypeFilter(
-                      "cooperative"
-                    );
-                  } else {
-                    setTypeFilter("all");
-                  }
-                }}
-              />
-
-              <LocatorDropdown
-                label="District"
-                value={
-                  districtFilter || "All"
-                }
-                items={[
-                  "All",
-                  ...allDistricts,
-                ]}
-                onSelect={(value) => {
-                  setDistrictFilter(
-                    value === "All"
-                      ? "All"
-                      : value
-                  );
-                  setSelectedId(null);
-                }}
-              />
-
-              <button
-                type="button"
-                onClick={requestLocation}
-                disabled={geoLocating}
-                className="flex min-h-10 items-center gap-2 border border-[#E87512] bg-[#E87512] px-3.5 py-2 text-xs font-extrabold text-white transition-colors hover:bg-[#C95F08] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <span>
-                  {geoLocating
-                    ? "..."
-                    : "◎"}
-                </span>
-
-                <span>
-                  {geoLocating
-                    ? "Locating..."
-                    : "Use My Location"}
-                </span>
-              </button>
-
-              <label className="flex min-h-10 cursor-pointer items-center gap-2 border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-bold text-[#334155]">
-                <input
-                  type="checkbox"
-                  checked={includeHighNpa}
-                  onChange={(event) =>
-                    setIncludeHighNpa(
-                      event.target.checked
-                    )
-                  }
-                  className="h-4 w-4 cursor-pointer accent-[#0F5FC5]"
-                />
-
-                <span>
-                  Show high NPA
-                </span>
-              </label>
+              <p className="mt-1 text-sm font-extrabold text-[#111827]">
+                {profile?.earningStatus === "earning"
+                  ? "Earning"
+                  : profile?.earningStatus === "non-earning"
+                    ? "Non-Earning"
+                    : "Application journey"}
+              </p>
             </div>
-          </div>
-        </section>
-                <section className="mt-5 grid grid-cols-1 border border-[#D7DEE8] sm:grid-cols-2">
-          <div className="border-b border-[#D7DEE8] border-l-4 border-l-[#0F5FC5] bg-white px-4 py-4 sm:border-b-0">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#64748B]">
-              Nearby branches
-            </p>
 
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-[#111827]">
-                {displayList.length}
-              </span>
+            <div className="p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#64748B]">
+                Network coverage
+              </p>
 
-              <span className="text-xs font-medium text-[#64748B]">
-                within 500 km
-              </span>
-            </div>
-          </div>
-
-          <div className="border-l-4 border-l-[#E87512] bg-[#FFF7ED] px-4 py-4">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#9A5B20]">
-              Partner network
-            </p>
-
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-[#111827]">
-                {partners.length}
-              </span>
-
-              <span className="text-xs font-medium text-[#64748B]">
-                offices on the map
-              </span>
+              <p className="mt-1 text-sm font-extrabold text-[#111827]">
+                India
+              </p>
             </div>
           </div>
         </section>
 
-        <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <div className="min-w-0">
-            <div className="mb-3 flex items-center justify-between border-b border-[#D7DEE8] pb-3">
+        {/* =========================================================
+            FILTER PANEL
+            ========================================================= */}
+        <section className="relative z-40 mt-6 border border-[#D7DEE8] bg-white">
+          <div className="border-b border-[#D7DEE8] bg-[#F8FAFC] px-5 py-4">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-base font-extrabold text-[#111827]">
-                  Partner offices
-                </h2>
+                <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#111827]">
+                  Partner search
+                </p>
 
-                <p className="mt-0.5 text-[11px] font-medium text-[#64748B]">
-                  Select an office to focus the map.
+                <p className="mt-1 text-xs font-medium text-[#64748B]">
+                  Filter the partner network by scheme,
+                  type or district.
                 </p>
               </div>
 
-              <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#64748B]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
+                All districts shown by default
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 sm:p-5">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div className="flex flex-wrap gap-2">
+                <LocatorDropdown
+                  label="Scheme"
+                  value={
+                    schemeFilter === "all"
+                      ? "All Schemes"
+                      : SCHEME_LABELS[
+                          schemeFilter
+                        ]
+                  }
+                  items={schemeOptions}
+                  onSelect={(value) => {
+                    if (
+                      value ===
+                      "Micro Finance"
+                    ) {
+                      setSchemeFilter(
+                        "micro-finance"
+                      );
+                    } else if (
+                      value === "Term Loan"
+                    ) {
+                      setSchemeFilter(
+                        "term-loan"
+                      );
+                    } else if (
+                      value ===
+                      "Education Loan"
+                    ) {
+                      setSchemeFilter(
+                        "education-loan"
+                      );
+                    } else {
+                      setSchemeFilter(
+                        "all"
+                      );
+                    }
+                  }}
+                />
+
+                <LocatorDropdown
+                  label="Type"
+                  value={
+                    typeFilter === "all"
+                      ? "All Types"
+                      : TYPE_LABELS[
+                          typeFilter
+                        ]
+                  }
+                  items={typeOptions}
+                  onSelect={(value) => {
+                    if (
+                      value === "PSU Bank"
+                    ) {
+                      setTypeFilter(
+                        "public-sector-bank"
+                      );
+                    } else if (
+                      value ===
+                      "Private Bank"
+                    ) {
+                      setTypeFilter(
+                        "private-bank"
+                      );
+                    } else if (
+                      value === "NBFC"
+                    ) {
+                      setTypeFilter(
+                        "nbfc"
+                      );
+                    } else if (
+                      value ===
+                      "Govt. Agency"
+                    ) {
+                      setTypeFilter(
+                        "regional-agency"
+                      );
+                    } else if (
+                      value === "Co-op Bank"
+                    ) {
+                      setTypeFilter(
+                        "cooperative"
+                      );
+                    } else {
+                      setTypeFilter(
+                        "all"
+                      );
+                    }
+                  }}
+                />
+
+                <LocatorDropdown
+                  label="District"
+                  value={
+                    districtFilter ||
+                    "All"
+                  }
+                  items={[
+                    "All",
+                    ...allDistricts,
+                  ]}
+                  onSelect={(value) => {
+                    setDistrictFilter(
+                      value === "All"
+                        ? "All"
+                        : value
+                    );
+
+                    setSelectedId(null);
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={requestLocation}
+                  disabled={geoLocating}
+                  className="border border-[#E87512] bg-[#E87512] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#C95F08] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {geoLocating
+                    ? "Locating..."
+                    : "Use My Location"}
+                </button>
+
+                <label className="flex cursor-pointer items-center gap-2 border border-[#CBD5E1] bg-white px-3 py-2.5 text-xs font-bold text-[#334155]">
+                  <input
+                    type="checkbox"
+                    checked={includeHighNpa}
+                    onChange={(event) =>
+                      setIncludeHighNpa(
+                        event.target.checked
+                      )
+                    }
+                    className="h-4 w-4 cursor-pointer accent-[#0F5FC5]"
+                  />
+
+                  <span>
+                    Include high-NPA partners
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================
+            RESULTS SUMMARY
+            ========================================================= */}
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="border-l-4 border-[#0F5FC5] bg-[#F8FAFC] px-4 py-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#64748B]">
+              Matching partners
+            </p>
+
+            <p className="mt-1 text-2xl font-extrabold text-[#111827]">
+              {partners.length}
+            </p>
+
+            <p className="mt-1 text-xs font-medium text-[#64748B]">
+              Locations on the current map
+            </p>
+          </div>
+
+          <div className="border-l-4 border-[#E87512] bg-[#FFF7ED] px-4 py-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#9A5B20]">
+              Nearby partners
+            </p>
+
+            <p className="mt-1 text-2xl font-extrabold text-[#111827]">
+              {displayList.length}
+            </p>
+
+            <p className="mt-1 text-xs font-medium text-[#64748B]">
+              Within 500 km when distance is available
+            </p>
+          </div>
+
+          <div className="border-l-4 border-[#334155] bg-[#F8FAFC] px-4 py-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#64748B]">
+              Selected partner
+            </p>
+
+            <p className="mt-1 truncate text-base font-extrabold text-[#111827]">
+              {selectedPartner
+                ? selectedPartner.name
+                : "None selected"}
+            </p>
+
+            <p className="mt-1 text-xs font-medium text-[#64748B]">
+              Select a location to view details
+            </p>
+          </div>
+        </div>
+
+        {/* =========================================================
+            MAIN CONTENT
+            ========================================================= */}
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.2fr)]">
+          {/* =======================================================
+              PARTNER LIST
+              ======================================================= */}
+          <section className="min-w-0">
+            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-base font-extrabold text-[#111827]">
+                  Partner Locations
+                </h2>
+
+                <p className="mt-1 text-xs font-medium text-[#64748B]">
+                  Select a partner to focus the map.
+                </p>
+              </div>
+
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
                 Nearest first
               </span>
             </div>
@@ -818,23 +907,27 @@ export default function LocatorPage() {
                     <div className="mx-auto mb-4 h-8 w-8 animate-spin border-4 border-[#D7DEE8] border-t-[#0F5FC5]" />
 
                     <p className="text-sm font-bold text-[#0F5FC5]">
-                      Finding partner branches...
+                      Loading partner locations...
+                    </p>
+
+                    <p className="mt-1 text-xs font-medium text-[#64748B]">
+                      Preparing the network map
                     </p>
                   </div>
                 </div>
               ) : displayList.length === 0 ? (
                 <div className="border border-[#D7DEE8] bg-[#F8FAFC] p-8 text-center">
-                  <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center border border-[#CBD5E1] bg-white text-[#0F5FC5]">
-                    ?
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center border border-[#CBD5E1] bg-white text-lg text-[#0F5FC5]">
+                    !
                   </div>
 
-                  <p className="text-base font-extrabold text-[#111827]">
-                    No matching partner branches found.
+                  <p className="mt-4 text-base font-extrabold text-[#111827]">
+                    No matching partner locations
                   </p>
 
-                  <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
-                    Try changing the district, scheme
-                    or partner type filter.
+                  <p className="mx-auto mt-2 max-w-sm text-xs font-medium leading-5 text-[#64748B]">
+                    Try changing the district, scheme,
+                    partner type or high-NPA filter.
                   </p>
                 </div>
               ) : (
@@ -866,10 +959,15 @@ export default function LocatorPage() {
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              {index ===
-                                0 && (
+                              {index === 0 && (
                                 <span className="border border-[#0F5FC5] bg-[#EFF6FF] px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.08em] text-[#0F5FC5]">
                                   Nearest
+                                </span>
+                              )}
+
+                              {selected && (
+                                <span className="border border-[#E87512] bg-[#FFF7ED] px-2 py-1 text-[9px] font-extrabold uppercase tracking-[0.08em] text-[#C95F08]">
+                                  Selected
                                 </span>
                               )}
 
@@ -879,8 +977,8 @@ export default function LocatorPage() {
                             </div>
 
                             <p className="mt-2 text-xs font-medium text-[#64748B]">
-                              {partner.city}{" "}
-                              ·{" "}
+                              {partner.city}
+                              {" · "}
                               <span className="font-bold text-[#334155]">
                                 {
                                   partner.district
@@ -915,7 +1013,7 @@ export default function LocatorPage() {
                             : ""}
                         </p>
 
-                        <div className="mt-4 flex flex-col gap-3 border-t border-[#E5E7EB] pt-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="mt-4 border-t border-[#E5E7EB] pt-3">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="border border-[#CBD5E1] bg-[#F8FAFC] px-2.5 py-1 text-[10px] font-bold text-[#475569]">
                               {
@@ -930,15 +1028,17 @@ export default function LocatorPage() {
                               partner.distanceKm >=
                                 0 && (
                                 <span className="text-[11px] font-bold text-[#0F5FC5]">
-                                  {partner.distanceKm.toFixed(
-                                    1
-                                  )}{" "}
+                                  {
+                                    partner.distanceKm.toFixed(
+                                      1
+                                    )
+                                  }{" "}
                                   km away
                                 </span>
                               )}
                           </div>
 
-                          <div className="flex flex-wrap gap-2">
+                          <div className="mt-3 flex flex-wrap gap-2">
                             {partner.phone && (
                               <a
                                 href={`tel:${partner.phone}`}
@@ -947,9 +1047,9 @@ export default function LocatorPage() {
                                 ) =>
                                   event.stopPropagation()
                                 }
-                                className="border border-[#0F5FC5] bg-white px-3 py-1.5 text-[11px] font-bold text-[#0F5FC5] transition-colors hover:bg-[#EFF6FF]"
+                                className="border border-[#0F5FC5] bg-white px-3 py-2 text-[11px] font-bold text-[#0F5FC5] transition-colors hover:bg-[#EFF6FF]"
                               >
-                                Call
+                                Call Partner
                               </a>
                             )}
 
@@ -962,9 +1062,9 @@ export default function LocatorPage() {
                               ) =>
                                 event.stopPropagation()
                               }
-                              className="border border-[#E87512] bg-[#E87512] px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-[#C95F08]"
+                              className="border border-[#E87512] bg-[#E87512] px-3 py-2 text-[11px] font-bold text-white transition-colors hover:bg-[#C95F08]"
                             >
-                              Directions
+                              Get Directions
                             </a>
                           </div>
                         </div>
@@ -974,22 +1074,25 @@ export default function LocatorPage() {
                 )
               )}
             </div>
-          </div>
-
-          <div className="min-w-0">
-            <div className="mb-3 flex items-center justify-between border-b border-[#D7DEE8] pb-3">
+          </section>
+                    {/* =======================================================
+              MAP
+              ======================================================= */}
+          <section className="min-w-0">
+            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-base font-extrabold text-[#111827]">
-                  Partner network map
+                  Satellite Partner Map
                 </h2>
 
-                <p className="mt-0.5 text-[11px] font-medium text-[#64748B]">
-                  Satellite view · All returned offices
+                <p className="mt-1 text-xs font-medium text-[#64748B]">
+                  Partner locations across India are shown on
+                  the map.
                 </p>
               </div>
 
-              <span className="border border-[#CBD5E1] bg-[#F8FAFC] px-2 py-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#475569]">
-                India
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
+                Satellite view
               </span>
             </div>
 
@@ -997,48 +1100,351 @@ export default function LocatorPage() {
               <MapClient
                 partners={partners}
                 center={mapCenter}
-                zoom={selectedId ? 14 : 5}
+                zoom={
+                  selectedId
+                    ? 14
+                    : districtFilter !== "All"
+                      ? 9
+                      : 5
+                }
                 selectedId={selectedId}
-                userLocation={
-                  userLocation
-                }
-                onSelect={
-                  handleSelectPartner
-                }
+                userLocation={userLocation}
+                onSelect={handleSelectPartner}
               />
+            </div>
 
-              <div className="pointer-events-none absolute bottom-3 left-3 border border-white/70 bg-white/95 px-3 py-2 shadow-lg">
-                <p className="text-[9px] font-extrabold uppercase tracking-[0.1em] text-[#475569]">
-                  Network view
+            {/* Map information bar */}
+            <div className="grid grid-cols-1 border-x border-b border-[#CBD5E1] bg-white sm:grid-cols-3">
+              <div className="border-b border-[#E5E7EB] p-4 sm:border-b-0 sm:border-r">
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
+                  Map coverage
                 </p>
 
-                <p className="mt-0.5 text-[11px] font-bold text-[#111827]">
-                  {partners.length} partner
-                  {partners.length === 1
-                    ? ""
-                    : "s"} mapped
+                <p className="mt-1 text-sm font-extrabold text-[#111827]">
+                  India
                 </p>
               </div>
+
+              <div className="border-b border-[#E5E7EB] p-4 sm:border-b-0 sm:border-r">
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
+                  Locations
+                </p>
+
+                <p className="mt-1 text-sm font-extrabold text-[#111827]">
+                  {partners.length}
+                </p>
+              </div>
+
+              <div className="p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
+                  Current filter
+                </p>
+
+                <p className="mt-1 truncate text-sm font-extrabold text-[#111827]">
+                  {districtFilter === "All"
+                    ? "All districts"
+                    : districtFilter}
+                </p>
+              </div>
+            </div>
+
+            {/* Selected partner details */}
+            {selectedPartner && (
+              <section className="mt-4 border border-[#CBD5E1] bg-white">
+                <div className="border-b border-[#D7DEE8] bg-[#F8FAFC] px-5 py-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
+                        Selected partner
+                      </p>
+
+                      <h3 className="mt-1 text-lg font-extrabold text-[#111827]">
+                        {selectedPartner.name}
+                      </h3>
+                    </div>
+
+                    <span
+                      className={`self-start border px-2.5 py-1 text-[10px] font-extrabold uppercase ${HEALTH_STYLES[selectedPartner.healthStatus]}`}
+                    >
+                      {getHealthLabel(
+                        selectedPartner.healthStatus
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2">
+                  <div className="border-b border-[#E5E7EB] p-5 sm:border-r">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
+                      Location
+                    </p>
+
+                    <p className="mt-2 text-sm font-bold text-[#111827]">
+                      {selectedPartner.city},{" "}
+                      {selectedPartner.district},{" "}
+                      {selectedPartner.state}
+                    </p>
+
+                    <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+                      {selectedPartner.address}
+
+                      {selectedPartner.pincode
+                        ? ` - ${selectedPartner.pincode}`
+                        : ""}
+                    </p>
+                  </div>
+
+                  <div className="border-b border-[#E5E7EB] p-5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#64748B]">
+                      Partner type
+                    </p>
+
+                    <p className="mt-2 text-sm font-bold text-[#111827]">
+                      {
+                        TYPE_LABELS[
+                          selectedPartner.type
+                        ]
+                      }
+                    </p>
+
+                    {typeof selectedPartner.distanceKm ===
+                      "number" &&
+                      selectedPartner.distanceKm >=
+                        0 && (
+                        <p className="mt-2 text-xs font-bold text-[#0F5FC5]">
+                          {
+                            selectedPartner.distanceKm.toFixed(
+                              1
+                            )
+                          }{" "}
+                          km from current reference
+                        </p>
+                      )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 border-t border-[#E5E7EB] bg-white p-5">
+                  {selectedPartner.phone && (
+                    <a
+                      href={`tel:${selectedPartner.phone}`}
+                      className="border border-[#0F5FC5] bg-white px-4 py-2.5 text-xs font-bold text-[#0F5FC5] transition-colors hover:bg-[#EFF6FF]"
+                    >
+                      Call Partner
+                    </a>
+                  )}
+
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPartner.lat},${selectedPartner.lng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="border border-[#E87512] bg-[#E87512] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#C95F08]"
+                  >
+                    Get Directions
+                  </a>
+                </div>
+              </section>
+            )}
+          </section>
+        </div>
+
+        {/* =========================================================
+            ROUTING GUIDE
+            ========================================================= */}
+        <section className="mt-8 border border-[#CBD5E1] bg-white">
+          <div className="border-b border-[#CBD5E1] px-5 py-5 sm:px-6">
+            <div className="border-l-4 border-[#E87512] pl-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C95F08]">
+                Partner routing
+              </p>
+
+              <h2 className="mt-1 text-xl font-extrabold text-[#111827]">
+                How to use the locator
+              </h2>
+
+              <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#64748B]">
+                Use the network map to identify a suitable
+                location, review its details and continue
+                with directions.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3">
+            <div className="border-b border-[#D7DEE8] p-5 md:border-b-0 md:border-r">
+              <span className="text-[11px] font-extrabold text-[#0F5FC5]">
+                01
+              </span>
+
+              <h3 className="mt-3 text-sm font-extrabold text-[#111827]">
+                Filter the network
+              </h3>
+
+              <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+                Choose a scheme, partner type or district.
+                The default view starts with all districts.
+              </p>
+            </div>
+
+            <div className="border-b border-[#D7DEE8] p-5 md:border-b-0 md:border-r">
+              <span className="text-[11px] font-extrabold text-[#0F5FC5]">
+                02
+              </span>
+
+              <h3 className="mt-3 text-sm font-extrabold text-[#111827]">
+                Select a partner
+              </h3>
+
+              <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+                Select a location from the list or directly
+                from the satellite map to view its details.
+              </p>
+            </div>
+
+            <div className="p-5">
+              <span className="text-[11px] font-extrabold text-[#0F5FC5]">
+                03
+              </span>
+
+              <h3 className="mt-3 text-sm font-extrabold text-[#111827]">
+                Get directions
+              </h3>
+
+              <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+                Use the directions option to open a route to
+                the selected partner location.
+              </p>
             </div>
           </div>
         </section>
 
-        <nav className="mt-8 grid grid-cols-1 gap-3 border-t border-[#D7DEE8] pt-6 sm:grid-cols-2">
+        {/* =========================================================
+            APPLICATION CONTEXT
+            ========================================================= */}
+        <section className="mt-6 border border-[#CBD5E1] bg-[#F8FAFC]">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="p-5 sm:p-6">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#0F5FC5]">
+                NIRVAAN application journey
+              </p>
+
+              <h2 className="mt-2 text-lg font-extrabold text-[#111827]">
+                Prepare before visiting a partner
+              </h2>
+
+              <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#64748B]">
+                Review your recommended scheme, selected loan
+                amount and required documents before contacting
+                or visiting a partner location.
+              </p>
+            </div>
+
+            <div className="border-t border-[#D7DEE8] p-5 lg:border-l lg:border-t-0 sm:p-6">
+              <Link
+                href="/checklist"
+                className="inline-flex w-full items-center justify-center border border-[#0F5FC5] bg-[#0F5FC5] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#0B4FA7] sm:w-auto"
+              >
+                Review Document Checklist →
+              </Link>
+            </div>
+          </div>
+        </section>
+                {/* =========================================================
+            IMPORTANT INFORMATION
+            ========================================================= */}
+        <section className="mt-6 border border-[#CBD5E1] bg-white">
+          <div className="border-b border-[#D7DEE8] px-5 py-4 sm:px-6">
+            <p className="text-xs font-extrabold text-[#111827]">
+              Important information
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="border-b border-[#E5E7EB] p-5 md:border-b-0 md:border-r sm:p-6">
+              <h3 className="text-sm font-extrabold text-[#111827]">
+                About partner locations
+              </h3>
+
+              <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+                Partner information displayed by NIRVAAN is
+                intended to help applicants identify and
+                navigate to relevant financing locations.
+                Availability of a particular scheme or
+                service may vary by partner.
+              </p>
+            </div>
+
+            <div className="p-5 sm:p-6">
+              <h3 className="text-sm font-extrabold text-[#111827]">
+                Before you visit
+              </h3>
+
+              <p className="mt-2 text-xs font-medium leading-5 text-[#64748B]">
+                Carry the documents identified for your
+                application and confirm the partner's current
+                requirements before making a visit. NIRVAAN
+                does not guarantee approval, sanction or
+                disbursement of any loan.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================
+            INDEPENDENT PLATFORM NOTICE
+            ========================================================= */}
+        <section className="mt-6 border border-[#CBD5E1] bg-[#F8FAFC]">
+          <div className="border-l-4 border-[#0F5FC5] px-5 py-5 sm:px-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
+              NIRVAAN
+            </p>
+
+            <p className="mt-2 text-xs font-medium leading-5 text-[#475569]">
+              NIRVAAN is an independent platform for scheme
+              discovery, financing guidance and application
+              assistance. It is not a government authority and
+              does not represent or guarantee any government
+              department, bank, financial institution or partner.
+            </p>
+          </div>
+        </section>
+
+        {/* =========================================================
+            BOTTOM NAVIGATION
+            ========================================================= */}
+        <div className="mt-8 grid grid-cols-1 gap-3 border-t border-[#D7DEE8] pt-6 sm:grid-cols-3">
           <Link
-            href="/checklist"
+            href="/calculator"
             className="border border-[#CBD5E1] bg-white px-5 py-3 text-center text-sm font-bold text-[#334155] transition-colors hover:bg-[#F8FAFC]"
           >
-            ← Document Checklist
+            ← Financial Calculator
           </Link>
 
           <Link
-            href="/calculator"
+            href="/recommendation"
+            className="border border-[#CBD5E1] bg-white px-5 py-3 text-center text-sm font-bold text-[#334155] transition-colors hover:bg-[#F8FAFC]"
+          >
+            View Recommendation
+          </Link>
+
+          <Link
+            href="/wizard"
             className="border border-[#0F5FC5] bg-[#0F5FC5] px-5 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-[#0B4FA7]"
           >
-            Loan Calculator →
+            Back to Application →
           </Link>
-        </nav>
+        </div>
+
+        {/* =========================================================
+            FOOTNOTE
+            ========================================================= */}
+        <div className="mt-6 border-t border-[#E5E7EB] pt-5">
+          <p className="text-center text-[10px] font-medium leading-5 text-[#94A3B8]">
+            Partner locations, availability and displayed
+            information may change. Verify details with the
+            relevant partner before proceeding.
+          </p>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
