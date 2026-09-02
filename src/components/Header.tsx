@@ -2,173 +2,159 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const NAV_ITEMS = [
+const LINKS = [
   {
+    href: "/",
+    label: "Home",
+  },
+  {
+    href: "/wizard",
     label: "How It Works",
-    href: "/#how-it-works",
   },
   {
-    label: "Scheme Recommender",
     href: "/recommendation",
+    label: "Schemes",
   },
   {
-    label: "Financial Calculator",
-    href: "/calculator",
-  },
-  {
-    label: "Partner Locator",
     href: "/locator",
+    label: "Partners",
+  },
+  {
+    href: "/checklist",
+    label: "Resources",
   },
 ];
 
 function NirvaanLogo() {
   return (
-    <Link
-      href="/"
-      aria-label="NIRVAAN home"
-      className="group inline-flex items-center"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 460 70"
-        width="184"
-        height="28"
-        role="img"
-        aria-label="NIRVAAN"
-        className="block h-8 w-auto sm:h-9"
-      >
-        <text
-          x="0"
-          y="44"
-          fontFamily="system-ui, -apple-system, Inter, Segoe UI, Roboto, sans-serif"
-          fontSize="44"
-          fontWeight="700"
-          letterSpacing="1.5px"
-          fill="#002244"
-        >
-          NIRVAAN
-        </text>
+    <span className="relative inline-flex items-center">
+      <span className="nirvaan-wordmark text-[27px] leading-none text-[#102A43] sm:text-[30px]">
+        NIRVAAN
+      </span>
 
-        <circle
-          cx="232"
-          cy="18"
-          r="4.5"
-          fill="#0077CC"
-          style={{ borderRadius: "50%" }}
-        />
-      </svg>
-    </Link>
+      <span className="absolute -right-2 -top-1 h-2.5 w-2.5 bg-[#F47B20]" />
+    </span>
   );
 }
 
 export default function Header() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
 
-  const isActive = (href: string) => {
-    if (href.includes("#")) {
-      return false;
-    }
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
-    return (
-    <header className="sticky top-0 z-50 border-b border-[#D9E0E7] bg-white">
-      <div className="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
-        <NirvaanLogo />
-
-        {/* Desktop Navigation */}
-        <nav
-          aria-label="Primary navigation"
-          className="hidden items-stretch md:flex"
+  return (
+    <header className="sticky top-0 z-50 border-b border-[#E1E8EF] bg-white print:hidden">
+      <div className="mx-auto flex min-h-[76px] max-w-7xl items-center justify-between gap-6 px-5 sm:px-8 lg:px-10">
+        <Link
+          href="/"
+          className="flex flex-none items-center"
+          aria-label="NIRVAAN Home"
         >
-          {NAV_ITEMS.map((item) => {
-            const active = isActive(item.href);
+          <NirvaanLogo />
+        </Link>
+
+        <nav className="hidden items-center gap-8 lg:flex">
+          {LINKS.map((link) => {
+            const active =
+              link.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(
+                    link.href
+                  );
 
             return (
               <Link
-                key={item.href}
-                href={item.href}
-                className={`relative inline-flex min-h-[72px] items-center border-l border-[#E5EAF0] px-5 text-sm font-semibold transition-colors ${
+                key={link.href}
+                href={link.href}
+                className={`relative py-7 text-[13px] font-semibold transition ${
                   active
-                    ? "text-[#0077CC]"
-                    : "text-[#374151] hover:bg-[#F7F9FB] hover:text-[#0077CC]"
+                    ? "text-[#102A43]"
+                    : "text-[#4E6176] hover:text-[#1769D2]"
                 }`}
               >
-                {item.label}
+                {link.label}
 
-                {active && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#0077CC]"
-                  />
-                )}
+                {active ? (
+                  <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1769D2]" />
+                ) : null}
               </Link>
             );
           })}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <a
+            href="#help"
+            className="hidden min-h-11 items-center gap-2 border border-[#1769D2] bg-white px-4 text-xs font-extrabold text-[#1769D2] transition hover:bg-[#EFF6FF] sm:inline-flex"
+          >
+            <span className="text-sm">♧</span>
+            Application Assistance
+          </a>
 
           <Link
             href="/wizard"
-            className="ml-4 inline-flex min-h-[42px] self-center items-center justify-center border border-[#0077CC] bg-[#0077CC] px-5 text-sm font-bold text-white transition-colors hover:border-[#005FA3] hover:bg-[#005FA3]"
+            className="hidden min-h-11 items-center justify-center border border-[#0758C7] bg-[#0758C7] px-5 text-xs font-extrabold text-white hover:bg-[#064CA9] md:inline-flex lg:hidden"
           >
-            Start Application
+            Get Started
           </Link>
-        </nav>
 
-        {/* Mobile Menu Button */}
-        <button
-          type="button"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen((open) => !open)}
-          className="inline-flex h-11 w-11 items-center justify-center border border-[#B9C4D1] bg-white text-[#002244] transition-colors hover:bg-[#F7F9FB] md:hidden"
-        >
-          {mobileOpen ? (
-            <X className="h-5 w-5" strokeWidth={2} />
-          ) : (
-            <Menu className="h-5 w-5" strokeWidth={2} />
-          )}
-        </button>
-      </div>
-            {/* Mobile Navigation */}
-      {mobileOpen && (
-        <div className="border-t border-[#D9E0E7] bg-white md:hidden">
-          <nav
-            aria-label="Mobile navigation"
-            className="mx-auto max-w-7xl px-4 sm:px-6"
+          <button
+            type="button"
+            onClick={() =>
+              setMobileOpen(
+                (current) => !current
+              )
+            }
+            aria-label="Toggle navigation"
+            aria-expanded={mobileOpen}
+            className="flex h-11 w-11 items-center justify-center border border-[#C8D4E1] bg-white text-[#17324F] lg:hidden"
           >
-            {NAV_ITEMS.map((item) => {
-              const active = isActive(item.href);
+            {mobileOpen ? "×" : "☰"}
+          </button>
+        </div>
+      </div>
+
+      {mobileOpen ? (
+        <div className="border-t border-[#E1E8EF] bg-white lg:hidden">
+          <nav className="mx-auto max-w-7xl px-5 py-3 sm:px-8">
+            {LINKS.map((link) => {
+              const active =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(
+                      link.href
+                    );
 
               return (
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex min-h-[52px] items-center border-b border-[#E5EAF0] px-1 text-sm font-semibold ${
+                  key={link.href}
+                  href={link.href}
+                  className={`flex min-h-12 items-center border-b border-[#E7EDF3] px-2 text-sm font-semibold last:border-b-0 ${
                     active
-                      ? "text-[#0077CC]"
-                      : "text-[#374151] hover:text-[#0077CC]"
+                      ? "text-[#1769D2]"
+                      : "text-[#3F5368]"
                   }`}
                 >
-                  {item.label}
+                  {link.label}
                 </Link>
               );
             })}
 
-            <Link
-              href="/wizard"
-              onClick={() => setMobileOpen(false)}
-              className="my-4 flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-5 text-sm font-bold text-white transition-colors hover:bg-[#005FA3]"
+            <a
+              href="#help"
+              className="mt-3 flex min-h-12 items-center justify-center border border-[#1769D2] text-xs font-extrabold text-[#1769D2]"
             >
-              Start Application
-            </Link>
+              Application Assistance
+            </a>
           </nav>
         </div>
-      )}
+      ) : null}
     </header>
   );
 }
