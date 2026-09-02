@@ -935,10 +935,10 @@ export default function LocatorPage() {
                       <article
                         key={partner.id}
                         ref={(element) => {
-                          cardRefs.current[
-                            partner.id
-                          ] = element;
-                        }}
+  cardRefs.current[
+    partner.id
+  ] = element as HTMLDivElement | null;
+}}
                         onClick={() =>
                           handleSelectPartner(
                             partner.id
