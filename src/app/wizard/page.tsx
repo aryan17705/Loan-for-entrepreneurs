@@ -1,1324 +1,1577 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ArrowRight,
-  Check,
-  ShieldCheck,
-} from "lucide-react";
-import { useJourney } from "@/context/JourneyContext";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-const STEPS = [
+import { useJourney } from "@/context/JourneyContext";
+import {
+  AGRICULTURE_ACTIVITIES,
+  BUSINESS_ACTIVITIES,
+  LOCATIONS,
+} from "@/lib/locations";
+import type { Profile } from "@/lib/types";
+import { formatINR } from "@/lib/format";
+
+type RouteType = "earning" | "non-earning" | null;
+
+type Data = {
+  state: string;
+  district: string;
+  category: Profile["category"];
+  age: number;
+  purpose: Profile["purpose"];
+  activityType: string;
+  projectCost: number;
+  annualIncome: number;
+  educationLevel: Profile["educationLevel"];
+  courseLocation: "india" | "abroad";
+};
+
+const INITIAL: Data = {
+  state: "",
+  district: "",
+  category: "sc",
+  age: 30,
+  purpose: "business",
+  activityType: BUSINESS_ACTIVITIES[0],
+  projectCost: 300000,
+  annualIncome: 250000,
+  educationLevel: "10th-12th",
+  courseLocation: "india",
+};
+
+const EDUCATION_ACTIVITIES = [
+  "B.Tech / Engineering Degree",
+  "MBBS / Medical / Dental",
+  "MBA / Business Management",
+  "Diploma / Polytechnic Course",
+  "Post-Graduate / Masters",
+  "Law / Legal Studies",
+  "Aviation / Commercial Pilot",
+  "Vocational / Skill Training",
+];
+
+const EDUCATION_LEVELS: {
+  id: Profile["educationLevel"];
+  label: string;
+}[] = [
+  {
+    id: "below-10th",
+    label: "Below 10th",
+  },
+  {
+    id: "10th-12th",
+    label: "10th – 12th",
+  },
+  {
+    id: "graduate",
+    label: "Graduate",
+  },
+  {
+    id: "post-graduate",
+    label: "Post-graduate",
+  },
+];
+
+const JOURNEY_STEPS = [
   {
     number: "01",
     title: "Verification",
-    description: "Verify your identity before continuing.",
+    short: "Identity",
   },
   {
     number: "02",
     title: "Earning Status",
-    description: "Tell us about your current earning situation.",
+    short: "Income",
   },
   {
     number: "03",
     title: "Smart Scheme Recommender",
-    description:
-      "Find a suitable scheme and maximum loan amount.",
+    short: "Matching",
   },
   {
     number: "04",
     title: "Financial Calculator",
-    description: "Choose your required loan amount.",
+    short: "Financing",
   },
   {
     number: "05",
-    title: "Partner Locator & Router",
-    description:
-      "Find a suitable partner and plan your route.",
+    title: "Geo-Spatial Partner Locator & Router",
+    short: "Partners",
   },
 ];
 
-type RouteType = "earning" | "non-earning" | null;
+function ShieldIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-9 w-9"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M24 5 39 11v11c0 10-6 17-15 21C15 39 9 32 9 22V11l15-6Z" />
+      <path d="m16 24 5 5 11-12" />
+    </svg>
+  );
+}
 
+function AadhaarIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-8 w-8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <rect x="8" y="6" width="32" height="36" />
+      <circle cx="24" cy="18" r="6" />
+      <path d="M14 35c1-6 5-9 10-9s9 3 10 9" />
+    </svg>
+  );
+}
+
+function DigiLockerIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-8 w-8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M8 16h32v24H8z" />
+      <path d="M12 16V10h24v6" />
+      <path d="M17 23h14M17 29h10M17 35h7" />
+      <path d="M34 26h6" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-9 w-9"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <circle cx="24" cy="14" r="6" />
+      <path d="M12 39c0-8 5-13 12-13s12 5 12 13" />
+    </svg>
+  );
+}
+
+function BriefcaseIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-8 w-8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <rect x="7" y="14" width="34" height="25" />
+      <path d="M17 14V9h14v5" />
+      <path d="M7 23h34M20 23v4h8v-4" />
+    </svg>
+  );
+}
+
+function GraduationIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-8 w-8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="m5 18 19-9 19 9-19 9-19-9Z" />
+      <path d="M12 22v10c7 6 17 6 24 0V22" />
+      <path d="M43 19v11" />
+    </svg>
+  );
+}
+
+function ProjectIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-8 w-8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M8 40V15l16-8 16 8v25" />
+      <path d="M16 40V25h16v15" />
+      <path d="M20 17h8" />
+      <path d="M12 40h24" />
+    </svg>
+  );
+}
+
+function VideoIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-8 w-8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <rect x="5" y="11" width="29" height="26" />
+      <path d="m34 20 9-6v20l-9-6" />
+      <path d="m17 20 8 4-8 4v-8Z" />
+    </svg>
+  );
+}
+
+function FileIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-7 w-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M10 5h20l8 8v30H10V5Z" />
+      <path d="M30 5v9h8" />
+      <path d="M16 23h16M16 29h16M16 35h10" />
+    </svg>
+  );
+}
+
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#41566D]">
+        {label}
+      </span>
+
+      {hint ? (
+        <span className="mb-2 block text-xs font-medium leading-5 text-[#7A8A9B]">
+          {hint}
+        </span>
+      ) : null}
+
+      {children}
+    </label>
+  );
+}
+
+function SelectBox({
+  label,
+  value,
+  placeholder,
+  items,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  items: string[];
+  disabled?: boolean;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  const filteredItems = useMemo(() => {
+    const sorted = [...items].sort((a, b) =>
+      a.localeCompare(b)
+    );
+
+    if (!search.trim()) return sorted;
+
+    const query = search.toLowerCase();
+
+    return sorted.filter((item) =>
+      item.toLowerCase().includes(query)
+    );
+  }, [items, search]);
+
+  useEffect(() => {
+    const handler = (event: MouseEvent) => {
+      if (
+        ref.current &&
+        !ref.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handler);
+
+            return () =>
+      document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+    >
+      <span className="mb-2 block text-xs font-extrabold uppercase tracking-[0.08em] text-[#41566D]">
+        {label}
+      </span>
+
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((current) => !current)}
+        className="flex min-h-12 w-full items-center justify-between border border-[#C7D4E1] bg-white px-4 text-left text-sm font-semibold text-[#17324F] transition hover:border-[#1769D2] disabled:cursor-not-allowed disabled:bg-[#F1F5F8] disabled:text-[#9AA7B4]"
+      >
+        <span className={value ? "" : "text-[#9AA7B4]"}>
+          {value || placeholder}
+        </span>
+
+        <span className="ml-3 text-xs text-[#1769D2]">
+          {open ? "▲" : "▼"}
+        </span>
+      </button>
+
+      {open && !disabled ? (
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 border border-[#C7D4E1] bg-white p-2 shadow-[0_16px_40px_rgba(16,42,67,0.15)]">
+          <input
+            autoFocus
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
+            placeholder="Search..."
+            className="mb-2 h-10 w-full border border-[#D5DFE8] bg-[#F8FAFC] px-3 text-xs font-medium text-[#17324F] outline-none focus:border-[#1769D2]"
+          />
+
+          <div className="max-h-56 overflow-y-auto">
+            {filteredItems.length === 0 ? (
+              <p className="px-3 py-5 text-center text-xs font-medium text-[#7A8A9B]">
+                No results found.
+              </p>
+            ) : (
+              filteredItems.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    onChange(item);
+                    setOpen(false);
+                    setSearch("");
+                  }}
+                  className={`block min-h-10 w-full border-b border-[#E5EBF1] px-3 py-2 text-left text-xs font-semibold last:border-0 ${
+                    item === value
+                      ? "bg-[#EFF6FF] text-[#1769D2]"
+                      : "text-[#3E536A] hover:bg-[#F7FAFD]"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function JourneyHeader({ current }: { current: number }) {
+  return (
+    <div className="border border-[#D5DFE8] bg-white">
+      <div className="hidden lg:grid lg:grid-cols-5">
+        {JOURNEY_STEPS.map((item, index) => {
+          const active = index === current;
+          const completed = index < current;
+
+          return (
+            <div
+              key={item.number}
+              className={`relative border-r border-[#E0E7EE] px-4 py-5 last:border-r-0 ${
+                active ? "bg-[#F2F7FD]" : ""
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`flex h-9 w-9 flex-none items-center justify-center border text-xs font-extrabold ${
+                    completed
+                      ? "border-[#1769D2] bg-[#1769D2] text-white"
+                      : active
+                      ? "border-[#1769D2] bg-white text-[#1769D2]"
+                      : "border-[#C7D4E1] bg-white text-[#8292A3]"
+                  }`}
+                >
+                  {completed ? "✓" : item.number}
+                </span>
+
+                <div>
+                  <p
+                    className={`text-xs font-extrabold leading-4 ${
+                      active
+                        ? "text-[#1769D2]"
+                        : "text-[#17324F]"
+                    }`}
+                  >
+                    {item.title}
+                  </p>
+
+                  <p className="mt-1 text-[10px] font-medium text-[#7B8B9B]">
+                    {item.short}
+                  </p>
+                </div>
+              </div>
+
+              {index < JOURNEY_STEPS.length - 1 ? (
+                <span className="absolute -right-2.5 top-8 z-10 hidden bg-white px-1 text-[#1769D2] lg:block">
+                  →
+                </span>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="lg:hidden">
+        <div className="flex items-center justify-between px-4 py-4">
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F47B20]">
+              Current stage
+            </p>
+
+            <p className="mt-1 text-sm font-extrabold text-[#17324F]">
+              {JOURNEY_STEPS[current].number} ·{" "}
+              {JOURNEY_STEPS[current].title}
+            </p>
+          </div>
+
+          <span className="text-xs font-extrabold text-[#1769D2]">
+            {current + 1} / 5
+          </span>
+        </div>
+
+        <div className="h-1 bg-[#E1E8EF]">
+          <div
+            className="h-full bg-[#1769D2] transition-all"
+            style={{
+              width: `${((current + 1) / 5) * 100}%`,
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 export default function WizardPage() {
   const router = useRouter();
-  const { profile, setProfile } = useJourney();
+  const { profile, setJourney } = useJourney();
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [route, setRoute] = useState<RouteType>(null);
-
-  const [annualIncome, setAnnualIncome] = useState(
-    profile?.annualIncome ? String(profile.annualIncome) : ""
+  const [step, setStep] = useState(0);
+  const [data, setData] = useState<Data>(() =>
+    profile
+      ? {
+          ...INITIAL,
+          ...profile,
+          courseLocation:
+            profile.courseLocation ?? "india",
+        }
+      : INITIAL
   );
-
-  const [incomeProofName, setIncomeProofName] =
-    useState("");
-
-  const [nonEarningPurpose, setNonEarningPurpose] =
-    useState<
-      "education" | "small-project" | null
-    >(null);
-
-  const [
-    videoAssessmentRequested,
-    setVideoAssessmentRequested,
-  ] = useState(false);
-
-  const [
-    verificationComplete,
-    setVerificationComplete,
-  ] = useState(false);
 
   const [verificationMethod, setVerificationMethod] =
     useState<"aadhaar" | "pan" | null>(null);
 
+  const [mobile, setMobile] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [verified, setVerified] = useState(false);
 
-  const [error, setError] = useState("");
+  const [routeType, setRouteType] =
+    useState<RouteType>(null);
 
-  const handleVerification = () => {
-    setError("");
+  const [incomeProof, setIncomeProof] =
+    useState<File | null>(null);
 
-    if (!verificationMethod) {
-      setError(
-        "Please select Aadhaar or PAN for identity verification."
-      );
-      return;
-    }
+  const [assessmentPurpose, setAssessmentPurpose] =
+    useState("");
 
-    if (!otpSent) {
-      setError(
-        "Please request the DigiLocker OTP before continuing."
-      );
-      return;
-    }
+  const [assessmentAmount, setAssessmentAmount] =
+    useState("50000");
 
-    setVerificationComplete(true);
-    setCurrentStep(2);
+  const [repaymentPlan, setRepaymentPlan] =
+    useState("");
+
+  const [guarantor, setGuarantor] = useState("");
+
+  const [videoRequested, setVideoRequested] =
+    useState(false);
+
+  const [teamVerified, setTeamVerified] =
+    useState(false);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const update = <K extends keyof Data>(
+    key: K,
+    value: Data[K]
+  ) => {
+    setData((current) => ({
+      ...current,
+      [key]: value,
+    }));
   };
 
-  const handleRouteContinue = () => {
-    setError("");
+  const stateList = Object.keys(LOCATIONS);
 
-    if (!route) {
-      setError("Please select your earning status.");
+  const districtList = data.state
+    ? LOCATIONS[data.state] ?? []
+    : [];
+
+  const selectState = (value: string) => {
+    update("state", value);
+
+    update(
+      "district",
+      LOCATIONS[value]?.[0] || ""
+    );
+  };
+
+  const onSelectRoute = (route: RouteType) => {
+    setRouteType(route);
+    setError(null);
+
+    if (route === "earning") {
+      update("purpose", "business");
+      update(
+        "activityType",
+        BUSINESS_ACTIVITIES[0]
+      );
+      update("projectCost", 300000);
+    }
+  };
+
+  const sendOtp = () => {
+    setError(null);
+
+    if (!mobile.trim()) {
+      setError(
+        "Please enter the mobile number used for DigiLocker verification."
+      );
       return;
     }
 
-    if (route === "earning") {
-      const income = Number(annualIncome);
+    if (mobile.replace(/\D/g, "").length !== 10) {
+      setError(
+        "Please enter a valid 10-digit mobile number."
+      );
+      return;
+    }
 
-      if (
-        !annualIncome ||
-        !Number.isFinite(income) ||
-        income <= 0
-      ) {
-        setError("Please enter a valid annual income.");
-        return;
+    setOtpSent(true);
+  };
+
+  const verifyOtp = () => {
+    setError(null);
+
+    if (otp.trim().length !== 6) {
+      setError(
+        "Please enter the 6-digit OTP to continue."
+      );
+      return;
+    }
+
+    setVerified(true);
+  };
+
+  const onSelectPurpose = (
+    purpose: Profile["purpose"]
+  ) => {
+    if (purpose === "business") {
+      update(
+        "activityType",
+        BUSINESS_ACTIVITIES[0]
+      );
+      update("projectCost", 300000);
+    } else if (purpose === "agriculture") {
+      update(
+        "activityType",
+        AGRICULTURE_ACTIVITIES[0]
+      );
+      update("projectCost", 250000);
+    } else {
+      update(
+        "activityType",
+        EDUCATION_ACTIVITIES[0]
+      );
+      update("projectCost", 1000000);
+    }
+
+    update("purpose", purpose);
+  };
+
+  const canContinueStepOne =
+    verified &&
+    !!verificationMethod &&
+    !!data.state &&
+    !!data.district;
+
+  const canContinueStepTwo =
+    !!routeType &&
+    (routeType === "earning"
+      ? !!incomeProof && data.annualIncome > 0
+      : videoRequested && teamVerified);
+
+  const goToRecommendation = async () => {
+    setError(null);
+    setSubmitting(true);
+
+    const finalProfile: Profile = {
+      state: data.state,
+      district: data.district,
+      category: data.category,
+      age: Number(data.age),
+      purpose: data.purpose,
+      activityType: data.activityType,
+      projectCost: Number(data.projectCost),
+      annualIncome: Number(data.annualIncome),
+      educationLevel: data.educationLevel,
+      courseLocation:
+        data.purpose === "education"
+          ? data.courseLocation
+          : undefined,
+    };
+
+    try {
+      const groqKey =
+        typeof window !== "undefined"
+          ? localStorage.getItem(
+              "groq-api-key"
+            ) || ""
+          : "";
+
+      const response = await fetch(
+        "/api/recommend",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...finalProfile,
+            apiKey: groqKey,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Could not generate the scheme recommendation."
+        );
       }
 
-      if (!incomeProofName) {
+      const json = await response.json();
+
+      setJourney({
+        profile: finalProfile,
+        recommendation: json.recommendation,
+      });
+
+      router.push("/recommendation");
+    } catch {
+      setError(
+        "We could not generate your recommendation right now. Please try again."
+      );
+      setSubmitting(false);
+    }
+  };
+
+  const next = () => {
+    setError(null);
+
+    if (step === 0) {
+      if (!verificationMethod) {
         setError(
-          "Please upload your bank income proof PDF."
+          "Please choose Aadhaar or PAN for identity verification."
         );
         return;
       }
 
-      setProfile({
-        ...(profile || {}),
-        annualIncome: income,
-      } as typeof profile);
+      if (!verified) {
+        setError(
+          "Please complete DigiLocker OTP verification first."
+        );
+        return;
+      }
 
-      setCurrentStep(3);
+      if (!data.state || !data.district) {
+        setError(
+          "Please select your state and district."
+        );
+        return;
+      }
+
+      setStep(1);
       return;
     }
 
-    if (!nonEarningPurpose) {
-      setError(
-        "Please select Educational Loan or Small Project Loan."
-      );
+    if (step === 1) {
+      if (!routeType) {
+        setError(
+          "Please select your earning status."
+        );
+        return;
+      }
+
+      if (
+        routeType === "earning" &&
+        (!incomeProof || data.annualIncome <= 0)
+      ) {
+        setError(
+          "Please enter your annual income and upload your income proof."
+        );
+        return;
+      }
+
+      if (
+        routeType === "non-earning" &&
+        (!videoRequested || !teamVerified)
+      ) {
+        setError(
+          "Please request the video assessment and complete the verification confirmation."
+        );
+        return;
+      }
+
+      setStep(2);
+      return;
+    }
+  };
+
+  const back = () => {
+    setError(null);
+
+    if (step === 0) {
+      router.push("/");
       return;
     }
 
-    if (!videoAssessmentRequested) {
-      setError(
-        "Please request the NIRVAAN team video assessment before continuing."
-      );
-      return;
-    }
-
-    setCurrentStep(3);
+    setStep((current) =>
+      Math.max(0, current - 1)
+    );
   };
+          return (
+    <main className="min-h-screen bg-[#F7FAFC] text-[#102A43]">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <div className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <Link
+              href="/"
+              className="inline-flex items-center text-xs font-extrabold uppercase tracking-[0.12em] text-[#1769D2] hover:text-[#064CA9]"
+            >
+              ← NIRVAAN
+            </Link>
 
-  const handleRecommender = () => {
-    setError("");
-    router.push("/recommendation");
-  };
-
-  const handleBack = () => {
-    setError("");
-
-    if (currentStep > 1) {
-      setCurrentStep((step) => step - 1);
-    }
-  };
-
-  return (
-    <main className="min-h-screen bg-white">
-      {/* PAGE HEADER */}
-      <section className="border-b border-[#D9E0E7] bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-3">
-              <span className="h-[3px] w-10 bg-[#0077CC]" />
-
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#0077CC]">
-                NIRVAAN Assistance Journey
-              </p>
-            </div>
-
-            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-[#002244] sm:text-4xl">
-              Find the right financing pathway
+            <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.03em] text-[#102A43] sm:text-4xl">
+              Your financing journey
             </h1>
 
-            <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-[#667085]">
-              Complete the five-stage journey to verify your
-              identity, establish your earning status, discover a
-              suitable scheme, choose a loan amount and locate a
-              partner.
+            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-[#617286]">
+              Complete each stage in sequence. Your verified
+              information is carried forward to the next stage.
+            </p>
+          </div>
+
+          <div className="border border-[#D4DFE9] bg-white px-5 py-4">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#F47B20]">
+              NIRVAAN Journey
+            </p>
+
+            <p className="mt-1 text-xs font-semibold text-[#52677D]">
+              Secure · Guided · Eligibility-based
             </p>
           </div>
         </div>
-      </section>
 
-      {/* PROGRESS TRACKER */}
-      <section className="border-b border-[#D9E0E7] bg-[#F7F9FB]">
-        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-          <div className="grid gap-px border border-[#CBD5E1] bg-[#CBD5E1] sm:grid-cols-5">
-            {STEPS.map((step, index) => {
-              const stepNumber = index + 1;
-              const active = currentStep === stepNumber;
-              const completed = currentStep > stepNumber;
+        <JourneyHeader current={step} />
 
-              return (
-                <button
-                  key={step.number}
-                  type="button"
-                  onClick={() => {
-                    if (completed) {
-                      setCurrentStep(stepNumber);
-                      setError("");
-                    }
-                  }}
-                  disabled={!completed && !active}
-                  className={[
-                    "min-h-[92px] bg-white px-4 py-4 text-left",
-                    "transition-colors",
-                    completed
-                      ? "cursor-pointer hover:bg-[#F0F7FC]"
-                      : "",
-                    active ? "bg-[#F0F7FC]" : "",
-                    !completed && !active
-                      ? "cursor-default opacity-70"
-                      : "",
-                  ].join(" ")}
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={[
-                        "flex h-8 w-8 shrink-0 items-center justify-center border text-[10px] font-extrabold",
-                        completed
-                          ? "border-[#0077CC] bg-[#0077CC] text-white"
-                          : active
-                            ? "border-[#0077CC] bg-white text-[#0077CC]"
-                            : "border-[#CBD5E1] bg-white text-[#8A96A6]",
-                      ].join(" ")}
-                    >
-                      {completed ? (
-                        <Check
-                          className="h-4 w-4"
-                          strokeWidth={3}
-                        />
-                      ) : (
-                        step.number
-                      )}
-                    </div>
+        <section className="mt-6 border border-[#D5DFE8] bg-white shadow-[0_8px_30px_rgba(16,42,67,0.05)]">
+          <div className="border-b border-[#DCE4EC] bg-[#0E2A4A] px-5 py-6 text-white sm:px-8">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#F47B20]">
+              Stage {step + 1}
+            </p>
 
-                    <div className="min-w-0">
-                      <p
-                        className={[
-                          "text-xs font-extrabold",
-                          active || completed
-                            ? "text-[#002244]"
-                            : "text-[#667085]",
-                        ].join(" ")}
-                      >
-                        {step.title}
-                      </p>
+            <h2 className="mt-1 text-xl font-extrabold text-white sm:text-2xl">
+              {JOURNEY_STEPS[step].title}
+            </h2>
 
-                      <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+            <p className="mt-2 max-w-3xl text-xs font-medium leading-5 text-[#C8D9EA]">
+              {step === 0
+                ? "Verify your identity before beginning the financing assessment."
+                : step === 1
+                ? "Tell us whether you currently earn and complete the appropriate verification route."
+                : "Your verified profile is ready for AI-powered scheme matching."}
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* MAIN CONTENT */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-          {/* STEP 01 */}
-          {currentStep === 1 && (
-            <div className="border border-[#CBD5E1] bg-white">
-              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
-                  Step 01
-                </p>
-
-                <h2 className="mt-2 text-2xl font-extrabold text-white">
-                  Verification
-                </h2>
-
-                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
-                  Verify your identity before entering the scheme
-                  assistance journey.
-                </p>
+          <div className="p-5 sm:p-8">
+            {error ? (
+              <div className="mb-7 border border-[#F2B46D] bg-[#FFF8EF] px-4 py-3 text-xs font-semibold leading-5 text-[#9A4D0A]">
+                {error}
               </div>
+            ) : null}
 
-              <div className="p-6 sm:p-8">
-                <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#0077CC] bg-white">
-                      <ShieldCheck
-                        className="h-5 w-5 text-[#0077CC]"
-                        strokeWidth={2}
-                      />
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-extrabold text-[#002244]">
-                        DigiLocker OTP verification
-                      </h3>
-
-                      <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
-                        Start with DigiLocker OTP verification,
-                        then link either Aadhaar or PAN for identity
-                        verification.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <p className="text-xs font-extrabold text-[#002244]">
-                    1. Verify through DigiLocker
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOtpSent(true);
-                      setError("");
-                    }}
-                    className="mt-3 inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-6 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
-                  >
-                    {otpSent
-                      ? "OTP Requested"
-                      : "Request DigiLocker OTP"}
-                  </button>
-
-                  {otpSent && (
-                    <p className="mt-3 text-[10px] font-bold text-[#15803D]">
-                      DigiLocker OTP request recorded.
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-7 border-t border-[#D9E0E7] pt-6">
-                  <p className="text-xs font-extrabold text-[#002244]">
-                    2. Select identity document
-                  </p>
-
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setVerificationMethod("aadhaar");
-                        setError("");
-                      }}
-                      className={[
-                        "border p-5 text-left transition-colors",
-                        verificationMethod === "aadhaar"
-                          ? "border-[#0077CC] bg-[#F0F7FC]"
-                          : "border-[#CBD5E1] bg-white hover:border-[#0077CC]",
-                      ].join(" ")}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-extrabold text-[#002244]">
-                            Aadhaar
-                          </p>
-
-                          <p className="mt-1 text-[10px] font-medium leading-4 text-[#667085]">
-                            Link Aadhaar for identity verification.
-                          </p>
-                        </div>
-
-                        {verificationMethod === "aadhaar" && (
-                          <Check
-                            className="h-4 w-4 shrink-0 text-[#0077CC]"
-                            strokeWidth={2.5}
-                          />
-                        )}
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setVerificationMethod("pan");
-                        setError("");
-                      }}
-                      className={[
-                        "border p-5 text-left transition-colors",
-                        verificationMethod === "pan"
-                          ? "border-[#0077CC] bg-[#F0F7FC]"
-                          : "border-[#CBD5E1] bg-white hover:border-[#0077CC]",
-                      ].join(" ")}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-extrabold text-[#002244]">
-                            PAN
-                          </p>
-
-                          <p className="mt-1 text-[10px] font-medium leading-4 text-[#667085]">
-                            Link PAN for identity verification.
-                          </p>
-                        </div>
-
-                        {verificationMethod === "pan" && (
-                          <Check
-                            className="h-4 w-4 shrink-0 text-[#0077CC]"
-                            strokeWidth={2.5}
-                          />
-                        )}
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                {verificationMethod && otpSent && (
-                  <div className="mt-6 border-l-[3px] border-[#16A34A] bg-[#F0FDF4] px-5 py-4">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#15803D]">
-                      Ready for verification
+            {step === 0 ? (
+              <div className="space-y-8">
+                <div className="grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+                  <div>
+                    <p className="text-sm font-extrabold text-[#102A43]">
+                      DigiLocker identity verification
                     </p>
 
-                    <p className="mt-1 text-xs font-semibold text-[#166534]">
-                      {verificationMethod === "aadhaar"
-                        ? "Aadhaar"
-                        : "PAN"}{" "}
-                      selected for identity verification.
-                    </p>
-                  </div>
-                )}
-
-                {error && (
-                  <div className="mt-6 border-l-[3px] border-[#DC2626] bg-[#FEF2F2] px-5 py-4">
-                    <p className="text-xs font-bold text-[#B91C1C]">
-                      {error}
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-7 flex justify-end border-t border-[#D9E0E7] pt-6">
-                  <button
-                    type="button"
-                    onClick={handleVerification}
-                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
-                  >
-                    Continue to Earning Status
-                    <ArrowRight
-                      className="ml-3 h-4 w-4"
-                      strokeWidth={2}
-                    />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-                    {/* STEP 02 */}
-          {currentStep === 2 && (
-            <div className="border border-[#CBD5E1] bg-white">
-              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
-                  Step 02
-                </p>
-
-                <h2 className="mt-2 text-2xl font-extrabold text-white">
-                  Earning Status
-                </h2>
-
-                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
-                  Tell us about your current earning situation so
-                  NIRVAAN can take you through the appropriate
-                  assessment route.
-                </p>
-              </div>
-
-              <div className="p-6 sm:p-8">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRoute("earning");
-                      setError("");
-                    }}
-                    className={[
-                      "border p-6 text-left transition-colors",
-                      route === "earning"
-                        ? "border-[#0077CC] bg-[#F0F7FC]"
-                        : "border-[#CBD5E1] bg-white hover:border-[#0077CC]",
-                    ].join(" ")}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
-                          Route A
-                        </p>
-
-                        <h3 className="mt-2 text-xl font-extrabold text-[#002244]">
-                          Earning
-                        </h3>
-
-                        <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
-                          For applicants who currently have an
-                          income and can provide bank income proof.
-                        </p>
-                      </div>
-
-                      {route === "earning" && (
-                        <Check
-                          className="h-5 w-5 shrink-0 text-[#0077CC]"
-                          strokeWidth={2.5}
-                        />
-                      )}
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRoute("non-earning");
-                      setError("");
-                    }}
-                    className={[
-                      "border p-6 text-left transition-colors",
-                      route === "non-earning"
-                        ? "border-[#E87512] bg-[#FFF8F1]"
-                        : "border-[#CBD5E1] bg-white hover:border-[#E87512]",
-                    ].join(" ")}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#E87512]">
-                          Route B
-                        </p>
-
-                        <h3 className="mt-2 text-xl font-extrabold text-[#002244]">
-                          Non-Earning
-                        </h3>
-
-                        <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
-                          For applicants who are not currently
-                          earning and need an educational or
-                          small-project financing pathway.
-                        </p>
-                      </div>
-
-                      {route === "non-earning" && (
-                        <Check
-                          className="h-5 w-5 shrink-0 text-[#E87512]"
-                          strokeWidth={2.5}
-                        />
-                      )}
-                    </div>
-                  </button>
-                </div>
-
-                {/* EARNING ROUTE */}
-                {route === "earning" && (
-                  <div className="mt-6 border border-[#CBD5E1] bg-[#F7F9FB] p-6">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
-                      Earning route
-                    </p>
-
-                    <h3 className="mt-2 text-lg font-extrabold text-[#002244]">
-                      Income verification
-                    </h3>
-
-                    <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#667085]">
-                      Enter your annual income and upload your
-                      bank income proof as a PDF. The information
-                      will be used as part of your verified
-                      assessment.
-                    </p>
-
-                    <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                      <div>
-                        <label
-                          htmlFor="annual-income"
-                          className="text-xs font-extrabold text-[#002244]"
-                        >
-                          Annual income
-                        </label>
-
-                        <div className="mt-2 flex border border-[#B9C4D1] bg-white focus-within:border-[#0077CC]">
-                          <span className="flex items-center border-r border-[#B9C4D1] px-3 text-sm font-bold text-[#526071]">
-                            ₹
-                          </span>
-
-                          <input
-                            id="annual-income"
-                            type="number"
-                            min="1"
-                            inputMode="numeric"
-                            value={annualIncome}
-                            onChange={(event) => {
-                              setAnnualIncome(
-                                event.target.value
-                              );
-                              setError("");
-                            }}
-                            placeholder="Enter annual income"
-                            className="min-h-[46px] min-w-0 flex-1 border-0 bg-white px-3 text-sm font-medium text-[#111827] outline-none placeholder:text-[#8A96A6]"
-                          />
-                        </div>
-
-                        <p className="mt-2 text-[10px] font-medium leading-4 text-[#7A8797]">
-                          Enter the annual income supported by
-                          your financial records.
-                        </p>
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="income-proof"
-                          className="text-xs font-extrabold text-[#002244]"
-                        >
-                          Bank income proof
-                        </label>
-
-                        <label
-                          htmlFor="income-proof"
-                          className="mt-2 flex min-h-[46px] cursor-pointer items-center border border-dashed border-[#B9C4D1] bg-white px-4 transition-colors hover:border-[#0077CC]"
-                        >
-                          <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[#526071]">
-                            {incomeProofName ||
-                              "Choose PDF document"}
-                          </span>
-
-                          <span className="ml-3 shrink-0 border border-[#CBD5E1] bg-[#F7F9FB] px-3 py-2 text-[10px] font-bold text-[#002244]">
-                            Browse
-                          </span>
-                        </label>
-
-                        <input
-                          id="income-proof"
-                          type="file"
-                          accept="application/pdf,.pdf"
-                          className="sr-only"
-                          onChange={(event) => {
-                            const file =
-                              event.target.files?.[0];
-
-                            if (!file) {
-                              setIncomeProofName("");
-                              return;
-                            }
-
-                            const isPdf =
-                              file.type ===
-                                "application/pdf" ||
-                              file.name
-                                .toLowerCase()
-                                .endsWith(".pdf");
-
-                            if (!isPdf) {
-                              setIncomeProofName("");
-                              setError(
-                                "Please upload your income proof as a PDF."
-                              );
-                              return;
-                            }
-
-                            setIncomeProofName(file.name);
-                            setError("");
-                          }}
-                        />
-
-                        <p className="mt-2 text-[10px] font-medium leading-4 text-[#7A8797]">
-                          PDF format required.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 border-l-[3px] border-[#E87512] bg-white px-5 py-4">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
-                        Income assessment
-                      </p>
-
-                      <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
-                        Your submitted income information and
-                        proof will be checked before you proceed
-                        to scheme matching.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* NON-EARNING ROUTE */}
-                {route === "non-earning" && (
-                  <div className="mt-6 border border-[#CBD5E1] bg-[#F7F9FB] p-6">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#E87512]">
-                      Non-earning route
-                    </p>
-
-                    <h3 className="mt-2 text-lg font-extrabold text-[#002244]">
-                      Choose your financing purpose
-                    </h3>
-
-                    <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#667085]">
-                      Non-earning applicants are not rejected
-                      immediately. Select the relevant pathway
-                      and request a video assessment with the
-                      NIRVAAN team.
+                    <p className="mt-2 max-w-xl text-sm font-medium leading-6 text-[#68798C]">
+                      Use DigiLocker OTP verification and
+                      link either Aadhaar or PAN as your
+                      identity document.
                     </p>
 
                     <div className="mt-5 grid gap-3 sm:grid-cols-2">
                       <button
                         type="button"
-                        onClick={() => {
-                          setNonEarningPurpose("education");
-                          setError("");
-                        }}
-                        className={[
-                          "border p-5 text-left transition-colors",
-                          nonEarningPurpose === "education"
-                            ? "border-[#0077CC] bg-white"
-                            : "border-[#CBD5E1] bg-white hover:border-[#0077CC]",
-                        ].join(" ")}
+                        onClick={() =>
+                          setVerificationMethod(
+                            "aadhaar"
+                          )
+                        }
+                        className={`border p-5 text-left transition ${
+                          verificationMethod ===
+                          "aadhaar"
+                            ? "border-[#1769D2] bg-[#F1F7FF]"
+                            : "border-[#D4DFE9] bg-white hover:border-[#1769D2]"
+                        }`}
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <h4 className="text-sm font-extrabold text-[#002244]">
-                              Educational Loan
-                            </h4>
+                        <AadhaarIcon />
 
-                            <p className="mt-1 text-[10px] font-medium leading-4 text-[#667085]">
-                              Financing pathway for eligible
-                              education-related needs.
-                            </p>
-                          </div>
+                        <p className="mt-4 text-sm font-extrabold text-[#17324F]">
+                          Aadhaar
+                        </p>
 
-                          {nonEarningPurpose === "education" && (
-                            <Check
-                              className="h-4 w-4 shrink-0 text-[#0077CC]"
-                              strokeWidth={2.5}
-                            />
-                          )}
-                        </div>
+                        <p className="mt-1 text-xs font-medium leading-5 text-[#718297]">
+                          Link Aadhaar for identity
+                          verification.
+                        </p>
+
+                        {verificationMethod ===
+                        "aadhaar" ? (
+                          <p className="mt-4 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#1769D2]">
+                            Selected
+                          </p>
+                        ) : null}
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => {
-                          setNonEarningPurpose(
-                            "small-project"
-                          );
-                          setError("");
-                        }}
-                        className={[
-                          "border p-5 text-left transition-colors",
-                          nonEarningPurpose ===
-                          "small-project"
-                            ? "border-[#E87512] bg-white"
-                            : "border-[#CBD5E1] bg-white hover:border-[#E87512]",
-                        ].join(" ")}
+                        onClick={() =>
+                          setVerificationMethod(
+                            "pan"
+                          )
+                        }
+                        className={`border p-5 text-left transition ${
+                          verificationMethod === "pan"
+                            ? "border-[#1769D2] bg-[#F1F7FF]"
+                            : "border-[#D4DFE9] bg-white hover:border-[#1769D2]"
+                        }`}
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <h4 className="text-sm font-extrabold text-[#002244]">
-                              Small Project Loan
-                            </h4>
+                        <FileIcon />
 
-                            <p className="mt-1 text-[10px] font-medium leading-4 text-[#667085]">
-                              For currently non-earning
-                              entrepreneurs with a project plan.
-                            </p>
+                        <p className="mt-4 text-sm font-extrabold text-[#17324F]">
+                          PAN
+                        </p>
+
+                        <p className="mt-1 text-xs font-medium leading-5 text-[#718297]">
+                          Link PAN for identity
+                          verification.
+                        </p>
+
+                        {verificationMethod ===
+                        "pan" ? (
+                          <p className="mt-4 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#1769D2]">
+                            Selected
+                          </p>
+                        ) : null}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="border border-[#D4DFE9] bg-[#F8FAFC] p-5 sm:p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center bg-[#EFF5FF] text-[#1769D2]">
+                        <DigiLockerIcon />
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-extrabold text-[#17324F]">
+                          DigiLocker OTP
+                        </p>
+
+                        <p className="text-[11px] font-medium text-[#748599]">
+                          Secure verification step
+                        </p>
+                      </div>
+                    </div>
+
+                    <Field
+                      label="Mobile number"
+                      hint="Enter the 10-digit mobile number used for verification."
+                    >
+                      <div className="flex gap-2">
+                        <span className="flex h-12 items-center border border-[#C7D4E1] bg-[#F5F8FB] px-3 text-sm font-bold text-[#52677D]">
+                          +91
+                        </span>
+
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          maxLength={10}
+                          value={mobile}
+                          onChange={(event) =>
+                            setMobile(
+                              event.target.value.replace(
+                                /\D/g,
+                                ""
+                              )
+                            )
+                          }
+                          placeholder="10-digit mobile number"
+                          className="h-12 min-w-0 flex-1 border border-[#C7D4E1] bg-white px-3 text-sm font-medium text-[#17324F] outline-none focus:border-[#1769D2]"
+                        />
+                      </div>
+                    </Field>
+
+                    {!otpSent ? (
+                      <button
+                        type="button"
+                        onClick={sendOtp}
+                        className="mt-4 flex min-h-11 w-full items-center justify-center border border-[#1769D2] bg-[#1769D2] px-5 text-xs font-extrabold text-white hover:bg-[#064CA9]"
+                      >
+                        SEND OTP
+                      </button>
+                    ) : (
+                      <div className="mt-4">
+                        <Field
+                          label="Enter OTP"
+                          hint="Enter the 6-digit OTP received on your mobile."
+                        >
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={6}
+                            value={otp}
+                            onChange={(event) =>
+                              setOtp(
+                                event.target.value.replace(
+                                  /\D/g,
+                                  ""
+                                )
+                              )
+                            }
+                            placeholder="6-digit OTP"
+                            className="h-12 w-full border border-[#C7D4E1] bg-white px-3 text-sm font-semibold tracking-[0.25em] text-[#17324F] outline-none focus:border-[#1769D2]"
+                          />
+                        </Field>
+
+                        <button
+                          type="button"
+                          onClick={verifyOtp}
+                          className="mt-4 flex min-h-11 w-full items-center justify-center border border-[#1769D2] bg-[#1769D2] px-5 text-xs font-extrabold text-white hover:bg-[#064CA9]"
+                        >
+                          VERIFY OTP
+                        </button>
+
+                        {verified ? (
+                          <div className="mt-3 border border-[#B9DEC9] bg-[#F1FBF5] px-3 py-3 text-xs font-bold text-[#19703F]">
+                            ✓ Identity verification completed
                           </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-                          {nonEarningPurpose ===
-                            "small-project" && (
-                            <Check
-                              className="h-4 w-4 shrink-0 text-[#E87512]"
-                              strokeWidth={2.5}
-                            />
-                          )}
+                <div className="border-t border-[#E0E7EE] pt-7">
+                  <p className="text-sm font-extrabold text-[#17324F]">
+                    Basic profile
+                  </p>
+
+                  <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                    <SelectBox
+                      label="State"
+                      value={data.state}
+                      placeholder="Select your state"
+                      items={stateList}
+                      onChange={selectState}
+                    />
+
+                    <SelectBox
+                      label="District"
+                      value={data.district}
+                      placeholder={
+                        data.state
+                          ? "Select your district"
+                          : "Select state first"
+                      }
+                      items={districtList}
+                      disabled={!data.state}
+                      onChange={(value) =>
+                        update(
+                          "district",
+                          value
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div className="mt-5">
+                    <Field label="Category">
+                      <div className="grid grid-cols-3 gap-3">
+                        {(
+                          ["sc", "st", "obc"] as const
+                        ).map((category) => (
+                          <button
+                            key={category}
+                            type="button"
+                            onClick={() =>
+                              update(
+                                "category",
+                                category
+                              )
+                            }
+                            className={`min-h-12 border text-xs font-extrabold ${
+                              data.category ===
+                              category
+                                ? "border-[#1769D2] bg-[#EFF6FF] text-[#1769D2]"
+                                : "border-[#C7D4E1] bg-white text-[#53677D] hover:border-[#1769D2]"
+                            }`}
+                          >
+                            {category === "sc"
+                              ? "SC"
+                              : category === "st"
+                              ? "ST"
+                              : "OBC / Gen"}
+                          </button>
+                        ))}
+                      </div>
+                    </Field>
+                  </div>
+
+                  <div className="mt-5">
+                    <Field
+                      label={`Age · ${data.age}
+                      years`}
+                    >
+                      <input
+                        type="range"
+                        min={17}
+                        max={70}
+                        value={data.age}
+                        onChange={(event) =>
+                          update(
+                            "age",
+                            Number(
+                              event.target.value
+                            )
+                          )
+                        }
+                        className="h-2 w-full cursor-pointer accent-[#1769D2]"
+                      />
+
+                      <div className="mt-2 flex justify-between text-[10px] font-semibold text-[#7A8A9B]">
+                        <span>17 years</span>
+                        <span>70 years</span>
+                      </div>
+                    </Field>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {step === 1 ? (
+              <div className="space-y-8">
+                <div>
+                  <p className="text-sm font-extrabold text-[#102A43]">
+                    Select your current earning status
+                  </p>
+
+                  <p className="mt-2 text-sm font-medium leading-6 text-[#68798C]">
+                    NIRVAAN follows a different verification
+                    route depending on whether you currently
+                    earn an income.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onSelectRoute("earning")
+                    }
+                    className={`border p-6 text-left transition ${
+                      routeType === "earning"
+                        ? "border-[#1769D2] bg-[#F1F7FF]"
+                        : "border-[#D4DFE9] bg-white hover:border-[#1769D2]"
+                    }`}
+                  >
+                    <div className="flex h-14 w-14 items-center justify-center bg-[#EFF5FF] text-[#1769D2]">
+                      <BriefcaseIcon />
+                    </div>
+
+                    <h3 className="mt-5 text-lg font-extrabold text-[#17324F]">
+                      Earning
+                    </h3>
+
+                    <p className="mt-2 text-xs font-medium leading-5 text-[#718297]">
+                      I currently earn an income and
+                      can provide bank income proof.
+                    </p>
+
+                    <div className="mt-5 border-t border-[#DCE5ED] pt-4 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#1769D2]">
+                      Income verification
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onSelectRoute("non-earning")
+                    }
+                    className={`border p-6 text-left transition ${
+                      routeType === "non-earning"
+                        ? "border-[#F47B20] bg-[#FFF8F1]"
+                        : "border-[#D4DFE9] bg-white hover:border-[#F47B20]"
+                    }`}
+                  >
+                    <div className="flex h-14 w-14 items-center justify-center bg-[#FFF1E5] text-[#D7660E]">
+                      <UserIcon />
+                    </div>
+
+                    <h3 className="mt-5 text-lg font-extrabold text-[#17324F]">
+                      Non-Earning
+                    </h3>
+
+                    <p className="mt-2 text-xs font-medium leading-5 text-[#718297]">
+                      I currently do not earn and need
+                      an educational or small project route.
+                    </p>
+
+                    <div className="mt-5 border-t border-[#DCE5ED] pt-4 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#D7660E]">
+                      Assessment required
+                    </div>
+                  </button>
+                </div>
+
+                {routeType === "earning" ? (
+                  <div className="border border-[#D4DFE9] bg-[#F8FAFC] p-5 sm:p-7">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-11 w-11 flex-none items-center justify-center bg-[#EFF5FF] text-[#1769D2]">
+                        <BriefcaseIcon />
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-extrabold text-[#17324F]">
+                          Earning verification
+                        </h3>
+
+                        <p className="mt-1 text-xs font-medium leading-5 text-[#6C7E91]">
+                          Enter your income and upload the
+                          bank income proof that will be
+                          reviewed as part of your journey.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                      <Field
+                        label="Annual family income"
+                        hint="Enter the verified annual family income."
+                      >
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-[#607388]">
+                            ₹
+                          </span>
+
+                          <input
+                            type="number"
+                            min={0}
+                            value={data.annualIncome}
+                            onChange={(event) =>
+                              update(
+                                "annualIncome",
+                                Number(
+                                  event.target.value
+                                )
+                              )
+                            }
+                            className="h-12 w-full border border-[#C7D4E1] bg-white pl-8 pr-3 text-sm font-semibold text-[#17324F] outline-none focus:border-[#1769D2]"
+                          />
                         </div>
+                      </Field>
+
+                      <Field
+                        label="Income proof"
+                        hint="Upload a PDF bank income proof."
+                      >
+                        <label className="flex min-h-12 cursor-pointer items-center gap-3 border border-dashed border-[#B9C8D6] bg-white px-4 hover:border-[#1769D2]">
+                          <FileIcon />
+
+                          <span className="min-w-0">
+                            <span className="block truncate text-xs font-bold text-[#42586E]">
+                              {incomeProof
+                                ? incomeProof.name
+                                : "Choose PDF document"}
+                            </span>
+
+                            <span className="mt-0.5 block text-[10px] font-medium text-[#8593A2]">
+                              PDF only
+                            </span>
+                          </span>
+
+                          <input
+                            type="file"
+                            accept="application/pdf"
+                            className="hidden"
+                            onChange={(event) =>
+                              setIncomeProof(
+                                event.target.files?.[0] ||
+                                  null
+                              )
+                            }
+                          />
+                        </label>
+                      </Field>
+                    </div>
+
+                    <div className="mt-5 border-l-2 border-[#1769D2] bg-white px-4 py-3">
+                      <p className="text-xs font-semibold leading-5 text-[#5B6F83]">
+                        Your income is subject to the applicable
+                        eligibility criteria and verification.
+                        NIRVAAN does not approve or sanction loans.
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+
+                {routeType === "non-earning" ? (
+                  <div className="space-y-6">
+                    <div className="border border-[#D4DFE9] bg-[#F8FAFC] p-5 sm:p-7">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-11 w-11 flex-none items-center justify-center bg-[#FFF1E5] text-[#D7660E]">
+                          <VideoIcon />
+                        </div>
+
+                        <div>
+                          <h3 className="text-base font-extrabold text-[#17324F]">
+                            NIRVAAN team video assessment
+                          </h3>
+
+                          <p className="mt-1 text-xs font-medium leading-5 text-[#6C7E91]">
+                            Non-earning applicants need an
+                            assessment covering why the money
+                            is needed, the plan, repayment
+                            approach, amount required and
+                            guarantor/security information.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                        <Field label="Why do you need the money?">
+                          <textarea
+                            value={assessmentPurpose}
+                            onChange={(event) =>
+                              setAssessmentPurpose(
+                                event.target.value
+                              )
+                            }
+                            rows={4}
+                            placeholder="Briefly explain your requirement..."
+                            className="w-full resize-none border border-[#C7D4E1] bg-white px-3 py-3 text-xs font-medium leading-5 text-[#17324F] outline-none focus:border-[#1769D2]"
+                          />
+                        </Field>
+
+                        <div className="space-y-5">
+                          <Field label="Amount required">
+                            <select
+                              value={assessmentAmount}
+                              onChange={(event) =>
+                                setAssessmentAmount(
+                                  event.target.value
+                                )
+                              }
+                              className="h-12 w-full border border-[#C7D4E1] bg-white px-3 text-sm font-semibold text-[#17324F] outline-none focus:border-[#1769D2]"
+                            >
+                              <option value="50000">
+                                ₹50,000
+                              </option>
+                              <option value="100000">
+                                ₹1,00,000
+                              </option>
+                              <option value="150000">
+                                ₹1,50,000
+                              </option>
+                              <option value="200000">
+                                ₹2,00,000
+                              </option>
+                              <option value="250000">
+                                ₹2,50,000
+                              </option>
+                              <option value="300000">
+                                ₹3,00,000
+                              </option>
+                              <option value="500000">
+                                ₹5,00,000
+                              </option>
+                            </select>
+                          </Field>
+
+                          <Field label="Repayment plan">
+                            <input
+                              value={repaymentPlan}
+                              onChange={(event) =>
+                                setRepaymentPlan(
+                                  event.target.value
+                                )
+                              }
+                              placeholder="How will you repay?"
+                              className="h-12 w-full border border-[#C7D4E1] bg-white px-3 text-xs font-medium text-[#17324F] outline-none focus:border-[#1769D2]"
+                            />
+                          </Field>
+
+                          <Field label="Guarantor / legal security">
+                            <input
+                              value={guarantor}
+                              onChange={(event) =>
+                                setGuarantor(
+                                  event.target.value
+                                )
+                              }
+                              placeholder="Provide details for assessment"
+                              className="h-12 w-full border border-[#C7D4E1] bg-white px-3 text-xs font-medium text-[#17324F] outline-none focus:border-[#1769D2]"
+                            />
+                          </Field>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (
+                            !assessmentPurpose.trim() ||
+                            !repaymentPlan.trim() ||
+                            !guarantor.trim()
+                          ) {
+                            setError(
+                              "Please complete the assessment details before requesting the video assessment."
+                            );
+                            return;
+                          }
+
+                          setError(null);
+                          setVideoRequested(true);
+                        }}
+                        className="mt-6 flex min-h-12 w-full items-center justify-center border border-[#D7660E] bg-[#F47B20] px-5 text-xs font-extrabold text-white hover:bg-[#D7660E]"
+                      >
+                        {videoRequested
+                          ? "VIDEO ASSESSMENT REQUESTED ✓"
+                          : "REQUEST VIDEO ASSESSMENT"}
                       </button>
                     </div>
 
-                    <div className="mt-6 border border-[#CBD5E1] bg-white p-5">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
-                        NIRVAAN team assessment
-                      </p>
+                    {videoRequested ? (
+                      <div className="border border-[#B9DEC9] bg-[#F1FBF5] p-5">
+                        <p className="text-sm font-extrabold text-[#19703F]">
+                          Assessment stage ready
+                        </p>
 
-                      <h4 className="mt-2 text-sm font-extrabold text-[#002244]">
-                        Video call before scheme matching
-                      </h4>
+                        <p className="mt-2 text-xs font-medium leading-5 text-[#4C705D]">
+                          In the prototype workflow, the NIRVAAN
+                          team verification checkpoint is represented
+                          below. Final eligibility remains subject
+                          to actual assessment and applicable
+                          requirements.
+                        </p>
+                         <label className="mt-4 flex cursor-pointer items-start gap-3 border border-[#C8E4D3] bg-white p-4">
+                          <input
+                            type="checkbox"
+                            checked={teamVerified}
+                            onChange={(event) =>
+                              setTeamVerified(
+                                event.target.checked
+                              )
+                            }
+                            className="mt-0.5 h-4 w-4 accent-[#19703F]"
+                          />
 
-                      <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
-                        During the video call, the team will ask
-                        why the money is needed, your plans, the
-                        amount required, your repayment plan and
-                        guarantor details.
-                      </p>
-
-                      <p className="mt-3 text-xs font-medium leading-5 text-[#667085]">
-                        The submitted claims and guarantor
-                        information are then assessed, including
-                        whether the guarantor is genuine or
-                        whether suitable legal security can be
-                        provided.
-                      </p>
-
-                      <label className="mt-5 flex cursor-pointer items-start gap-3 border border-[#CBD5E1] bg-[#F7F9FB] p-4">
-                        <input
-                          type="checkbox"
-                          checked={
-                            videoAssessmentRequested
-                          }
-                          onChange={(event) => {
-                            setVideoAssessmentRequested(
-                              event.target.checked
-                            );
-                            setError("");
-                          }}
-                          className="mt-0.5 h-4 w-4 shrink-0 accent-[#0077CC]"
-                        />
-
-                        <span>
-                          <span className="block text-xs font-extrabold text-[#002244]">
-                            Request NIRVAAN team video
-                            assessment
+                          <span className="text-xs font-semibold leading-5 text-[#4C705D]">
+                            I understand that the team must
+                            verify my assessment claims and
+                            guarantor/security information before
+                            this route can proceed.
                           </span>
-
-                          <span className="mt-1 block text-[10px] font-medium leading-4 text-[#667085]">
-                            I understand that this assessment is
-                            required before proceeding.
-                          </span>
-                        </span>
-                      </label>
-                    </div>
+                        </label>
+                      </div>
+                    ) : null}
                   </div>
-                )}
-
-                {error && (
-                  <div className="mt-6 border-l-[3px] border-[#DC2626] bg-[#FEF2F2] px-5 py-4">
-                    <p className="text-xs font-bold text-[#B91C1C]">
-                      {error}
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-7 flex flex-col gap-3 border-t border-[#D9E0E7] pt-6 sm:flex-row sm:justify-between">
-                  <button
-                    type="button"
-                    onClick={handleBack}
-                    className="min-h-[44px] border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
-                  >
-                    ← Back
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleRouteContinue}
-                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
-                  >
-                    Continue to Smart Scheme Recommender
-                    <ArrowRight
-                      className="ml-3 h-4 w-4"
-                      strokeWidth={2}
-                    />
-                  </button>
-                </div>
+                ) : null}
               </div>
-            </div>
-          )}
-                    {/* STEP 03 */}
-          {currentStep === 3 && (
-            <div className="border border-[#CBD5E1] bg-white">
-              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
-                  Step 03
+            ) : null}
+
+            {step === 2 ? (
+              <div className="py-8 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center bg-[#EFF5FF] text-[#1769D2]">
+                  <TargetIcon />
+                </div>
+
+                <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.14em] text-[#F47B20]">
+                  Stage 03
                 </p>
 
-                <h2 className="mt-2 text-2xl font-extrabold text-white">
+                <h3 className="mt-2 text-2xl font-extrabold text-[#102A43]">
                   Smart Scheme Recommender
-                </h2>
+                </h3>
 
-                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
-                  Use AI-assisted scheme matching to identify a
-                  suitable scheme and maximum loan amount.
-                </p>
-              </div>
-
-              <div className="p-6 sm:p-8">
-                <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-6">
-                  <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-start">
-                    <div className="flex h-14 w-14 items-center justify-center border border-[#0077CC] bg-white">
-                      <span className="text-lg font-extrabold text-[#0077CC]">
-                        AI
-                      </span>
-                    </div>
-
-                    <div>
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
-                        AI-assisted matching
-                      </p>
-
-                      <h3 className="mt-2 text-xl font-extrabold text-[#002244]">
-                        Match your verified profile with
-                        suitable schemes
-                      </h3>
-
-                      <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#667085]">
-                        The Smart Scheme Recommender uses the
-                        information available from your journey
-                        to identify suitable financing options and
-                        determine the maximum loan amount
-                        associated with the recommendation.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                  <div className="border border-[#CBD5E1] bg-white p-5">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
-                      Profile
-                    </p>
-
-                    <p className="mt-2 text-sm font-extrabold text-[#002244]">
-                      Verified context
-                    </p>
-
-                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
-                      Identity and earning-status information.
-                    </p>
-                  </div>
-
-                  <div className="border border-[#CBD5E1] bg-white p-5">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
-                      AI
-                    </p>
-
-                    <p className="mt-2 text-sm font-extrabold text-[#002244]">
-                      Scheme matching
-                    </p>
-
-                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
-                      Suitable scheme options based on the
-                      available profile information.
-                    </p>
-                  </div>
-
-                  <div className="border border-[#CBD5E1] bg-white p-5">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
-                      Output
-                    </p>
-
-                    <p className="mt-2 text-sm font-extrabold text-[#002244]">
-                      Maximum loan amount
-                    </p>
-
-                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
-                      Used as the upper limit in the next stage.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 border-l-[3px] border-[#E87512] bg-[#FFF8F1] px-5 py-4">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
-                    Important
-                  </p>
-
-                  <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
-                    A recommendation is intended to assist with
-                    scheme discovery. Final eligibility,
-                    sanctioned amount and approval are determined
-                    by the applicable scheme rules and concerned
-                    institution.
-                  </p>
-                </div>
-
-                {error && (
-                  <div className="mt-6 border-l-[3px] border-[#DC2626] bg-[#FEF2F2] px-5 py-4">
-                    <p className="text-xs font-bold text-[#B91C1C]">
-                      {error}
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-7 flex flex-col gap-3 border-t border-[#D9E0E7] pt-6 sm:flex-row sm:justify-between">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrentStep(2);
-                      setError("");
-                    }}
-                    className="min-h-[44px] border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
-                  >
-                    ← Back
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleRecommender}
-                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
-                  >
-                    Open Smart Scheme Recommender
-                    <ArrowRight
-                      className="ml-3 h-4 w-4"
-                      strokeWidth={2}
-                    />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 04 */}
-          {currentStep === 4 && (
-            <div className="border border-[#CBD5E1] bg-white">
-              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
-                  Step 04
+                <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-6 text-[#68798C]">
+                  Your identity and earning-status journey is
+                  complete. NIRVAAN is ready to use your verified
+                  profile for scheme matching.
                 </p>
 
-                <h2 className="mt-2 text-2xl font-extrabold text-white">
-                  Financial Calculator
-                </h2>
+                <div className="mx-auto mt-7 grid max-w-2xl gap-3 sm:grid-cols-3">
+                  <div className="border border-[#D5DFE8] bg-[#F8FAFC] p-4">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8A9B]">
+                      Location
+                    </p>
+                    <p className="mt-1 text-xs font-bold text-[#17324F]">
+                      {data.district}
+                    </p>
+                  </div>
 
-                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
-                  Choose a loan amount within the maximum amount
-                  returned by the Smart Scheme Recommender.
-                </p>
+                  <div className="border border-[#D5DFE8] bg-[#F8FAFC] p-4">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8A9B]">
+                      Route
+                    </p>
+                    <p className="mt-1 text-xs font-bold text-[#17324F]">
+                      {routeType === "earning"
+                        ? "Earning"
+                        : "Non-Earning"}
+                    </p>
+                  </div>
+
+                  <div className="border border-[#D5DFE8] bg-[#F8FAFC] p-4">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8A9B]">
+                      Requirement
+                    </p>
+                    <p className="mt-1 text-xs font-bold text-[#17324F]">
+                      {formatINR(
+                        data.projectCost
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={goToRecommendation}
+                  disabled={submitting}
+                  className="mt-8 inline-flex min-h-13 min-w-[250px] items-center justify-center border border-[#0758C7] bg-[#0758C7] px-8 text-sm font-extrabold text-white hover:bg-[#064CA9] disabled:cursor-not-allowed disabled:bg-[#8BAFD7]"
+                >
+                  {submitting
+                    ? "MATCHING SCHEMES..."
+                    : "CONTINUE TO SMART SCHEME RECOMMENDER →"}
+                </button>
               </div>
-
-              <div className="p-6 sm:p-8">
-                <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-6">
-                  <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-start">
-                    <div className="flex h-14 w-14 items-center justify-center border border-[#0077CC] bg-white">
-                      <span className="text-lg font-extrabold text-[#0077CC]">
-                        ₹
-                      </span>
-                    </div>
-
-                    <div>
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
-                        Financial planning
-                      </p>
-
-                      <h3 className="mt-2 text-xl font-extrabold text-[#002244]">
-                        Select the loan amount you need
-                      </h3>
-
-                      <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#667085]">
-                        The Financial Calculator uses ₹50,000
-                        increments. Available options begin at
-                        ₹50,000 and continue until the maximum
-                        amount returned by the recommender.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                  <div className="border border-[#CBD5E1] bg-white p-5">
-                    <p className="text-2xl font-extrabold text-[#0077CC]">
-                      ₹50K
-                    </p>
-
-                    <p className="mt-2 text-xs font-extrabold text-[#002244]">
-                      Starting amount
-                    </p>
-
-                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
-                      The first available selection.
-                    </p>
-                  </div>
-
-                  <div className="border border-[#CBD5E1] bg-white p-5">
-                    <p className="text-2xl font-extrabold text-[#0077CC]">
-                      +₹50K
-                    </p>
-
-                    <p className="mt-2 text-xs font-extrabold text-[#002244]">
-                      Fixed increments
-                    </p>
-
-                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
-                      Each option increases by ₹50,000.
-                    </p>
-                  </div>
-
-                  <div className="border border-[#CBD5E1] bg-white p-5">
-                    <p className="text-2xl font-extrabold text-[#E87512]">
-                      MAX
-                    </p>
-
-                    <p className="mt-2 text-xs font-extrabold text-[#002244]">
-                      Maximum selectable amount
-                    </p>
-
-                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
-                      The recommended maximum remains
-                      selectable.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 border-l-[3px] border-[#E87512] bg-[#FFF8F1] px-5 py-4">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
-                    Example
-                  </p>
-
-                  <p className="mt-2 text-xs font-semibold leading-5 text-[#667085]">
-                    If the maximum amount is ₹4,00,000, the
-                    available choices are ₹50,000, ₹1,00,000,
-                    ₹1,50,000, ₹2,00,000, ₹2,50,000, ₹3,00,000,
-                    ₹3,50,000 and ₹4,00,000.
-                  </p>
-                </div>
-
-                <div className="mt-7 flex flex-col gap-3 border-t border-[#D9E0E7] pt-6 sm:flex-row sm:justify-between">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrentStep(3);
-                      setError("");
-                    }}
-                    className="min-h-[44px] border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
-                  >
-                    ← Back
-                  </button>
-
-                  <Link
-                    href="/calculator"
-                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
-                  >
-                    Open Financial Calculator
-                    <ArrowRight
-                      className="ml-3 h-4 w-4"
-                      strokeWidth={2}
-                    />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-                    {/* STEP 05 */}
-          {currentStep === 5 && (
-            <div className="border border-[#CBD5E1] bg-white">
-              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
-                  Step 05
-                </p>
-
-                <h2 className="mt-2 text-2xl font-extrabold text-white">
-                  Geo-Spatial Partner Locator &amp; Router
-                </h2>
-
-                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
-                  Find partner locations, select a suitable partner
-                  and plan your route.
-                </p>
-              </div>
-
-              <div className="p-6 sm:p-8">
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
-                    <p className="text-2xl font-extrabold text-[#0077CC]">
-                      01
-                    </p>
-
-                    <h3 className="mt-3 text-sm font-extrabold text-[#002244]">
-                      Satellite Map
-                    </h3>
-
-                    <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
-                      View available partner locations across
-                      India on a satellite map.
-                    </p>
-                  </div>
-
-                  <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
-                    <p className="text-2xl font-extrabold text-[#0077CC]">
-                      02
-                    </p>
-
-                    <h3 className="mt-3 text-sm font-extrabold text-[#002244]">
-                      Partner Selection
-                    </h3>
-
-                    <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
-                      Search the network and select a partner
-                      location that suits your journey.
-                    </p>
-                  </div>
-
-                  <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
-                    <p className="text-2xl font-extrabold text-[#E87512]">
-                      03
-                    </p>
-
-                    <h3 className="mt-3 text-sm font-extrabold text-[#002244]">
-                      Routing
-                    </h3>
-
-                    <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
-                      Plan directions to your selected partner
-                      location.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 border border-[#CBD5E1] bg-white p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#0077CC] bg-[#F0F7FC]">
-                      <span className="text-[9px] font-extrabold tracking-wide text-[#0077CC]">
-                        MAP
-                      </span>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-extrabold text-[#002244]">
-                        Full partner network
-                      </p>
-
-                      <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
-                        The locator initially shows the available
-                        partner network with the district filter
-                        set to All. You can narrow the results
-                        after opening the locator.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-7 flex flex-col gap-3 border-t border-[#D9E0E7] pt-6 sm:flex-row sm:justify-between">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrentStep(4);
-                      setError("");
-                    }}
-                    className="min-h-[44px] border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
-                  >
-                    ← Back
-                  </button>
-
-                  <Link
-                    href="/locator"
-                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
-                  >
-                    Open Partner Locator &amp; Router
-                    <ArrowRight
-                      className="ml-3 h-4 w-4"
-                      strokeWidth={2}
-                    />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* JOURNEY TOOLS */}
-          {currentStep >= 3 && (
-            <div className="mt-6 border border-[#CBD5E1] bg-[#F7F9FB] p-5">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#667085]">
-                    Journey tools
-                  </p>
-
-                  <p className="mt-1 text-xs font-semibold text-[#526071]">
-                    Open any completed or current tool directly.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Link
-                    href="/recommendation"
-                    className="border border-[#CBD5E1] bg-white px-4 py-2 text-[10px] font-bold text-[#002244] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
-                  >
-                    Smart Recommender
-                  </Link>
-
-                  <Link
-                    href="/calculator"
-                    className="border border-[#CBD5E1] bg-white px-4 py-2 text-[10px] font-bold text-[#002244] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
-                  >
-                    Financial Calculator
-                  </Link>
-
-                  <Link
-                    href="/locator"
-                    className="border border-[#0077CC] bg-white px-4 py-2 text-[10px] font-bold text-[#0077CC] transition-colors hover:bg-[#F0F7FC]"
-                  >
-                    Partner Locator
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* PLATFORM NOTICE */}
-          <div className="mt-8 border-l-[3px] border-[#E87512] bg-[#FFF8F1] px-5 py-4">
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
-              Important information
-            </p>
-
-            <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
-              NIRVAAN is an independent platform for scheme
-              discovery and application assistance. It does not
-              represent, operate or speak on behalf of any
-              government department, bank, financial institution
-              or scheme authority. Eligibility, loan limits,
-              interest rates and final approval are subject to
-              the applicable rules and the concerned institution.
-            </p>
+            ) : null}
           </div>
 
-          {/* RETURN HOME */}
-          <div className="mt-8 flex justify-center">
-            <Link
-              href="/"
-              className="inline-flex min-h-[44px] items-center justify-center border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
+          <div className="flex flex-col gap-3 border-t border-[#DCE4EC] bg-[#F8FAFC] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <button
+              type="button"
+              onClick={back}
+              disabled={submitting}
+              className="min-h-11 border border-[#C8D4E1] bg-white px-6 text-xs font-extrabold text-[#52677D] hover:border-[#1769D2] hover:text-[#1769D2] disabled:opacity-50"
             >
-              Return to NIRVAAN Home
-            </Link>
+              ← BACK
+            </button>
+
+            {step < 2 ? (
+              <button
+                type="button"
+                onClick={next}
+                disabled={
+                  submitting ||
+                  (step === 0
+                    ? !canContinueStepOne
+                    : !canContinueStepTwo)
+                }
+                className="min-h-11 border border-[#0758C7] bg-[#0758C7] px-7 text-xs font-extrabold text-white hover:bg-[#064CA9] disabled:cursor-not-allowed disabled:bg-[#A7BED8]"
+              >
+                CONTINUE TO{" "}
+                {step === 0
+                  ? "EARNING STATUS"
+                  : "SMART SCHEME RECOMMENDER"}{" "}
+                →
+              </button>
+            ) : null}
+          </div>
+        </section>
+
+        <div className="mt-5 flex items-start gap-3 border border-[#D5DFE8] bg-white p-4">
+          <ShieldIcon />
+
+          <div>
+            <p className="text-xs font-extrabold text-[#17324F]">
+              Your information
+            </p>
+
+            <p className="mt-1 text-[11px] font-medium leading-5 text-[#718297]">
+              NIRVAAN is an independent platform that helps
+              users discover and prepare for government scheme
+              applications. Final approval, verification,
+              sanction and disbursement are handled by the
+              relevant institutions.
+            </p>
           </div>
         </div>
-      </section>
+      </div>
     </main>
   );
 }
+
+function TargetIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="h-9 w-9"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <circle cx="22" cy="26" r="14" />
+      <circle cx="22" cy="26" r="7" />
+      <circle cx="22" cy="26" r="2" fill="currentColor" />
+      <path d="m31 17 9-9M34 8h6v6" />
+    </svg>
+  );
+          }
