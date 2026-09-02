@@ -1,1140 +1,1324 @@
 "use client";
 
+import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect, useMemo } from "react";
-import { useJourney } from "@/context/JourneyContext";
-import { useTranslation } from "@/context/LanguageContext";
 import {
-  AGRICULTURE_ACTIVITIES,
-  BUSINESS_ACTIVITIES,
-  LOCATIONS,
-} from "@/lib/locations";
-import type { Profile } from "@/lib/types";
-import { formatINR } from "@/lib/format";
+  ArrowRight,
+  Check,
+  ShieldCheck,
+} from "lucide-react";
+import { useJourney } from "@/context/JourneyContext";
 
-type Data = Omit<Profile, never> & {
-  courseLocation: "india" | "abroad";
-};
-
-const INITIAL: Data = {
-  state: "",
-  district: "",
-  category: "sc",
-  age: 30,
-  purpose: "business",
-  activityType: BUSINESS_ACTIVITIES[0],
-  projectCost: 300000,
-  annualIncome: 250000,
-  educationLevel: "10th-12th",
-  courseLocation: "india",
-};
-
-const EDUCATION_ACTIVITIES = [
-  "B.Tech / Engineering Degree",
-  "MBBS / Medical / Dental",
-  "MBA / Business Management",
-  "Diploma / Polytechnic Course",
-  "Post-Graduate / Masters",
-  "Law / Legal Studies",
-  "Aviation / Commercial Pilot",
-  "Vocational / Skill Training",
+const STEPS = [
+  {
+    number: "01",
+    title: "Verification",
+    description: "Verify your identity before continuing.",
+  },
+  {
+    number: "02",
+    title: "Earning Status",
+    description: "Tell us about your current earning situation.",
+  },
+  {
+    number: "03",
+    title: "Smart Scheme Recommender",
+    description:
+      "Find a suitable scheme and maximum loan amount.",
+  },
+  {
+    number: "04",
+    title: "Financial Calculator",
+    description: "Choose your required loan amount.",
+  },
+  {
+    number: "05",
+    title: "Partner Locator & Router",
+    description:
+      "Find a suitable partner and plan your route.",
+  },
 ];
 
-const EDUCATION_LEVELS: {
-  id: Profile["educationLevel"];
-  label: string;
-}[] = [
-  { id: "below-10th", label: "Below 10th" },
-  { id: "10th-12th", label: "10th – 12th" },
-  { id: "graduate", label: "Graduate" },
-  { id: "post-graduate", label: "Post-graduate" },
-];
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[#475569] sm:text-sm">
-        {label}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-function AnimatedSelect({
-  label,
-  placeholder,
-  value,
-  items,
-  disabled = false,
-  onChange,
-}: {
-  label: string;
-  placeholder: string;
-  value: string;
-  items: string[];
-  disabled?: boolean;
-  onChange: (val: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
-
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  const sortedAndFilteredItems = useMemo(() => {
-    const sorted = [...items].sort((a, b) => a.localeCompare(b));
-
-    if (!search.trim()) return sorted;
-
-    const q = search.trim().toLowerCase();
-
-    const startsWith = sorted.filter((item) =>
-      item.toLowerCase().startsWith(q)
-    );
-
-    const contains = sorted.filter(
-      (item) =>
-        !item.toLowerCase().startsWith(q) &&
-        item.toLowerCase().includes(q)
-    );
-
-    return [...startsWith, ...contains];
-  }, [items, search]);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-
-    setSearch("");
-
-    const initialIndex = sortedAndFilteredItems.indexOf(value);
-
-    setHighlightedIndex(
-      initialIndex !== -1 ? initialIndex : 0
-    );
-
-    const timer = window.setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, 40);
-
-    return () => window.clearTimeout(timer);
-  }, [open, sortedAndFilteredItems, value]);
-
-  useEffect(() => {
-    setHighlightedIndex(0);
-  }, [search]);
-
-  useEffect(() => {
-    if (!open || !listRef.current) return;
-
-    const element = listRef.current.querySelector(
-      `[data-wizard-item-index="${highlightedIndex}"]`
-    ) as HTMLElement | null;
-
-    element?.scrollIntoView({
-      block: "nearest",
-    });
-  }, [highlightedIndex, open]);
-
-  const selectItem = (item: string) => {
-    onChange(item);
-    setOpen(false);
-  };
-
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-
-      setHighlightedIndex((previous) =>
-        previous < sortedAndFilteredItems.length - 1
-          ? previous + 1
-          : 0
-      );
-    }
-
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-
-      setHighlightedIndex((previous) =>
-        previous > 0
-          ? previous - 1
-          : sortedAndFilteredItems.length - 1
-      );
-    }
-
-    if (event.key === "Enter") {
-      event.preventDefault();
-
-      const selected =
-        sortedAndFilteredItems[highlightedIndex];
-
-      if (selected) selectItem(selected);
-    }
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      setOpen(false);
-    }
-  };
-
-  return (
-    <div
-      ref={dropdownRef}
-      className={`relative ${
-        open ? "z-[99999]" : "z-20"
-      }`}
-    >
-      <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[#475569] sm:text-sm">
-        {label}
-      </span>
-
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={(event) => {
-          event.stopPropagation();
-          setOpen((previous) => !previous);
-        }}
-        className="flex min-h-12 w-full items-center justify-between border border-[#CBD5E1] bg-white px-4 py-3 text-left text-sm font-semibold text-[#111827] outline-none transition hover:border-[#0F5FC5] focus:border-[#0F5FC5] focus:ring-2 focus:ring-[#0F5FC5]/10 disabled:cursor-not-allowed disabled:bg-[#F1F5F9] disabled:text-[#94A3B8]"
-      >
-        <span
-          className={`truncate ${
-            value ? "text-[#111827]" : "text-[#94A3B8]"
-          }`}
-        >
-          {value || placeholder}
-        </span>
-
-        <span
-          className={`ml-3 flex-none text-xs font-bold text-[#0F5FC5] transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-        >
-          ▼
-        </span>
-      </button>
-
-      {open && !disabled && (
-        <div
-          className="absolute left-0 right-0 top-full z-[99999] mt-1 border border-[#CBD5E1] bg-white p-2 shadow-[0_16px_40px_rgba(15,23,42,0.14)]"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <div className="mb-2 flex items-center border border-[#CBD5E1] bg-[#F8FAFC]">
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Search..."
-              className="h-10 min-w-0 flex-1 bg-transparent px-3 text-sm font-medium text-[#111827] outline-none placeholder:text-[#94A3B8]"
-            />
-
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="px-3 text-sm font-bold text-[#64748B] hover:text-[#0F5FC5]"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-
-          <div
-            ref={listRef}
-            className="max-h-56 overflow-y-auto"
-          >
-            {sortedAndFilteredItems.length === 0 ? (
-              <div className="px-3 py-5 text-center text-xs font-medium text-[#64748B]">
-                No results found.
-              </div>
-            ) : (
-              sortedAndFilteredItems.map((item, index) => {
-                const selected = value === item;
-                const highlighted =
-                  highlightedIndex === index;
-
-                return (
-                  <button
-                    key={item}
-                    type="button"
-                    data-wizard-item-index={index}
-                    onMouseEnter={() =>
-                      setHighlightedIndex(index)
-                    }
-                    onClick={() => selectItem(item)}
-                    className={`flex min-h-10 w-full items-center justify-between border-b border-[#E2E8F0] px-3 py-2 text-left text-sm font-semibold transition last:border-b-0 ${
-                      highlighted
-                        ? "bg-[#EFF6FF] text-[#0F5FC5]"
-                        : selected
-                        ? "bg-[#F8FAFC] text-[#111827]"
-                        : "text-[#334155] hover:bg-[#F8FAFC]"
-                    }`}
-                  >
-                    <span className="truncate">
-                      {item}
-                    </span>
-
-                    {selected && (
-                      <span className="ml-3 text-xs font-black text-[#0F5FC5]">
-                        Selected
-                      </span>
-                    )}
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+type RouteType = "earning" | "non-earning" | null;
 
 export default function WizardPage() {
   const router = useRouter();
+  const { profile, setProfile } = useJourney();
 
-  const { profile, setJourney } = useJourney();
-  const { t } = useTranslation();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [route, setRoute] = useState<RouteType>(null);
 
-  const [step, setStep] = useState(0);
-
-  const [data, setData] = useState<Data>(() =>
-    profile
-      ? {
-          ...INITIAL,
-          ...profile,
-          courseLocation:
-            profile.courseLocation ?? "india",
-        }
-      : INITIAL
+  const [annualIncome, setAnnualIncome] = useState(
+    profile?.annualIncome ? String(profile.annualIncome) : ""
   );
 
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [incomeProofName, setIncomeProofName] =
+    useState("");
 
-  const steps = [
-    t("wiz_step_0"),
-    t("wiz_step_1"),
-    t("wiz_step_2"),
-    t("wiz_step_3"),
-  ];
+  const [nonEarningPurpose, setNonEarningPurpose] =
+    useState<
+      "education" | "small-project" | null
+    >(null);
 
-  const purposes: {
-    id: Profile["purpose"];
-    label: string;
-    hint: string;
-  }[] = [
-    {
-      id: "business",
-      label: t("wiz_pur_biz"),
-      hint: t("wiz_pur_biz_hint"),
-    },
-    {
-      id: "agriculture",
-      label: t("wiz_pur_agri"),
-      hint: t("wiz_pur_agri_hint"),
-    },
-    {
-      id: "education",
-      label: t("wiz_pur_edu"),
-      hint: t("wiz_pur_edu_hint"),
-    },
-  ];
+  const [
+    videoAssessmentRequested,
+    setVideoAssessmentRequested,
+  ] = useState(false);
 
-  const stateList = Object.keys(LOCATIONS);
+  const [
+    verificationComplete,
+    setVerificationComplete,
+  ] = useState(false);
 
-  const districtList = data.state
-    ? LOCATIONS[data.state] ?? []
-    : [];
+  const [verificationMethod, setVerificationMethod] =
+    useState<"aadhaar" | "pan" | null>(null);
 
-  const update = <K extends keyof Data>(
-    key: K,
-    value: Data[K]
-  ) => {
-    setData((previous) => ({
-      ...previous,
-      [key]: value,
-    }));
-  };
+  const [otpSent, setOtpSent] = useState(false);
 
-  const onSelectPurpose = (
-    purpose: Profile["purpose"]
-  ) => {
-    let activity = data.activityType;
-    let cost = data.projectCost;
+  const [error, setError] = useState("");
 
-    if (purpose === "business") {
-      activity = BUSINESS_ACTIVITIES[0];
-      cost = 300000;
-    } else if (purpose === "agriculture") {
-      activity = AGRICULTURE_ACTIVITIES[0];
-      cost = 250000;
-    } else {
-      activity = EDUCATION_ACTIVITIES[0];
-      cost = 1000000;
-    }
+  const handleVerification = () => {
+    setError("");
 
-    setData((previous) => ({
-      ...previous,
-      purpose,
-      activityType: activity,
-      projectCost: cost,
-    }));
-  };
-
-  const nextStep = () => {
-    setError(null);
-
-    if (step === 0) {
-      if (!data.state) {
-        setError(
-          "Please select your state to continue."
-        );
-        return;
-      }
-
-      if (!data.district) {
-        setError(
-          "Please select your district to continue."
-        );
-        return;
-      }
-    }
-
-    setStep((previous) =>
-      Math.min(previous + 1, steps.length - 1)
-    );
-  };
-
-  const prevStep = () => {
-    setError(null);
-
-    setStep((previous) =>
-      Math.max(previous - 1, 0)
-    );
-  };
-
-  const onSubmit = async () => {
-    setError(null);
-    setSubmitting(true);
-
-    const finalProfile: Profile = {
-      state: data.state,
-      district: data.district,
-      category: data.category,
-      age: Number(data.age),
-      purpose: data.purpose,
-      activityType: data.activityType,
-      projectCost: Number(data.projectCost),
-      annualIncome: Number(data.annualIncome),
-      educationLevel: data.educationLevel,
-      courseLocation:
-        data.purpose === "education"
-          ? data.courseLocation
-          : undefined,
-    };
-
-    try {
-      const groqKey =
-        typeof window !== "undefined"
-          ? localStorage.getItem("groq-api-key") || ""
-          : "";
-
-      const response = await fetch(
-        "/api/recommend",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...finalProfile,
-            apiKey: groqKey,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Could not compute recommendation"
-        );
-      }
-
-      const json = await response.json();
-
-      setJourney({
-        profile: finalProfile,
-        recommendation: json.recommendation,
-      });
-
-      router.push("/recommendation");
-    } catch {
+    if (!verificationMethod) {
       setError(
-        "Failed to generate recommendation. Please check your network."
+        "Please select Aadhaar or PAN for identity verification."
       );
-      setSubmitting(false);
+      return;
+    }
+
+    if (!otpSent) {
+      setError(
+        "Please request the DigiLocker OTP before continuing."
+      );
+      return;
+    }
+
+    setVerificationComplete(true);
+    setCurrentStep(2);
+  };
+
+  const handleRouteContinue = () => {
+    setError("");
+
+    if (!route) {
+      setError("Please select your earning status.");
+      return;
+    }
+
+    if (route === "earning") {
+      const income = Number(annualIncome);
+
+      if (
+        !annualIncome ||
+        !Number.isFinite(income) ||
+        income <= 0
+      ) {
+        setError("Please enter a valid annual income.");
+        return;
+      }
+
+      if (!incomeProofName) {
+        setError(
+          "Please upload your bank income proof PDF."
+        );
+        return;
+      }
+
+      setProfile({
+        ...(profile || {}),
+        annualIncome: income,
+      } as typeof profile);
+
+      setCurrentStep(3);
+      return;
+    }
+
+    if (!nonEarningPurpose) {
+      setError(
+        "Please select Educational Loan or Small Project Loan."
+      );
+      return;
+    }
+
+    if (!videoAssessmentRequested) {
+      setError(
+        "Please request the NIRVAAN team video assessment before continuing."
+      );
+      return;
+    }
+
+    setCurrentStep(3);
+  };
+
+  const handleRecommender = () => {
+    setError("");
+    router.push("/recommendation");
+  };
+
+  const handleBack = () => {
+    setError("");
+
+    if (currentStep > 1) {
+      setCurrentStep((step) => step - 1);
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#F7F9FC] px-4 py-8 text-[#111827] sm:px-6 sm:py-12">
-      <div className="mx-auto w-full max-w-3xl">
+    <main className="min-h-screen bg-white">
+      {/* PAGE HEADER */}
+      <section className="border-b border-[#D9E0E7] bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-3">
+              <span className="h-[3px] w-10 bg-[#0077CC]" />
 
-        <header className="mb-8">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#0F5FC5]">
-            NIRVAAN
-          </p>
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#0077CC]">
+                NIRVAAN Assistance Journey
+              </p>
+            </div>
 
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#111827] sm:text-3xl">
-            Find the right scheme
-          </h1>
+            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-[#002244] sm:text-4xl">
+              Find the right financing pathway
+            </h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#64748B]">
-            Answer a few questions to identify the government
-            scheme that best matches your profile.
-          </p>
-        </header>
+            <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-[#667085]">
+              Complete the five-stage journey to verify your
+              identity, establish your earning status, discover a
+              suitable scheme, choose a loan amount and locate a
+              partner.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <section className="mb-6 border border-[#CBD5E1] bg-white">
-          <div className="grid grid-cols-4">
-            {steps.map((stepLabel, index) => {
-              const active = index === step;
-              const completed = index < step;
+      {/* PROGRESS TRACKER */}
+      <section className="border-b border-[#D9E0E7] bg-[#F7F9FB]">
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+          <div className="grid gap-px border border-[#CBD5E1] bg-[#CBD5E1] sm:grid-cols-5">
+            {STEPS.map((step, index) => {
+              const stepNumber = index + 1;
+              const active = currentStep === stepNumber;
+              const completed = currentStep > stepNumber;
 
               return (
-                <div
-                  key={stepLabel}
-                  className={`border-r border-[#E2E8F0] px-2 py-3 text-center last:border-r-0 sm:px-4 ${
-                    active
-                      ? "bg-[#EFF6FF]"
-                      : "bg-white"
-                  }`}
+                <button
+                  key={step.number}
+                  type="button"
+                  onClick={() => {
+                    if (completed) {
+                      setCurrentStep(stepNumber);
+                      setError("");
+                    }
+                  }}
+                  disabled={!completed && !active}
+                  className={[
+                    "min-h-[92px] bg-white px-4 py-4 text-left",
+                    "transition-colors",
+                    completed
+                      ? "cursor-pointer hover:bg-[#F0F7FC]"
+                      : "",
+                    active ? "bg-[#F0F7FC]" : "",
+                    !completed && !active
+                      ? "cursor-default opacity-70"
+                      : "",
+                  ].join(" ")}
                 >
-                  <div
-                    className={`mx-auto flex h-8 w-8 items-center justify-center border text-xs font-extrabold ${
-                      completed
-                        ? "border-[#0F5FC5] bg-[#0F5FC5] text-white"
-                        : active
-                        ? "border-[#0F5FC5] bg-white text-[#0F5FC5]"
-                        : "border-[#CBD5E1] bg-white text-[#64748B]"
-                    }`}
-                  >
-                    {completed ? "✓" : index + 1}
-                  </div>
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={[
+                        "flex h-8 w-8 shrink-0 items-center justify-center border text-[10px] font-extrabold",
+                        completed
+                          ? "border-[#0077CC] bg-[#0077CC] text-white"
+                          : active
+                            ? "border-[#0077CC] bg-white text-[#0077CC]"
+                            : "border-[#CBD5E1] bg-white text-[#8A96A6]",
+                      ].join(" ")}
+                    >
+                      {completed ? (
+                        <Check
+                          className="h-4 w-4"
+                          strokeWidth={3}
+                        />
+                      ) : (
+                        step.number
+                      )}
+                    </div>
 
-                  <p
-                    className={`mt-2 hidden text-[10px] font-semibold sm:block ${
-                      active
-                        ? "text-[#0F5FC5]"
-                        : "text-[#64748B]"
-                    }`}
-                  >
-                    {stepLabel}
-                  </p>
-                </div>
+                    <div className="min-w-0">
+                      <p
+                        className={[
+                          "text-xs font-extrabold",
+                          active || completed
+                            ? "text-[#002244]"
+                            : "text-[#667085]",
+                        ].join(" ")}
+                      >
+                        {step.title}
+                      </p>
+
+                      <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                </button>
               );
             })}
           </div>
+        </div>
+      </section>
 
-          <div className="h-1 bg-[#E2E8F0]">
-            <div
-              className="h-full bg-[#0F5FC5] transition-all duration-300"
-              style={{
-                width: `${(step / (steps.length - 1)) * 100}%`,
-              }}
-            />
-          </div>
-        </section>
-
-        <section className="border border-[#CBD5E1] bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
-
-          {error && (
-            <div className="mb-6 border border-[#F59E0B] bg-[#FFF7ED] px-4 py-3 text-sm font-semibold text-[#9A3412]">
-              {error}
-            </div>
-          )}
-
-          {step === 0 && (
-            <div className="space-y-7">
-
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
-                  Step 1
+      {/* MAIN CONTENT */}
+      <section className="bg-white">
+        <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+          {/* STEP 01 */}
+          {currentStep === 1 && (
+            <div className="border border-[#CBD5E1] bg-white">
+              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
+                  Step 01
                 </p>
 
-                <h2 className="mt-1 text-xl font-extrabold text-[#111827] sm:text-2xl">
-                  {t("wiz_title_0")}
+                <h2 className="mt-2 text-2xl font-extrabold text-white">
+                  Verification
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-[#64748B]">
-                  {t("wiz_sub_0")}
+                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
+                  Verify your identity before entering the scheme
+                  assistance journey.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className="p-6 sm:p-8">
+                <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#0077CC] bg-white">
+                      <ShieldCheck
+                        className="h-5 w-5 text-[#0077CC]"
+                        strokeWidth={2}
+                      />
+                    </div>
 
-                <AnimatedSelect
-                  label={t("wiz_state_lbl")}
-                  placeholder={t("wiz_state_ph")}
-                  value={data.state}
-                  items={stateList}
-                  onChange={(value) => {
-                    update("state", value);
+                    <div>
+                      <h3 className="text-sm font-extrabold text-[#002244]">
+                        DigiLocker OTP verification
+                      </h3>
 
-                    const districts =
-                      LOCATIONS[value] ?? [];
+                      <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
+                        Start with DigiLocker OTP verification,
+                        then link either Aadhaar or PAN for identity
+                        verification.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                    update(
-                      "district",
-                      districts[0] || ""
-                    );
-                  }}
-                />
+                <div className="mt-6">
+                  <p className="text-xs font-extrabold text-[#002244]">
+                    1. Verify through DigiLocker
+                  </p>
 
-                <AnimatedSelect
-                  label={t("wiz_dist_lbl")}
-                  placeholder={
-                    data.state
-                      ? t("wiz_dist_ph")
-                      : t("wiz_dist_wait")
-                  }
-                  value={data.district}
-                  items={districtList}
-                  disabled={!data.state}
-                  onChange={(value) =>
-                    update("district", value)
-                  }
-                />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpSent(true);
+                      setError("");
+                    }}
+                    className="mt-3 inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-6 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
+                  >
+                    {otpSent
+                      ? "OTP Requested"
+                      : "Request DigiLocker OTP"}
+                  </button>
 
-              </div>
-
-              <Field label={t("wiz_cat_lbl")}>
-                <div className="grid grid-cols-3 gap-3">
-                  {(["sc", "st", "obc"] as const).map(
-                    (category) => {
-                      const selected =
-                        data.category === category;
-
-                      return (
-                        <button
-                          key={category}
-                          type="button"
-                          onClick={() =>
-                            update(
-                              "category",
-                              category
-                            )
-                          }
-                          className={`min-h-12 border px-3 py-3 text-xs font-bold transition sm:text-sm ${
-                            selected
-                              ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
-                              : "border-[#CBD5E1] bg-white text-[#475569] hover:border-[#0F5FC5] hover:bg-[#F8FAFC]"
-                          }`}
-                        >
-                          {category === "sc"
-                            ? "SC"
-                            : category === "st"
-                            ? "ST"
-                            : "OBC / Gen"}
-                        </button>
-                      );
-                    }
+                  {otpSent && (
+                    <p className="mt-3 text-[10px] font-bold text-[#15803D]">
+                      DigiLocker OTP request recorded.
+                    </p>
                   )}
                 </div>
-              </Field>
 
-              <Field
-                label={`${t("wiz_age_lbl")} • ${data.age} ${t(
-                  "wiz_years"
-                )}`}
-              >
-                <input
-                  type="range"
-                  min={17}
-                  max={70}
-                  step={1}
-                  value={data.age}
-                  onChange={(event) =>
-                    update(
-                      "age",
-                      Number(event.target.value)
-                    )
-                  }
-                  className="h-2 w-full cursor-pointer accent-[#0F5FC5]"
-                />
+                <div className="mt-7 border-t border-[#D9E0E7] pt-6">
+                  <p className="text-xs font-extrabold text-[#002244]">
+                    2. Select identity document
+                  </p>
 
-                <div className="mt-2 flex justify-between text-xs font-semibold text-[#64748B]">
-                  <span>17 years</span>
-                  <span className="font-bold text-[#0F5FC5]">
-                    {data.age} years
-                  </span>
-                  <span>70 years</span>
-                </div>
-              </Field>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVerificationMethod("aadhaar");
+                        setError("");
+                      }}
+                      className={[
+                        "border p-5 text-left transition-colors",
+                        verificationMethod === "aadhaar"
+                          ? "border-[#0077CC] bg-[#F0F7FC]"
+                          : "border-[#CBD5E1] bg-white hover:border-[#0077CC]",
+                      ].join(" ")}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-extrabold text-[#002244]">
+                            Aadhaar
+                          </p>
 
-            </div>
-          )}{step === 1 && (
-            <div className="space-y-7">
+                          <p className="mt-1 text-[10px] font-medium leading-4 text-[#667085]">
+                            Link Aadhaar for identity verification.
+                          </p>
+                        </div>
 
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
-                  Step 2
-                </p>
-
-                <h2 className="mt-1 text-xl font-extrabold text-[#111827] sm:text-2xl">
-                  {t("wiz_title_1")}
-                </h2>
-
-                <p className="mt-2 text-sm leading-6 text-[#64748B]">
-                  {t("wiz_sub_1")}
-                </p>
-              </div>
-
-              <Field label="Purpose">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  {purposes.map((purpose) => {
-                    const selected =
-                      data.purpose === purpose.id;
-
-                    return (
-                      <button
-                        key={purpose.id}
-                        type="button"
-                        onClick={() =>
-                          onSelectPurpose(purpose.id)
-                        }
-                        className={`min-h-[120px] border p-4 text-left transition ${
-                          selected
-                            ? "border-[#0F5FC5] bg-[#EFF6FF]"
-                            : "border-[#CBD5E1] bg-white hover:border-[#0F5FC5] hover:bg-[#F8FAFC]"
-                        }`}
-                      >
-                        <span
-                          className={`block text-sm font-extrabold ${
-                            selected
-                              ? "text-[#0F5FC5]"
-                              : "text-[#111827]"
-                          }`}
-                        >
-                          {purpose.label}
-                        </span>
-
-                        <span className="mt-2 block text-xs leading-5 text-[#64748B]">
-                          {purpose.hint}
-                        </span>
-
-                        {selected && (
-                          <span className="mt-4 block text-[10px] font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
-                            Selected
-                          </span>
+                        {verificationMethod === "aadhaar" && (
+                          <Check
+                            className="h-4 w-4 shrink-0 text-[#0077CC]"
+                            strokeWidth={2.5}
+                          />
                         )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-
-              <div>
-                {data.purpose === "business" && (
-                  <AnimatedSelect
-                    label={t("wiz_act_select")}
-                    placeholder={t("wiz_act_ph")}
-                    value={data.activityType}
-                    items={BUSINESS_ACTIVITIES}
-                    onChange={(value) =>
-                      update("activityType", value)
-                    }
-                  />
-                )}
-
-                {data.purpose === "agriculture" && (
-                  <AnimatedSelect
-                    label={t("wiz_act_select")}
-                    placeholder={t("wiz_act_ph")}
-                    value={data.activityType}
-                    items={AGRICULTURE_ACTIVITIES}
-                    onChange={(value) =>
-                      update("activityType", value)
-                    }
-                  />
-                )}
-
-                {data.purpose === "education" && (
-                  <div className="space-y-5">
-
-                    <AnimatedSelect
-                      label={t("wiz_act_edu_select")}
-                      placeholder={t("wiz_act_ph")}
-                      value={data.activityType}
-                      items={EDUCATION_ACTIVITIES}
-                      onChange={(value) =>
-                        update(
-                          "activityType",
-                          value
-                        )
-                      }
-                    />
-
-                    <Field label={t("wiz_course_loc")}>
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            update(
-                              "courseLocation",
-                              "india"
-                            )
-                          }
-                          className={`min-h-12 border px-4 py-3 text-sm font-bold transition ${
-                            data.courseLocation ===
-                            "india"
-                              ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
-                              : "border-[#CBD5E1] bg-white text-[#475569] hover:border-[#0F5FC5]"
-                          }`}
-                        >
-                          {t("wiz_course_in")}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            update(
-                              "courseLocation",
-                              "abroad"
-                            )
-                          }
-                          className={`min-h-12 border px-4 py-3 text-sm font-bold transition ${
-                            data.courseLocation ===
-                            "abroad"
-                              ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
-                              : "border-[#CBD5E1] bg-white text-[#475569] hover:border-[#0F5FC5]"
-                          }`}
-                        >
-                          {t("wiz_course_ab")}
-                        </button>
-
                       </div>
-                    </Field>
+                    </button>
 
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVerificationMethod("pan");
+                        setError("");
+                      }}
+                      className={[
+                        "border p-5 text-left transition-colors",
+                        verificationMethod === "pan"
+                          ? "border-[#0077CC] bg-[#F0F7FC]"
+                          : "border-[#CBD5E1] bg-white hover:border-[#0077CC]",
+                      ].join(" ")}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-extrabold text-[#002244]">
+                            PAN
+                          </p>
+
+                          <p className="mt-1 text-[10px] font-medium leading-4 text-[#667085]">
+                            Link PAN for identity verification.
+                          </p>
+                        </div>
+
+                        {verificationMethod === "pan" && (
+                          <Check
+                            className="h-4 w-4 shrink-0 text-[#0077CC]"
+                            strokeWidth={2.5}
+                          />
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {verificationMethod && otpSent && (
+                  <div className="mt-6 border-l-[3px] border-[#16A34A] bg-[#F0FDF4] px-5 py-4">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#15803D]">
+                      Ready for verification
+                    </p>
+
+                    <p className="mt-1 text-xs font-semibold text-[#166534]">
+                      {verificationMethod === "aadhaar"
+                        ? "Aadhaar"
+                        : "PAN"}{" "}
+                      selected for identity verification.
+                    </p>
                   </div>
                 )}
-              </div>
 
+                {error && (
+                  <div className="mt-6 border-l-[3px] border-[#DC2626] bg-[#FEF2F2] px-5 py-4">
+                    <p className="text-xs font-bold text-[#B91C1C]">
+                      {error}
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-7 flex justify-end border-t border-[#D9E0E7] pt-6">
+                  <button
+                    type="button"
+                    onClick={handleVerification}
+                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
+                  >
+                    Continue to Earning Status
+                    <ArrowRight
+                      className="ml-3 h-4 w-4"
+                      strokeWidth={2}
+                    />
+                  </button>
+                </div>
+              </div>
             </div>
           )}
-
-          {step === 2 && (
-            <div className="space-y-7">
-
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
-                  Step 3
+                    {/* STEP 02 */}
+          {currentStep === 2 && (
+            <div className="border border-[#CBD5E1] bg-white">
+              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
+                  Step 02
                 </p>
 
-                <h2 className="mt-1 text-xl font-extrabold text-[#111827] sm:text-2xl">
-                  {t("wiz_title_2")}
+                <h2 className="mt-2 text-2xl font-extrabold text-white">
+                  Earning Status
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-[#64748B]">
-                  {t("wiz_sub_2")}
+                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
+                  Tell us about your current earning situation so
+                  NIRVAAN can take you through the appropriate
+                  assessment route.
                 </p>
               </div>
 
-              <Field
-                label={t("wiz_cost_lbl")}
-              >
-                <div className="border border-[#CBD5E1] bg-[#F8FAFC] p-4">
+              <div className="p-6 sm:p-8">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRoute("earning");
+                      setError("");
+                    }}
+                    className={[
+                      "border p-6 text-left transition-colors",
+                      route === "earning"
+                        ? "border-[#0077CC] bg-[#F0F7FC]"
+                        : "border-[#CBD5E1] bg-white hover:border-[#0077CC]",
+                    ].join(" ")}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
+                          Route A
+                        </p>
 
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-sm font-semibold text-[#475569]">
-                      {data.purpose === "education"
-                        ? t("wiz_course_cost_lbl")
-                        : t("wiz_cost_lbl")}
-                    </span>
+                        <h3 className="mt-2 text-xl font-extrabold text-[#002244]">
+                          Earning
+                        </h3>
 
-                    <span className="text-xl font-extrabold text-[#0F5FC5]">
-                      {formatINR(data.projectCost)}
-                    </span>
-                  </div>
+                        <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                          For applicants who currently have an
+                          income and can provide bank income proof.
+                        </p>
+                      </div>
 
-                  <input
-                    type="range"
-                    min={10000}
-                    max={
-                      data.purpose === "education"
-                        ? data.courseLocation ===
-                          "abroad"
-                          ? 4000000
-                          : 2500000
-                        : 5000000
-                    }
-                    step={10000}
-                    value={data.projectCost}
-                    onChange={(event) =>
-                      update(
-                        "projectCost",
-                        Number(event.target.value)
-                      )
-                    }
-                    className="mt-5 h-2 w-full cursor-pointer accent-[#0F5FC5]"
-                  />
-
-                  <div className="mt-2 flex justify-between text-[11px] font-semibold text-[#64748B]">
-                    <span>₹10,000</span>
-
-                    <span className="text-[#0F5FC5]">
-                      {t("wiz_financed_lbl")}{" "}
-                      {formatINR(
-                        Math.round(
-                          data.projectCost * 0.9
-                        )
+                      {route === "earning" && (
+                        <Check
+                          className="h-5 w-5 shrink-0 text-[#0077CC]"
+                          strokeWidth={2.5}
+                        />
                       )}
-                    </span>
+                    </div>
+                  </button>
 
-                    <span>
-                      {formatINR(
-                        data.purpose === "education"
-                          ? data.courseLocation ===
-                            "abroad"
-                            ? 4000000
-                            : 2500000
-                          : 5000000
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRoute("non-earning");
+                      setError("");
+                    }}
+                    className={[
+                      "border p-6 text-left transition-colors",
+                      route === "non-earning"
+                        ? "border-[#E87512] bg-[#FFF8F1]"
+                        : "border-[#CBD5E1] bg-white hover:border-[#E87512]",
+                    ].join(" ")}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#E87512]">
+                          Route B
+                        </p>
+
+                        <h3 className="mt-2 text-xl font-extrabold text-[#002244]">
+                          Non-Earning
+                        </h3>
+
+                        <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                          For applicants who are not currently
+                          earning and need an educational or
+                          small-project financing pathway.
+                        </p>
+                      </div>
+
+                      {route === "non-earning" && (
+                        <Check
+                          className="h-5 w-5 shrink-0 text-[#E87512]"
+                          strokeWidth={2.5}
+                        />
                       )}
-                    </span>
-                  </div>
-
+                    </div>
+                  </button>
                 </div>
-              </Field>
 
-              <Field label={t("wiz_income_lbl")}>
-                <div className="border border-[#CBD5E1] bg-[#F8FAFC] p-4">
+                {/* EARNING ROUTE */}
+                {route === "earning" && (
+                  <div className="mt-6 border border-[#CBD5E1] bg-[#F7F9FB] p-6">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
+                      Earning route
+                    </p>
 
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-sm font-semibold text-[#475569]">
-                      Annual family income
-                    </span>
+                    <h3 className="mt-2 text-lg font-extrabold text-[#002244]">
+                      Income verification
+                    </h3>
 
-                    <span className="text-xl font-extrabold text-[#0F5FC5]">
-                      {formatINR(data.annualIncome)}
-                      /yr
-                    </span>
+                    <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#667085]">
+                      Enter your annual income and upload your
+                      bank income proof as a PDF. The information
+                      will be used as part of your verified
+                      assessment.
+                    </p>
+
+                    <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                      <div>
+                        <label
+                          htmlFor="annual-income"
+                          className="text-xs font-extrabold text-[#002244]"
+                        >
+                          Annual income
+                        </label>
+
+                        <div className="mt-2 flex border border-[#B9C4D1] bg-white focus-within:border-[#0077CC]">
+                          <span className="flex items-center border-r border-[#B9C4D1] px-3 text-sm font-bold text-[#526071]">
+                            ₹
+                          </span>
+
+                          <input
+                            id="annual-income"
+                            type="number"
+                            min="1"
+                            inputMode="numeric"
+                            value={annualIncome}
+                            onChange={(event) => {
+                              setAnnualIncome(
+                                event.target.value
+                              );
+                              setError("");
+                            }}
+                            placeholder="Enter annual income"
+                            className="min-h-[46px] min-w-0 flex-1 border-0 bg-white px-3 text-sm font-medium text-[#111827] outline-none placeholder:text-[#8A96A6]"
+                          />
+                        </div>
+
+                        <p className="mt-2 text-[10px] font-medium leading-4 text-[#7A8797]">
+                          Enter the annual income supported by
+                          your financial records.
+                        </p>
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="income-proof"
+                          className="text-xs font-extrabold text-[#002244]"
+                        >
+                          Bank income proof
+                        </label>
+
+                        <label
+                          htmlFor="income-proof"
+                          className="mt-2 flex min-h-[46px] cursor-pointer items-center border border-dashed border-[#B9C4D1] bg-white px-4 transition-colors hover:border-[#0077CC]"
+                        >
+                          <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[#526071]">
+                            {incomeProofName ||
+                              "Choose PDF document"}
+                          </span>
+
+                          <span className="ml-3 shrink-0 border border-[#CBD5E1] bg-[#F7F9FB] px-3 py-2 text-[10px] font-bold text-[#002244]">
+                            Browse
+                          </span>
+                        </label>
+
+                        <input
+                          id="income-proof"
+                          type="file"
+                          accept="application/pdf,.pdf"
+                          className="sr-only"
+                          onChange={(event) => {
+                            const file =
+                              event.target.files?.[0];
+
+                            if (!file) {
+                              setIncomeProofName("");
+                              return;
+                            }
+
+                            const isPdf =
+                              file.type ===
+                                "application/pdf" ||
+                              file.name
+                                .toLowerCase()
+                                .endsWith(".pdf");
+
+                            if (!isPdf) {
+                              setIncomeProofName("");
+                              setError(
+                                "Please upload your income proof as a PDF."
+                              );
+                              return;
+                            }
+
+                            setIncomeProofName(file.name);
+                            setError("");
+                          }}
+                        />
+
+                        <p className="mt-2 text-[10px] font-medium leading-4 text-[#7A8797]">
+                          PDF format required.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 border-l-[3px] border-[#E87512] bg-white px-5 py-4">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
+                        Income assessment
+                      </p>
+
+                      <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
+                        Your submitted income information and
+                        proof will be checked before you proceed
+                        to scheme matching.
+                      </p>
+                    </div>
                   </div>
+                )}
 
-                  <input
-                    type="range"
-                    min={50000}
-                    max={1200000}
-                    step={10000}
-                    value={data.annualIncome}
-                    onChange={(event) =>
-                      update(
-                        "annualIncome",
-                        Number(event.target.value)
-                      )
-                    }
-                    className="mt-5 h-2 w-full cursor-pointer accent-[#0F5FC5]"
-                  />
+                {/* NON-EARNING ROUTE */}
+                {route === "non-earning" && (
+                  <div className="mt-6 border border-[#CBD5E1] bg-[#F7F9FB] p-6">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#E87512]">
+                      Non-earning route
+                    </p>
 
-                  <div className="mt-2 flex justify-between text-[11px] font-semibold text-[#64748B]">
-                    <span>₹50,000/yr</span>
-                    <span>₹12,00,000/yr</span>
+                    <h3 className="mt-2 text-lg font-extrabold text-[#002244]">
+                      Choose your financing purpose
+                    </h3>
+
+                    <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#667085]">
+                      Non-earning applicants are not rejected
+                      immediately. Select the relevant pathway
+                      and request a video assessment with the
+                      NIRVAAN team.
+                    </p>
+
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNonEarningPurpose("education");
+                          setError("");
+                        }}
+                        className={[
+                          "border p-5 text-left transition-colors",
+                          nonEarningPurpose === "education"
+                            ? "border-[#0077CC] bg-white"
+                            : "border-[#CBD5E1] bg-white hover:border-[#0077CC]",
+                        ].join(" ")}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h4 className="text-sm font-extrabold text-[#002244]">
+                              Educational Loan
+                            </h4>
+
+                            <p className="mt-1 text-[10px] font-medium leading-4 text-[#667085]">
+                              Financing pathway for eligible
+                              education-related needs.
+                            </p>
+                          </div>
+
+                          {nonEarningPurpose === "education" && (
+                            <Check
+                              className="h-4 w-4 shrink-0 text-[#0077CC]"
+                              strokeWidth={2.5}
+                            />
+                          )}
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNonEarningPurpose(
+                            "small-project"
+                          );
+                          setError("");
+                        }}
+                        className={[
+                          "border p-5 text-left transition-colors",
+                          nonEarningPurpose ===
+                          "small-project"
+                            ? "border-[#E87512] bg-white"
+                            : "border-[#CBD5E1] bg-white hover:border-[#E87512]",
+                        ].join(" ")}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h4 className="text-sm font-extrabold text-[#002244]">
+                              Small Project Loan
+                            </h4>
+
+                            <p className="mt-1 text-[10px] font-medium leading-4 text-[#667085]">
+                              For currently non-earning
+                              entrepreneurs with a project plan.
+                            </p>
+                          </div>
+
+                          {nonEarningPurpose ===
+                            "small-project" && (
+                            <Check
+                              className="h-4 w-4 shrink-0 text-[#E87512]"
+                              strokeWidth={2.5}
+                            />
+                          )}
+                        </div>
+                      </button>
+                    </div>
+
+                    <div className="mt-6 border border-[#CBD5E1] bg-white p-5">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
+                        NIRVAAN team assessment
+                      </p>
+
+                      <h4 className="mt-2 text-sm font-extrabold text-[#002244]">
+                        Video call before scheme matching
+                      </h4>
+
+                      <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                        During the video call, the team will ask
+                        why the money is needed, your plans, the
+                        amount required, your repayment plan and
+                        guarantor details.
+                      </p>
+
+                      <p className="mt-3 text-xs font-medium leading-5 text-[#667085]">
+                        The submitted claims and guarantor
+                        information are then assessed, including
+                        whether the guarantor is genuine or
+                        whether suitable legal security can be
+                        provided.
+                      </p>
+
+                      <label className="mt-5 flex cursor-pointer items-start gap-3 border border-[#CBD5E1] bg-[#F7F9FB] p-4">
+                        <input
+                          type="checkbox"
+                          checked={
+                            videoAssessmentRequested
+                          }
+                          onChange={(event) => {
+                            setVideoAssessmentRequested(
+                              event.target.checked
+                            );
+                            setError("");
+                          }}
+                          className="mt-0.5 h-4 w-4 shrink-0 accent-[#0077CC]"
+                        />
+
+                        <span>
+                          <span className="block text-xs font-extrabold text-[#002244]">
+                            Request NIRVAAN team video
+                            assessment
+                          </span>
+
+                          <span className="mt-1 block text-[10px] font-medium leading-4 text-[#667085]">
+                            I understand that this assessment is
+                            required before proceeding.
+                          </span>
+                        </span>
+                      </label>
+                    </div>
                   </div>
+                )}
 
-                  <div className="mt-4 border-l-2 border-[#E87512] bg-[#FFF7ED] px-3 py-2">
-                    <p className="text-xs font-semibold leading-5 text-[#9A3412]">
-                      {t("wiz_income_rule")}
+                {error && (
+                  <div className="mt-6 border-l-[3px] border-[#DC2626] bg-[#FEF2F2] px-5 py-4">
+                    <p className="text-xs font-bold text-[#B91C1C]">
+                      {error}
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-7 flex flex-col gap-3 border-t border-[#D9E0E7] pt-6 sm:flex-row sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="min-h-[44px] border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
+                  >
+                    ← Back
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleRouteContinue}
+                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
+                  >
+                    Continue to Smart Scheme Recommender
+                    <ArrowRight
+                      className="ml-3 h-4 w-4"
+                      strokeWidth={2}
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+                    {/* STEP 03 */}
+          {currentStep === 3 && (
+            <div className="border border-[#CBD5E1] bg-white">
+              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
+                  Step 03
+                </p>
+
+                <h2 className="mt-2 text-2xl font-extrabold text-white">
+                  Smart Scheme Recommender
+                </h2>
+
+                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
+                  Use AI-assisted scheme matching to identify a
+                  suitable scheme and maximum loan amount.
+                </p>
+              </div>
+
+              <div className="p-6 sm:p-8">
+                <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-6">
+                  <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-start">
+                    <div className="flex h-14 w-14 items-center justify-center border border-[#0077CC] bg-white">
+                      <span className="text-lg font-extrabold text-[#0077CC]">
+                        AI
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
+                        AI-assisted matching
+                      </p>
+
+                      <h3 className="mt-2 text-xl font-extrabold text-[#002244]">
+                        Match your verified profile with
+                        suitable schemes
+                      </h3>
+
+                      <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#667085]">
+                        The Smart Scheme Recommender uses the
+                        information available from your journey
+                        to identify suitable financing options and
+                        determine the maximum loan amount
+                        associated with the recommendation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                  <div className="border border-[#CBD5E1] bg-white p-5">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                      Profile
+                    </p>
+
+                    <p className="mt-2 text-sm font-extrabold text-[#002244]">
+                      Verified context
+                    </p>
+
+                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
+                      Identity and earning-status information.
                     </p>
                   </div>
 
+                  <div className="border border-[#CBD5E1] bg-white p-5">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                      AI
+                    </p>
+
+                    <p className="mt-2 text-sm font-extrabold text-[#002244]">
+                      Scheme matching
+                    </p>
+
+                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
+                      Suitable scheme options based on the
+                      available profile information.
+                    </p>
+                  </div>
+
+                  <div className="border border-[#CBD5E1] bg-white p-5">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                      Output
+                    </p>
+
+                    <p className="mt-2 text-sm font-extrabold text-[#002244]">
+                      Maximum loan amount
+                    </p>
+
+                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
+                      Used as the upper limit in the next stage.
+                    </p>
+                  </div>
                 </div>
-              </Field>
 
-            </div>
-          )}
+                <div className="mt-6 border-l-[3px] border-[#E87512] bg-[#FFF8F1] px-5 py-4">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
+                    Important
+                  </p>
 
-          {step === 3 && (
-            <div className="space-y-7">
-
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#0F5FC5]">
-                  Step 4
-                </p>
-
-                <h2 className="mt-1 text-xl font-extrabold text-[#111827] sm:text-2xl">
-                  {t("wiz_title_3")}
-                </h2>
-
-                <p className="mt-2 text-sm leading-6 text-[#64748B]">
-                  {t("wiz_sub_3")}
-                </p>
-              </div>
-
-              <AnimatedSelect
-                label={t("wiz_edu_lbl")}
-                placeholder={t("wiz_edu_ph")}
-                value={
-                  EDUCATION_LEVELS.find(
-                    (level) =>
-                      level.id ===
-                      data.educationLevel
-                  )?.label || "10th – 12th"
-                }
-                items={EDUCATION_LEVELS.map(
-                  (level) => level.label
-                )}
-                onChange={(value) => {
-                  const found =
-                    EDUCATION_LEVELS.find(
-                      (level) =>
-                        level.label === value
-                    );
-
-                  if (found) {
-                    update(
-                      "educationLevel",
-                      found.id
-                    );
-                  }
-                }}
-              />
-
-              <div className="border border-[#CBD5E1] bg-[#F8FAFC]">
-
-                <div className="border-b border-[#CBD5E1] bg-white px-4 py-3">
-                  <p className="text-xs font-bold uppercase tracking-[0.1em] text-[#0F5FC5]">
-                    {t("wiz_profile_sum")}
+                  <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                    A recommendation is intended to assist with
+                    scheme discovery. Final eligibility,
+                    sanctioned amount and approval are determined
+                    by the applicable scheme rules and concerned
+                    institution.
                   </p>
                 </div>
 
-                <div className="divide-y divide-[#E2E8F0]">
-
-                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-xs font-medium text-[#64748B]">
-                      {t("wiz_sum_loc")}
-                    </span>
-
-                    <span className="text-sm font-bold text-[#111827]">
-                      {data.district},{" "}
-                      {data.state}
-                    </span>
+                {error && (
+                  <div className="mt-6 border-l-[3px] border-[#DC2626] bg-[#FEF2F2] px-5 py-4">
+                    <p className="text-xs font-bold text-[#B91C1C]">
+                      {error}
+                    </p>
                   </div>
+                )}
 
-                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-xs font-medium text-[#64748B]">
-                      {t("wiz_sum_pur")}
-                    </span>
+                <div className="mt-7 flex flex-col gap-3 border-t border-[#D9E0E7] pt-6 sm:flex-row sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrentStep(2);
+                      setError("");
+                    }}
+                    className="min-h-[44px] border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
+                  >
+                    ← Back
+                  </button>
 
-                    <span className="text-sm font-bold text-[#111827]">
-                      {data.activityType}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-xs font-medium text-[#64748B]">
-                      {t("wiz_sum_cost")}
-                    </span>
-
-                    <span className="text-sm font-bold text-[#0F5FC5]">
-                      {formatINR(
-                        data.projectCost
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-xs font-medium text-[#64748B]">
-                      {t("wiz_sum_inc")}
-                    </span>
-
-                    <span className="text-sm font-bold text-[#111827]">
-                      {formatINR(
-                        data.annualIncome
-                      )}
-                      /yr
-                    </span>
-                  </div>
-
+                  <button
+                    type="button"
+                    onClick={handleRecommender}
+                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
+                  >
+                    Open Smart Scheme Recommender
+                    <ArrowRight
+                      className="ml-3 h-4 w-4"
+                      strokeWidth={2}
+                    />
+                  </button>
                 </div>
               </div>
-
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-between gap-3 border-t border-[#E2E8F0] pt-5">
+          {/* STEP 04 */}
+          {currentStep === 4 && (
+            <div className="border border-[#CBD5E1] bg-white">
+              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
+                  Step 04
+                </p>
 
-            {step > 0 ? (
-              <button
-                type="button"
-                onClick={prevStep}
-                disabled={submitting}
-                className="min-h-11 border border-[#CBD5E1] bg-white px-5 text-sm font-bold text-[#475569] transition hover:border-[#0F5FC5] hover:bg-[#F8FAFC] hover:text-[#0F5FC5] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {t("wiz_btn_back")}
-              </button>
-            ) : (
-              <div />
-            )}
+                <h2 className="mt-2 text-2xl font-extrabold text-white">
+                  Financial Calculator
+                </h2>
 
-            {step < steps.length - 1 ? (
-              <button
-                type="button"
-                onClick={nextStep}
-                className="min-h-11 border border-[#0F5FC5] bg-[#0F5FC5] px-6 text-sm font-bold text-white transition hover:bg-[#0B4FA7]"
-              >
-                {t("wiz_btn_continue")}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onSubmit}
-                disabled={submitting}
-                className="min-h-11 border border-[#E87512] bg-[#E87512] px-6 text-sm font-bold text-white transition hover:bg-[#C95F0A] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {submitting
-                  ? t("wiz_btn_analyzing")
-                  : t("wiz_btn_submit")}
-              </button>
-            )}
+                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
+                  Choose a loan amount within the maximum amount
+                  returned by the Smart Scheme Recommender.
+                </p>
+              </div>
 
+              <div className="p-6 sm:p-8">
+                <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-6">
+                  <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-start">
+                    <div className="flex h-14 w-14 items-center justify-center border border-[#0077CC] bg-white">
+                      <span className="text-lg font-extrabold text-[#0077CC]">
+                        ₹
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#0077CC]">
+                        Financial planning
+                      </p>
+
+                      <h3 className="mt-2 text-xl font-extrabold text-[#002244]">
+                        Select the loan amount you need
+                      </h3>
+
+                      <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#667085]">
+                        The Financial Calculator uses ₹50,000
+                        increments. Available options begin at
+                        ₹50,000 and continue until the maximum
+                        amount returned by the recommender.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                  <div className="border border-[#CBD5E1] bg-white p-5">
+                    <p className="text-2xl font-extrabold text-[#0077CC]">
+                      ₹50K
+                    </p>
+
+                    <p className="mt-2 text-xs font-extrabold text-[#002244]">
+                      Starting amount
+                    </p>
+
+                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
+                      The first available selection.
+                    </p>
+                  </div>
+
+                  <div className="border border-[#CBD5E1] bg-white p-5">
+                    <p className="text-2xl font-extrabold text-[#0077CC]">
+                      +₹50K
+                    </p>
+
+                    <p className="mt-2 text-xs font-extrabold text-[#002244]">
+                      Fixed increments
+                    </p>
+
+                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
+                      Each option increases by ₹50,000.
+                    </p>
+                  </div>
+
+                  <div className="border border-[#CBD5E1] bg-white p-5">
+                    <p className="text-2xl font-extrabold text-[#E87512]">
+                      MAX
+                    </p>
+
+                    <p className="mt-2 text-xs font-extrabold text-[#002244]">
+                      Maximum selectable amount
+                    </p>
+
+                    <p className="mt-1 text-[10px] font-medium leading-4 text-[#7A8797]">
+                      The recommended maximum remains
+                      selectable.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 border-l-[3px] border-[#E87512] bg-[#FFF8F1] px-5 py-4">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
+                    Example
+                  </p>
+
+                  <p className="mt-2 text-xs font-semibold leading-5 text-[#667085]">
+                    If the maximum amount is ₹4,00,000, the
+                    available choices are ₹50,000, ₹1,00,000,
+                    ₹1,50,000, ₹2,00,000, ₹2,50,000, ₹3,00,000,
+                    ₹3,50,000 and ₹4,00,000.
+                  </p>
+                </div>
+
+                <div className="mt-7 flex flex-col gap-3 border-t border-[#D9E0E7] pt-6 sm:flex-row sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrentStep(3);
+                      setError("");
+                    }}
+                    className="min-h-[44px] border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
+                  >
+                    ← Back
+                  </button>
+
+                  <Link
+                    href="/calculator"
+                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
+                  >
+                    Open Financial Calculator
+                    <ArrowRight
+                      className="ml-3 h-4 w-4"
+                      strokeWidth={2}
+                    />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+                    {/* STEP 05 */}
+          {currentStep === 5 && (
+            <div className="border border-[#CBD5E1] bg-white">
+              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-6 sm:px-8">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9CC8EA]">
+                  Step 05
+                </p>
+
+                <h2 className="mt-2 text-2xl font-extrabold text-white">
+                  Geo-Spatial Partner Locator &amp; Router
+                </h2>
+
+                <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#D8E4F0]">
+                  Find partner locations, select a suitable partner
+                  and plan your route.
+                </p>
+              </div>
+
+              <div className="p-6 sm:p-8">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
+                    <p className="text-2xl font-extrabold text-[#0077CC]">
+                      01
+                    </p>
+
+                    <h3 className="mt-3 text-sm font-extrabold text-[#002244]">
+                      Satellite Map
+                    </h3>
+
+                    <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                      View available partner locations across
+                      India on a satellite map.
+                    </p>
+                  </div>
+
+                  <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
+                    <p className="text-2xl font-extrabold text-[#0077CC]">
+                      02
+                    </p>
+
+                    <h3 className="mt-3 text-sm font-extrabold text-[#002244]">
+                      Partner Selection
+                    </h3>
+
+                    <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                      Search the network and select a partner
+                      location that suits your journey.
+                    </p>
+                  </div>
+
+                  <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
+                    <p className="text-2xl font-extrabold text-[#E87512]">
+                      03
+                    </p>
+
+                    <h3 className="mt-3 text-sm font-extrabold text-[#002244]">
+                      Routing
+                    </h3>
+
+                    <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+                      Plan directions to your selected partner
+                      location.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 border border-[#CBD5E1] bg-white p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#0077CC] bg-[#F0F7FC]">
+                      <span className="text-[9px] font-extrabold tracking-wide text-[#0077CC]">
+                        MAP
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-extrabold text-[#002244]">
+                        Full partner network
+                      </p>
+
+                      <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
+                        The locator initially shows the available
+                        partner network with the district filter
+                        set to All. You can narrow the results
+                        after opening the locator.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-7 flex flex-col gap-3 border-t border-[#D9E0E7] pt-6 sm:flex-row sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrentStep(4);
+                      setError("");
+                    }}
+                    className="min-h-[44px] border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
+                  >
+                    ← Back
+                  </button>
+
+                  <Link
+                    href="/locator"
+                    className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
+                  >
+                    Open Partner Locator &amp; Router
+                    <ArrowRight
+                      className="ml-3 h-4 w-4"
+                      strokeWidth={2}
+                    />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* JOURNEY TOOLS */}
+          {currentStep >= 3 && (
+            <div className="mt-6 border border-[#CBD5E1] bg-[#F7F9FB] p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#667085]">
+                    Journey tools
+                  </p>
+
+                  <p className="mt-1 text-xs font-semibold text-[#526071]">
+                    Open any completed or current tool directly.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href="/recommendation"
+                    className="border border-[#CBD5E1] bg-white px-4 py-2 text-[10px] font-bold text-[#002244] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
+                  >
+                    Smart Recommender
+                  </Link>
+
+                  <Link
+                    href="/calculator"
+                    className="border border-[#CBD5E1] bg-white px-4 py-2 text-[10px] font-bold text-[#002244] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
+                  >
+                    Financial Calculator
+                  </Link>
+
+                  <Link
+                    href="/locator"
+                    className="border border-[#0077CC] bg-white px-4 py-2 text-[10px] font-bold text-[#0077CC] transition-colors hover:bg-[#F0F7FC]"
+                  >
+                    Partner Locator
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PLATFORM NOTICE */}
+          <div className="mt-8 border-l-[3px] border-[#E87512] bg-[#FFF8F1] px-5 py-4">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
+              Important information
+            </p>
+
+            <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+              NIRVAAN is an independent platform for scheme
+              discovery and application assistance. It does not
+              represent, operate or speak on behalf of any
+              government department, bank, financial institution
+              or scheme authority. Eligibility, loan limits,
+              interest rates and final approval are subject to
+              the applicable rules and the concerned institution.
+            </p>
           </div>
 
-        </section>
-
-        <p className="mt-5 text-center text-[11px] font-medium text-[#94A3B8]">
-          Your information is used only to identify suitable government schemes.
-        </p>
-
-      </div>
+          {/* RETURN HOME */}
+          <div className="mt-8 flex justify-center">
+            <Link
+              href="/"
+              className="inline-flex min-h-[44px] items-center justify-center border border-[#B9C4D1] bg-white px-6 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
+            >
+              Return to NIRVAAN Home
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
-    }
+}
