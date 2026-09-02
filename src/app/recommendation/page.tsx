@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight,
+  Check,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 
 import { useJourney } from "@/context/JourneyContext";
 import { formatINR } from "@/lib/format";
@@ -15,7 +21,11 @@ interface Explanation {
 
 export default function RecommendationPage() {
   const router = useRouter();
-  const { profile, recommendation, ready } = useJourney();
+  const {
+    profile,
+    recommendation,
+    ready,
+  } = useJourney();
 
   const [ai, setAi] = useState<Explanation | null>(() => {
     if (recommendation?.aiExplanation) {
@@ -32,19 +42,11 @@ export default function RecommendationPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const requested = useRef(false);
 
-  /* =========================================================
-     REDIRECT IF NO RECOMMENDATION EXISTS
-     ========================================================= */
-
   useEffect(() => {
     if (ready && !recommendation) {
       router.replace("/wizard");
     }
   }, [ready, recommendation, router]);
-
-  /* =========================================================
-     AI EXPLANATION
-     ========================================================= */
 
   useEffect(() => {
     if (!profile || !recommendation || requested.current) {
@@ -86,14 +88,20 @@ export default function RecommendationPage() {
         apiKey: storedKey,
       }),
     })
-      .then((response) => response.json())
-      .then((data) => {
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Unable to load explanation");
+        }
+
+        return response.json();
+      })
+      .then((data: Explanation) => {
         setAi(data);
       })
       .catch(() => {
         setAi({
           explanation:
-            "The AI explanation could not be loaded right now. Your scheme recommendation is still available based on the eligibility assessment.",
+            "The recommendation is available, but the AI explanation could not be loaded right now.",
           tips: [],
           source: "fallback",
         });
@@ -103,552 +111,496 @@ export default function RecommendationPage() {
       });
   }, [profile, recommendation]);
 
-  /* =========================================================
-     LOADING
-     ========================================================= */
-
   if (!ready || !recommendation || !profile) {
     return (
-      <main className="min-h-screen bg-[#F7F9FC] px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl border border-[#CBD5E1] bg-white">
-          <div className="border-b border-[#CBD5E1] bg-[#0F294A] px-6 py-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white">
-              NIRVAAN
-            </p>
+      <main className="min-h-screen bg-white">
+        <section className="border-b border-[#D9E0E7] bg-[#F7F9FB]">
+          <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+            <div className="border border-[#CBD5E1] bg-white p-8">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center border border-[#0077CC] bg-[#F0F7FC]">
+                  <Loader2
+                    className="h-5 w-5 animate-spin text-[#0077CC]"
+                    strokeWidth={2}
+                  />
+                </div>
 
-            <p className="mt-1 text-sm font-medium text-[#DCE7F5]">
-              Processing scheme recommendation
-            </p>
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
+                    NIRVAAN
+                  </p>
+
+                  <p className="mt-1 text-sm font-extrabold text-[#002244]">
+                    Preparing your scheme recommendation
+                  </p>
+
+                  <p className="mt-1 text-xs font-medium leading-5 text-[#667085]">
+                    Please wait while your verified journey
+                    information is loaded.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-
-          <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-            <div
-              className="h-8 w-8 animate-spin border-2 border-[#D7DEE8] border-t-[#0F5FC5]"
-              aria-hidden="true"
-            />
-
-            <p className="mt-5 text-sm font-semibold text-[#111827]">
-              Matching your eligibility profile...
-            </p>
-
-            <p className="mt-2 max-w-md text-xs font-normal leading-5 text-[#687587]">
-              Please wait while NIRVAAN prepares your scheme
-              recommendation.
-            </p>
-          </div>
-        </div>
+        </section>
       </main>
     );
   }
 
-  /* =========================================================
-     CONFIDENCE
-     ========================================================= */
-
-  const confidenceLabel =
-    recommendation.confidence === "high"
-      ? "High match"
-      : recommendation.confidence === "medium"
-      ? "Moderate match"
-      : "Low match";
-
-  const confidenceClass =
-    recommendation.confidence === "high"
-      ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
-      : recommendation.confidence === "medium"
-      ? "border-[#E87512] bg-[#FFF7ED] text-[#B45309]"
-      : "border-[#B9C4D1] bg-[#F8FAFC] text-[#526071]";
+  const confidenceStyles = {
+    high: {
+      wrapper:
+        "border-[#16A34A] bg-[#F0FDF4] text-[#15803D]",
+      label: "Strong match",
+    },
+    medium: {
+      wrapper:
+        "border-[#D97706] bg-[#FFFBEB] text-[#A16207]",
+      label: "Moderate match",
+    },
+    low: {
+      wrapper:
+        "border-[#DC2626] bg-[#FEF2F2] text-[#B91C1C]",
+      label: "Limited match",
+    },
+  }[recommendation.confidence];
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#F7F9FC] text-[#111827]">
-
-      {/* =====================================================
-          PAGE HEADER
-          ===================================================== */}
-
-      <section className="border-b border-[#D7DEE8] bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+    <main className="min-h-screen bg-white">
+      {/* PAGE HEADER */}
+      <section className="border-b border-[#D9E0E7] bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#0F5FC5]">
-                NIRVAAN
-              </p>
+              <div className="flex items-center gap-3">
+                <span className="h-[3px] w-10 bg-[#0077CC]" />
 
-              <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#111827] sm:text-3xl">
-                Scheme Recommendation
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#0077CC]">
+                  NIRVAAN
+                </p>
+              </div>
+
+              <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-[#002244] sm:text-4xl">
+                Smart Scheme Recommender
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm font-normal leading-6 text-[#687587]">
-                Based on the information provided in your
-                eligibility assessment, the following government
-                scheme is the recommended match.
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#667085]">
+                Your verified journey information has been
+                assessed to identify a suitable scheme and
+                maximum loan amount.
               </p>
             </div>
 
-            <div
-              className={`inline-flex w-fit items-center border px-3 py-2 text-xs font-semibold ${confidenceClass}`}
+            <Link
+              href="/wizard"
+              className="inline-flex min-h-[42px] items-center justify-center border border-[#B9C4D1] bg-white px-5 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
             >
-              {confidenceLabel}
-            </div>
+              Back to Journey
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* =====================================================
-          MAIN CONTENT
-          ===================================================== */}
+      {/* RECOMMENDATION HERO */}
+      <section className="border-b border-[#D9E0E7] bg-[#F7F9FB]">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="border border-[#CBD5E1] bg-white">
+            <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-7 sm:px-8">
+              <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center border border-[#6BA9D6] bg-[#07345C]">
+                      <Sparkles
+                        className="h-5 w-5 text-[#9CC8EA]"
+                        strokeWidth={2}
+                      />
+                    </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#9CC8EA]">
+                        AI-assisted result
+                      </p>
 
-        {/* ===================================================
-            PRIMARY RESULT
-            =================================================== */}
+                      <p className="mt-1 text-xs font-semibold text-[#D8E4F0]">
+                        Recommended financing option
+                      </p>
+                    </div>
+                  </div>
 
-        <section className="border border-[#CBD5E1] bg-white">
-
-          <div className="border-b border-[#CBD5E1] bg-[#0F294A] px-5 py-7 text-white sm:px-8 sm:py-9">
-
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-
-              <div className="max-w-3xl">
-
-                <div className="mb-4 inline-flex border border-[#8FB9EA] bg-[#163A66] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#DCEBFF]">
-                  Recommended government scheme
+                  <h2 className="mt-6 text-2xl font-extrabold text-white sm:text-3xl">
+                    {recommendation.schemeName}
+                  </h2>
                 </div>
 
-                <h2 className="text-2xl font-extrabold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
-                  {recommendation.schemeName}
-                </h2>
+                <div
+                  className={`border px-4 py-3 ${confidenceStyles.wrapper}`}
+                >
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em]">
+                    Match assessment
+                  </p>
 
-                <p className="mt-3 max-w-2xl text-sm font-normal leading-6 text-[#DCE7F5]">
-                  {recommendation.tagline}
+                  <p className="mt-1 text-sm font-extrabold">
+                    {confidenceStyles.label}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-px border-b border-[#CBD5E1] bg-[#CBD5E1] sm:grid-cols-2">
+              <div className="bg-white p-6 sm:p-7">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                  Maximum loan amount
                 </p>
 
+                <p className="mt-3 text-3xl font-extrabold tracking-tight text-[#0077CC]">
+                  {formatINR(
+                    recommendation.eligibleAmount
+                  )}
+                </p>
+
+                <p className="mt-2 text-xs font-medium leading-5 text-[#7A8797]">
+                  Upper amount available for planning in the
+                  next stage, subject to applicable eligibility
+                  and approval.
+                </p>
               </div>
 
-              <div className="border-l-4 border-[#E87512] bg-[#183A60] px-5 py-4 lg:min-w-[240px]">
-                <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[#BFD3EA]">
-                  Estimated eligible loan
+              <div className="bg-white p-6 sm:p-7">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                  Recommended interest rate
                 </p>
 
-                <p className="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+                <p className="mt-3 text-3xl font-extrabold tracking-tight text-[#002244]">
+                  {recommendation.interestRate}%
+                </p>
+
+                <p className="mt-2 text-xs font-medium leading-5 text-[#7A8797]">
+                  Indicative rate used for the financial
+                  planning stage.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 sm:p-8">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                    Scheme
+                  </p>
+
+                  <p className="mt-2 text-sm font-extrabold text-[#002244]">
+                    {recommendation.schemeName}
+                  </p>
+                </div>
+
+                <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                    Maximum
+                  </p>
+
+                  <p className="mt-2 text-sm font-extrabold text-[#002244]">
+                    {formatINR(
+                      recommendation.eligibleAmount
+                    )}
+                  </p>
+                </div>
+
+                <div className="border border-[#CBD5E1] bg-[#F7F9FB] p-5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#667085]">
+                    AI source
+                  </p>
+
+                  <p className="mt-2 text-sm font-extrabold text-[#002244]">
+                    {recommendation.source === "groq"
+                      ? "AI model"
+                      : "NIRVAAN fallback"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+            {/* AI EXPLANATION */}
+      <section className="bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
+            <div className="border border-[#CBD5E1] bg-white">
+              <div className="border-b border-[#CBD5E1] bg-[#F7F9FB] px-6 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center border border-[#0077CC] bg-white">
+                    <Sparkles
+                      className="h-4 w-4 text-[#0077CC]"
+                      strokeWidth={2}
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
+                      AI explanation
+                    </p>
+
+                    <h3 className="mt-1 text-base font-extrabold text-[#002244]">
+                      Why this recommendation?
+                    </h3>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 sm:p-7">
+                {aiLoading ? (
+                  <div className="flex items-center gap-3 border border-[#CBD5E1] bg-[#F7F9FB] px-5 py-5">
+                    <Loader2
+                      className="h-4 w-4 animate-spin text-[#0077CC]"
+                      strokeWidth={2}
+                    />
+
+                    <p className="text-xs font-semibold text-[#526071]">
+                      Preparing your AI explanation...
+                    </p>
+                  </div>
+                ) : ai?.explanation ? (
+                  <>
+                    <p className="text-sm font-medium leading-7 text-[#526071]">
+                      {ai.explanation}
+                    </p>
+
+                    {ai.source && (
+                      <p className="mt-4 text-[10px] font-semibold text-[#8A96A6]">
+                        Explanation source:{" "}
+                        {ai.source === "groq"
+                          ? "AI model"
+                          : "NIRVAAN fallback guidance"}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm font-medium leading-7 text-[#667085]">
+                    Your recommendation is based on the verified
+                    information available from your journey.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* PROFILE SUMMARY */}
+            <div className="border border-[#CBD5E1] bg-white">
+              <div className="border-b border-[#CBD5E1] bg-[#002244] px-6 py-5">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#9CC8EA]">
+                  Assessment context
+                </p>
+
+                <h3 className="mt-1 text-base font-extrabold text-white">
+                  Your journey profile
+                </h3>
+              </div>
+
+              <div className="divide-y divide-[#D9E0E7]">
+                <div className="p-5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797]">
+                    Route
+                  </p>
+
+                  <p className="mt-1 text-sm font-extrabold capitalize text-[#002244]">
+                    {profile.route ??
+                      profile.earningStatus ??
+                      "Verified profile"}
+                  </p>
+                </div>
+
+                {profile.annualIncome ? (
+                  <div className="p-5">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797]">
+                      Annual income
+                    </p>
+
+                    <p className="mt-1 text-sm font-extrabold text-[#002244]">
+                      {formatINR(profile.annualIncome)}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-5">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797]">
+                      Assessment
+                    </p>
+
+                    <p className="mt-1 text-sm font-extrabold text-[#002244]">
+                      Non-earning assessment
+                    </p>
+                  </div>
+                )}
+
+                <div className="p-5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#7A8797]">
+                    Recommendation status
+                  </p>
+
+                  <div className="mt-2 flex items-center gap-2">
+                    <Check
+                      className="h-4 w-4 text-[#16A34A]"
+                      strokeWidth={2.5}
+                    />
+
+                    <p className="text-xs font-bold text-[#166534]">
+                      Recommendation generated
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI TIPS */}
+          {ai?.tips && ai.tips.length > 0 && (
+            <div className="mt-6 border border-[#CBD5E1] bg-white">
+              <div className="border-b border-[#CBD5E1] bg-[#F7F9FB] px-6 py-5">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
+                  Preparation guidance
+                </p>
+
+                <h3 className="mt-1 text-base font-extrabold text-[#002244]">
+                  Before you continue
+                </h3>
+              </div>
+
+              <div className="grid gap-px bg-[#CBD5E1] sm:grid-cols-2 lg:grid-cols-3">
+                {ai.tips.map((tip, index) => (
+                  <div
+                    key={`${tip}-${index}`}
+                    className="bg-white p-5"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center border border-[#CBD5E1] bg-[#F7F9FB] text-[10px] font-extrabold text-[#0077CC]">
+                        {String(index + 1).padStart(2, "0")}
+                      </div>
+
+                      <p className="text-xs font-semibold leading-5 text-[#526071]">
+                        {tip}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+                    {/* RECOMMENDATION DETAILS */}
+          <div className="mt-6 border border-[#CBD5E1] bg-white">
+            <div className="border-b border-[#CBD5E1] bg-[#F7F9FB] px-6 py-5">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
+                Recommendation details
+              </p>
+
+              <h3 className="mt-1 text-base font-extrabold text-[#002244]">
+                Financing information
+              </h3>
+            </div>
+
+            <div className="grid gap-px bg-[#CBD5E1] sm:grid-cols-2 lg:grid-cols-4">
+              <div className="bg-white p-5">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#7A8797]">
+                  Scheme
+                </p>
+
+                <p className="mt-2 text-sm font-extrabold leading-5 text-[#002244]">
+                  {recommendation.schemeName}
+                </p>
+              </div>
+
+              <div className="bg-white p-5">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#7A8797]">
+                  Maximum loan
+                </p>
+
+                <p className="mt-2 text-sm font-extrabold text-[#0077CC]">
                   {formatINR(
                     recommendation.eligibleAmount
                   )}
                 </p>
               </div>
 
-            </div>
-          </div>
-
-          {/* Key financing information */}
-
-          <div className="grid grid-cols-2 divide-x divide-y divide-[#D7DEE8] sm:grid-cols-4 sm:divide-y-0">
-
-            <div className="p-5 sm:p-6">
-              <p className="text-xl font-bold text-[#0F5FC5]">
-                {recommendation.interestRate}%
-              </p>
-
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-[#687587]">
-                Interest rate p.a.
-              </p>
-            </div>
-
-            <div className="p-5 sm:p-6">
-              <p className="text-xl font-bold text-[#111827]">
-                {recommendation.moratoriumMonths}
-              </p>
-
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-[#687587]">
-                Grace period / months
-              </p>
-            </div>
-
-            <div className="p-5 sm:p-6">
-              <p className="text-xl font-bold text-[#111827]">
-                {Math.round(
-                  recommendation.maxTenureMonths / 12
-                )}
-              </p>
-
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-[#687587]">
-                Maximum tenure / years
-              </p>
-            </div>
-
-            <div className="p-5 sm:p-6">
-              <p className="text-xl font-bold text-[#111827]">
-                Up to 90%
-              </p>
-
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-[#687587]">
-                Project financing
-              </p>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ===================================================
-            TWO COLUMN INFORMATION
-            =================================================== */}
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-
-          {/* =================================================
-              ELIGIBILITY
-              ================================================= */}
-
-          <section className="border border-[#CBD5E1] bg-white">
-
-            <div className="flex items-center justify-between border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4 sm:px-6">
-
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0F5FC5]">
-                  Eligibility
+              <div className="bg-white p-5">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#7A8797]">
+                  Interest rate
                 </p>
 
-                <h2 className="mt-1 text-base font-bold text-[#111827]">
-                  Eligibility assessment
-                </h2>
+                <p className="mt-2 text-sm font-extrabold text-[#002244]">
+                  {recommendation.interestRate}%
+                </p>
               </div>
 
-              <span className="border border-[#0F5FC5] bg-[#EFF6FF] px-2.5 py-1 text-[10px] font-semibold uppercase text-[#0F5FC5]">
-                Reviewed
-              </span>
+              <div className="bg-white p-5">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#7A8797]">
+                  Maximum tenure
+                </p>
 
+                <p className="mt-2 text-sm font-extrabold text-[#002244]">
+                  {recommendation.maxTenureMonths
+                    ? `${recommendation.maxTenureMonths} months`
+                    : "As applicable"}
+                </p>
+              </div>
             </div>
+          </div>
 
-            <div className="divide-y divide-[#E5EAF0]">
+          {/* NEXT STEP */}
+          <div className="mt-6 border border-[#CBD5E1] bg-white">
+            <div className="border-l-[3px] border-[#0077CC] px-6 py-6 sm:px-7">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#0077CC]">
+                Step 04
+              </p>
 
-              {recommendation.checks.map((check) => (
-                <div
-                  key={check.label}
-                  className="flex items-start gap-4 px-5 py-4 sm:px-6"
+              <h3 className="mt-2 text-xl font-extrabold text-[#002244]">
+                Continue to Financial Calculator
+              </h3>
+
+              <p className="mt-2 max-w-2xl text-xs font-medium leading-5 text-[#667085]">
+                Use the recommended maximum as your upper
+                limit and select the amount you actually need.
+                Available selections increase in ₹50,000
+                increments, beginning at ₹50,000.
+              </p>
+
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/calculator"
+                  className="inline-flex min-h-[46px] items-center justify-center border border-[#0077CC] bg-[#0077CC] px-7 text-xs font-bold text-white transition-colors hover:bg-[#005FA3]"
                 >
-                  <span
-                    className={`mt-0.5 flex h-6 w-6 flex-none items-center justify-center border text-xs font-bold ${
-                      check.passed
-                        ? "border-[#0F5FC5] bg-[#EFF6FF] text-[#0F5FC5]"
-                        : "border-[#E87512] bg-[#FFF7ED] text-[#B45309]"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {check.passed ? "✓" : "!"}
-                  </span>
+                  Open Financial Calculator
+                  <ArrowRight
+                    className="ml-3 h-4 w-4"
+                    strokeWidth={2}
+                  />
+                </Link>
 
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-5 text-[#111827]">
-                      {check.label}
-                    </p>
-
-                    <p className="mt-1 text-xs font-normal leading-5 text-[#687587]">
-                      {check.detail}
-                    </p>
-                  </div>
-                </div>
-              ))}
-
-            </div>
-          </section>
-
-          {/* =================================================
-              WHY THIS SCHEME
-              ================================================= */}
-
-          <section className="border border-[#CBD5E1] bg-white">
-
-            <div className="border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4 sm:px-6">
-
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#E87512]">
-                Explanation
-              </p>
-
-              <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-base font-bold text-[#111827]">
-                  Why this scheme?
-                </h2>
-
-                <span className="w-fit border border-[#D7DEE8] bg-white px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-[#526071]">
-                  {ai?.source === "groq"
-                    ? "AI assisted"
-                    : "System explanation"}
-                </span>
+                <Link
+                  href="/wizard"
+                  className="inline-flex min-h-[46px] items-center justify-center border border-[#B9C4D1] bg-white px-7 text-xs font-bold text-[#526071] transition-colors hover:border-[#0077CC] hover:text-[#0077CC]"
+                >
+                  Review Journey
+                </Link>
               </div>
-
             </div>
+          </div>
 
-            <div className="p-5 sm:p-6">
+          {/* DISCLAIMER */}
+          <div className="mt-8 border-l-[3px] border-[#E87512] bg-[#FFF8F1] px-5 py-4">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#8A4B08]">
+              Important information
+            </p>
 
-              {aiLoading ? (
-                <div className="space-y-3">
-                  <div className="h-3 w-[95%] animate-pulse bg-[#E7ECF2]" />
-                  <div className="h-3 w-[88%] animate-pulse bg-[#E7ECF2]" />
-                  <div className="h-3 w-[76%] animate-pulse bg-[#E7ECF2]" />
-                  <div className="h-3 w-[64%] animate-pulse bg-[#E7ECF2]" />
-                </div>
-              ) : (
-                <>
-                  <p className="text-sm font-normal leading-7 text-[#374151]">
-                    {ai?.explanation}
-                  </p>
-
-                  {ai && ai.tips.length > 0 && (
-                    <div className="mt-6 border-t border-[#E5EAF0] pt-5">
-
-                      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#0F5FC5]">
-                        Important points
-                      </p>
-
-                      <ul className="mt-3 space-y-3">
-                        {ai.tips.map((tip, index) => (
-                          <li
-                            key={index}
-                            className="flex items-start gap-3 text-xs font-normal leading-5 text-[#526071]"
-                          >
-                            <span className="font-bold text-[#E87512]">
-                              {String(index + 1).padStart(
-                                2,
-                                "0"
-                              )}
-                            </span>
-
-                            <span>{tip}</span>
-                          </li>
-                        ))}
-                      </ul>
-
-                    </div>
-                  )}
-                </>
-              )}
-
-            </div>
-          </section>
-
+            <p className="mt-2 text-xs font-medium leading-5 text-[#667085]">
+              NIRVAAN is an independent platform for scheme
+              discovery and application assistance. An AI-assisted
+              recommendation is intended for guidance and does not
+              constitute a sanction, approval, financial guarantee
+              or official determination of eligibility. Final
+              eligibility, loan limits, interest rates and approval
+              are subject to the applicable scheme rules and the
+              concerned institution.
+            </p>
+          </div>
         </div>
-
-        {/* ===================================================
-            ALTERNATIVE SCHEMES
-            =================================================== */}
-
-        {recommendation.alternatives.length > 0 && (
-          <section className="mt-6 border border-[#CBD5E1] bg-white">
-
-            <div className="border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4 sm:px-6">
-
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#E87512]">
-                Additional options
-              </p>
-
-              <h2 className="mt-1 text-base font-bold text-[#111827]">
-                Alternative schemes
-              </h2>
-
-            </div>
-
-            <div className="divide-y divide-[#E5EAF0]">
-
-              {recommendation.alternatives.map(
-                (alternative) => (
-                  <div
-                    key={alternative.schemeId}
-                    className="grid gap-3 px-5 py-4 sm:grid-cols-[180px_1fr] sm:px-6"
-                  >
-                    <p className="text-sm font-semibold text-[#111827]">
-                      {alternative.schemeId}
-                    </p>
-
-                    <p className="text-xs font-normal leading-5 text-[#687587]">
-                      {alternative.reason}
-                    </p>
-                  </div>
-                )
-              )}
-
-            </div>
-          </section>
-        )}
-
-        {/* ===================================================
-            USER PROFILE SUMMARY
-            =================================================== */}
-
-        <section className="mt-6 border border-[#CBD5E1] bg-white">
-
-          <div className="border-b border-[#CBD5E1] bg-[#F8FAFC] px-5 py-4 sm:px-6">
-
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#0F5FC5]">
-              Assessment record
-            </p>
-
-            <h2 className="mt-1 text-base font-bold text-[#111827]">
-              Information used for matching
-            </h2>
-
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4">
-
-            <div className="border-b border-[#E5EAF0] p-5 lg:border-r">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-[#687587]">
-                Location
-              </p>
-
-              <p className="mt-2 text-sm font-semibold text-[#111827]">
-                {profile.district}
-                <br />
-                {profile.state}
-              </p>
-            </div>
-
-            <div className="border-b border-[#E5EAF0] p-5 lg:border-r">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-[#687587]">
-                Purpose
-              </p>
-
-              <p className="mt-2 text-sm font-semibold text-[#111827]">
-                {profile.activityType}
-              </p>
-            </div>
-
-            <div className="border-b border-[#E5EAF0] p-5 lg:border-r">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-[#687587]">
-                Project requirement
-              </p>
-
-              <p className="mt-2 text-sm font-semibold text-[#0F5FC5]">
-                {formatINR(profile.projectCost)}
-              </p>
-            </div>
-
-            <div className="p-5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-[#687587]">
-                Annual family income
-              </p>
-
-              <p className="mt-2 text-sm font-semibold text-[#111827]">
-                {formatINR(profile.annualIncome)}
-                /yr
-              </p>
-            </div>
-
-          </div>
-        </section>
-
-           {/* ===================================================
-            ACTIONS
-            =================================================== */}
-
-        <section className="mt-6 border border-[#CBD5E1] bg-white">
-
-          <div className="border-b border-[#CBD5E1] px-5 py-4 sm:px-6">
-            <p className="text-xs font-semibold text-[#111827]">
-              Continue your application journey
-            </p>
-
-            <p className="mt-1 text-xs font-normal text-[#687587]">
-              Use the tools below to understand financing,
-              prepare documents and find where to apply.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-3">
-
-            <Link
-              href="/calculator"
-              className="group border-b border-[#D7DEE8] p-5 transition-colors hover:bg-[#F8FAFC] sm:border-b-0 sm:border-r sm:p-6"
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#0F5FC5]">
-                01
-              </span>
-
-              <h3 className="mt-3 text-sm font-semibold text-[#111827] group-hover:text-[#0F5FC5]">
-                Calculate EMI
-              </h3>
-
-              <p className="mt-2 text-xs font-normal leading-5 text-[#687587]">
-                Estimate monthly repayment and understand your
-                financing requirement.
-              </p>
-
-              <span className="mt-4 block text-xs font-semibold text-[#0F5FC5]">
-                Open calculator →
-              </span>
-            </Link>
-
-            <Link
-              href="/locator"
-              className="group border-b border-[#D7DEE8] p-5 transition-colors hover:bg-[#F8FAFC] sm:border-b-0 sm:border-r sm:p-6"
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#0F5FC5]">
-                02
-              </span>
-
-              <h3 className="mt-3 text-sm font-semibold text-[#111827] group-hover:text-[#0F5FC5]">
-                Find a Channel Partner
-              </h3>
-
-              <p className="mt-2 text-xs font-normal leading-5 text-[#687587]">
-                Locate relevant authorised institutions in your
-                area.
-              </p>
-
-              <span className="mt-4 block text-xs font-semibold text-[#0F5FC5]">
-                Open locator →
-              </span>
-            </Link>
-
-            <Link
-              href="/checklist"
-              className="group p-5 transition-colors hover:bg-[#F8FAFC] sm:p-6"
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#E87512]">
-                03
-              </span>
-
-              <h3 className="mt-3 text-sm font-semibold text-[#111827] group-hover:text-[#0F5FC5]">
-                Prepare Documents
-              </h3>
-
-              <p className="mt-2 text-xs font-normal leading-5 text-[#687587]">
-                Review the documents needed before approaching
-                the authorised partner.
-              </p>
-
-              <span className="mt-4 block text-xs font-semibold text-[#0F5FC5]">
-                Open checklist →
-              </span>
-            </Link>
-
-          </div>
-        </section>
-
-        {/* ===================================================
-            FOOTER ACTIONS
-            =================================================== */}
-
-        <div className="flex flex-col gap-3 py-8 sm:flex-row sm:justify-between">
-
-          <Link
-            href="/wizard"
-            className="inline-flex min-h-11 items-center justify-center border border-[#B9C4D1] bg-white px-6 text-sm font-semibold text-[#374151] transition-colors hover:border-[#0F5FC5] hover:bg-[#F3F7FC] hover:text-[#0F5FC5]"
-          >
-            ← Reassess my eligibility
-          </Link>
-
-          <Link
-            href="/locator"
-            className="inline-flex min-h-11 items-center justify-center border border-[#0F5FC5] bg-[#0F5FC5] px-7 text-sm font-semibold text-white transition-colors hover:bg-[#0B4FA7]"
-          >
-            Find where to apply →
-          </Link>
-
-        </div>
-
-      </div>
+      </section>
     </main>
   );
 }
