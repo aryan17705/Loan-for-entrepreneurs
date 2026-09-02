@@ -401,11 +401,9 @@ export default function RecommendationPage() {
                     Route
                   </p>
 
-                  <p className="mt-1 text-sm font-extrabold capitalize text-[#002244]">
-                    {profile.route ??
-                      profile.earningStatus ??
-                      "Verified profile"}
-                  </p>
+                  <p className="mt-1 text-sm font-extrabold text-[#002244]">
+  {profile ? "Verified profile" : "Profile"}
+</p>
                 </div>
 
                 {profile.annualIncome ? (
