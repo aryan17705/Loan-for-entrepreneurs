@@ -1913,8 +1913,7 @@ export default function WizardPage() {
                     </button>
                   </div>
                 </div>
-              ) : null}
-                    </div>
+                            ) : null}
           </div>
         </div>
       </section>
