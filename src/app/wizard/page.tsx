@@ -549,8 +549,7 @@ export default function WizardPage() {
   (data.earningStatus === "non-earning"
     ? getPurposeFromAssessment(data.assessmentPurpose)
     : data.purpose) as Profile["purpose"],
-          : data.purpose,
-      activityType: data.activityType,
+activityType: data.activityType,
       projectCost: Number(data.projectCost) || 0,
       annualIncome:
         data.earningStatus === "earning"
