@@ -552,3 +552,22 @@ html[data-theme="dark"] .border-slate-200 {
     color: #000000 !important;
   }
 }
+/* -------------------------------------------------------
+   INDIA HERO IMAGE THEME SWITCH
+------------------------------------------------------- */
+
+.nirvaan-map-light {
+  display: block;
+}
+
+.nirvaan-map-dark {
+  display: none;
+}
+
+html[data-theme="dark"] .nirvaan-map-light {
+  display: none;
+}
+
+html[data-theme="dark"] .nirvaan-map-dark {
+  display: block;
+}
