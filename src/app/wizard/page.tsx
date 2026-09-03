@@ -557,9 +557,9 @@ activityType: data.activityType,
           : 0,
       educationLevel: data.educationLevel as Profile["educationLevel"],
       courseLocation:
-        data.assessmentPurpose === "education"
-          ? data.courseLocation || undefined
-          : undefined,
+  data.assessmentPurpose === "education"
+    ? (data.courseLocation as Profile["courseLocation"])
+    : undefined,
     };
 
     try {
