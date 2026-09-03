@@ -59,7 +59,7 @@ type FormData = {
   videoRequested: boolean;
   teamVerificationAccepted: boolean;
 
-  purpose: Profile["purpose"];
+  purpose: Profile["purpose"] | undefined;
   activityType: string;
   projectCost: string;
   educationLevel: string;
