@@ -189,7 +189,7 @@ function getPurposeFromAssessment(
 }
 
 function getActivityForPurpose(
-  purpose: Profile["purpose"]
+  purpose: Profile["purpose"] | undefined
 ) {
   if (purpose === "education") {
     return {
