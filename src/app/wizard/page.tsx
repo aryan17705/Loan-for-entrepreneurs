@@ -38,7 +38,7 @@ type AssessmentPurpose =
 type FormData = {
   state: string;
   district: string;
-  category: string;
+category: "sc" | "st" | "obc" | "general" | "";
   age: string;
 
   verificationMethod: VerificationMethod;
