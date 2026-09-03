@@ -543,7 +543,7 @@ export default function WizardPage() {
     const finalProfile: Profile = {
       state: data.state,
       district: data.district,
-      category: data.category,
+      category: data.category as Profile["category"],
       age: Number(data.age),
       purpose:
         data.earningStatus === "non-earning"
