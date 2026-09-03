@@ -1,355 +1,253 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "@/context/LanguageContext";
 
-const JOURNEY_STEPS = [
-  {
-    number: "01",
-    title: "Verification",
-    description:
-      "Verify your identity and establish the basic information required to begin your assistance journey.",
-    icon: (
-      <svg
-        viewBox="0 0 32 32"
-        className="h-7 w-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      >
-        <rect x="6" y="4" width="20" height="24" />
-        <path d="M11 10h10" />
-        <path d="M11 15h10" />
-        <path d="M11 20h6" />
-        <path d="m20 20 2 2 4-5" />
-      </svg>
-    ),
-  },
-  {
-    number: "02",
-    title: "Earning Status",
-    description:
-      "Establish whether you are earning or non-earning and complete the relevant assessment route.",
-    icon: (
-      <svg
-        viewBox="0 0 32 32"
-        className="h-7 w-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      >
-        <rect x="4" y="8" width="24" height="18" />
-        <path d="M11 8V5h10v3" />
-        <path d="M4 14h24" />
-        <path d="M13 14v4h6v-4" />
-      </svg>
-    ),
-  },
-  {
-    number: "03",
-    title: "Smart Scheme Recommender",
-    description:
-      "Use verified information to identify suitable government loan schemes and understand the available support.",
-    icon: (
-      <svg
-        viewBox="0 0 32 32"
-        className="h-7 w-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      >
-        <circle cx="16" cy="16" r="10" />
-        <path d="M16 10v6l4 3" />
-        <path d="M8 8 6 6" />
-        <path d="m24 8 2-2" />
-      </svg>
-    ),
-  },
-  {
-    number: "04",
-    title: "Financial Calculator",
-    description:
-      "Select an eligible loan amount and explore repayment planning based on your recommended financial option.",
-    icon: (
-      <svg
-        viewBox="0 0 32 32"
-        className="h-7 w-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      >
-        <rect x="6" y="4" width="20" height="24" />
-        <rect x="10" y="8" width="12" height="5" />
-        <path d="M10 17h3" />
-        <path d="M16 17h3" />
-        <path d="M22 17h0" />
-        <path d="M10 22h3" />
-        <path d="M16 22h3" />
-        <path d="M22 22h0" />
-      </svg>
-    ),
-  },
-  {
-    number: "05",
-    title: "Geo-Spatial Partner Locator & Router",
-    description:
-      "Locate available partner institutions across India and route your application journey to the appropriate partner.",
-    icon: (
-      <svg
-        viewBox="0 0 32 32"
-        className="h-7 w-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      >
-        <path d="M16 27s8-8.2 8-14a8 8 0 1 0-16 0c0 5.8 8 14 8 14Z" />
-        <circle cx="16" cy="13" r="2.5" />
-        <path d="M7 25h5" />
-        <path d="M20 25h5" />
-      </svg>
-    ),
-  },
-];
+export default function Home() {
+  const { t } = useTranslation();
 
-function ArrowIcon() {
+  const MODULES = [
+    {
+      step: "01",
+      title: t("nav_wizard"),
+      desc: t("wiz_sub_1"),
+      href: "/wizard",
+      cta: t("hero_cta_find"),
+      icon: "01",
+    },
+    {
+      step: "02",
+      title: t("nav_calculator"),
+      desc: t("calc_sub_rec"),
+      href: "/calculator",
+      cta: t("calc_title"),
+      icon: "02",
+    },
+    {
+      step: "03",
+      title: t("nav_locator"),
+      desc: t("loc_sub"),
+      href: "/locator",
+      cta: t("hero_cta_locate"),
+      icon: "03",
+    },
+  ];
+
+  const STATS = [
+    {
+      value: t("stat_1_val"),
+      label: t("stat_1_lbl"),
+    },
+    {
+      value: t("stat_2_val"),
+      label: t("stat_2_lbl"),
+    },
+    {
+      value: t("stat_3_val"),
+      label: t("stat_3_lbl"),
+    },
+    {
+      value: t("stat_4_val"),
+      label: t("stat_4_lbl"),
+    },
+  ];
+
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-4 w-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      aria-hidden="true"
-    >
-      <path d="M5 12h13" />
-      <path d="m13 6 6 6-6 6" />
-    </svg>
-  );
-}
+    <div className="min-h-screen bg-white text-slate-900 transition-colors duration-300 dark:bg-black dark:text-white">
 
-export default function HomePage() {
-  return (
-    <div className="nirvaan-page">
-      {/* -------------------------------------------------
+      {/* =====================================================
+          GOVERNMENT STYLE TOP STRIP
+          ===================================================== */}
+
+      <div className="border-b border-slate-200 bg-slate-50 px-4 py-2 text-[11px] dark:border-white/10 dark:bg-[#050505]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 text-slate-600 dark:text-slate-400">
+          <span>
+            Ministry of Social Justice & Empowerment
+          </span>
+
+          <span>
+            Smart India Hackathon Prototype · SIH26092
+          </span>
+        </div>
+      </div>
+
+      {/* =====================================================
           HERO
-      ------------------------------------------------- */}
+          ===================================================== */}
 
-      <section className="relative overflow-hidden border-b border-[var(--nirvaan-border)]">
-        <div className="nirvaan-hero absolute inset-0 z-0" />
+      <section className="relative overflow-hidden border-b border-slate-200 dark:border-white/10">
 
-        <div className="relative z-10 mx-auto grid min-h-[620px] w-full max-w-[1440px] grid-cols-1 items-center px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-16">
-          <div className="relative z-20 max-w-[640px]">
-            <div className="mb-6 flex items-center gap-3">
-              <span className="h-[2px] w-10 bg-[var(--nirvaan-orange)]" />
+        <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 py-14 sm:px-8 md:grid-cols-2 md:py-20 lg:px-10">
 
-              <span className="text-[10px] font-bold tracking-[2px] text-[var(--nirvaan-blue)]">
-                FINANCIAL SUPPORT ASSISTANCE
-              </span>
+          {/* LEFT */}
+
+          <div className="relative z-10">
+
+            <div className="mb-5 inline-flex items-center gap-3 border border-[#1769D2]/30 bg-[#1769D2]/5 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#1769D2] dark:bg-[#1769D2]/10">
+              <span className="h-1.5 w-7 bg-[#F97316]" />
+              {t("hero_badge")}
             </div>
 
-            <h1 className="nirvaan-text-strong max-w-[680px] text-[44px] font-extrabold leading-[1.05] tracking-[-1.5px] sm:text-[58px] lg:text-[70px]">
-              Find the right scheme.
+            <h1 className="max-w-3xl text-4xl font-black leading-[1.05] tracking-[-0.04em] text-slate-950 sm:text-5xl lg:text-6xl dark:text-white">
+              {t("hero_title_1")}
               <br />
-              <span className="nirvaan-blue">
-                Get your financial support.
+              <span className="text-[#1769D2]">
+                {t("hero_title_2")}
               </span>
             </h1>
 
-            <p className="nirvaan-muted mt-7 max-w-[560px] text-[14px] font-medium leading-7 sm:text-[15px]">
-              Follow a structured assistance journey designed to
-              help you verify your information, understand your
-              eligibility, identify suitable loan schemes, plan
-              repayment and reach the appropriate partner.
+            <p className="mt-6 max-w-xl text-sm font-medium leading-7 text-slate-600 sm:text-base dark:text-slate-400">
+              {t("hero_desc")}
             </p>
 
-            <div className="mt-9">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+
               <Link
                 href="/wizard"
-                className="nirvaan-primary text-[11px]"
+                className="inline-flex h-12 items-center justify-center bg-[#1769D2] px-7 text-sm font-bold text-white transition hover:bg-[#1257B0]"
               >
-                START YOUR JOURNEY
-                <span className="ml-3">
-                  <ArrowIcon />
-                </span>
+                {t("hero_cta_find")}
+                <span className="ml-3 text-lg">→</span>
               </Link>
-            </div>
-          </div>
 
-          <div className="relative mt-10 flex min-h-[330px] items-center justify-center lg:mt-0 lg:min-h-[500px]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(23,105,210,0.10),transparent_62%)]" />
-
-            <div className="relative w-full max-w-[760px]">
-              <img
-                src="/nirvaan-india-illustration.png"
-                alt="India map with financial network and partner locations"
-                className="nirvaan-map-light nirvaan-hero-image relative h-auto w-full object-contain"
-              />
-
-              <img
-                src="/nirvaan-india-illustration-dark.png"
-                alt="India map with financial network and partner locations"
-                className="nirvaan-map-dark nirvaan-hero-image relative h-auto w-full object-contain"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* -------------------------------------------------
-          FIVE STEP JOURNEY
-      ------------------------------------------------- */}
-
-      <section
-        id="journey"
-        className="border-b border-[var(--nirvaan-border)]"
-      >
-        <div className="mx-auto w-full max-w-[1440px] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
-          <div className="max-w-[760px]">
-            <div className="mb-4 flex items-center gap-3">
-              <span className="h-[2px] w-8 bg-[var(--nirvaan-orange)]" />
-
-              <span className="text-[10px] font-bold tracking-[2px] text-[var(--nirvaan-blue)]">
-                FIVE-STEP JOURNEY
-              </span>
-            </div>
-
-            <h2 className="nirvaan-text-strong text-[32px] font-extrabold leading-tight sm:text-[42px]">
-              One journey.
-              <br />
-              <span className="nirvaan-blue">
-                Everything in order.
-              </span>
-            </h2>
-
-            <p className="nirvaan-muted mt-5 max-w-[700px] text-[13px] font-medium leading-6">
-              Your assistance journey follows a fixed sequence.
-              Each stage builds on the information completed in
-              the previous stage.
-            </p>
-          </div>
-
-          <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-            {JOURNEY_STEPS.map((step) => (
-              <article
-                key={step.number}
-                className="nirvaan-step flex min-h-[275px] flex-col p-6"
+              <Link
+                href="/locator"
+                className="inline-flex h-12 items-center justify-center border border-slate-300 bg-white px-7 text-sm font-bold text-slate-700 transition hover:border-[#1769D2] hover:text-[#1769D2] dark:border-white/15 dark:bg-black dark:text-white"
               >
-                <div className="flex items-start justify-between">
-                  <span className="nirvaan-step-number text-[25px] font-extrabold tracking-[-0.5px]">
-                    {step.number}
-                  </span>
+                {t("hero_cta_locate")}
+              </Link>
 
-                  <span className="nirvaan-step-icon">
-                    {step.icon}
-                  </span>
-                </div>
-
-                <div className="mt-12">
-                  <h3 className="nirvaan-text-strong text-[17px] font-extrabold leading-6">
-                    {step.title}
-                  </h3>
-
-                  <p className="nirvaan-muted mt-4 text-[11px] font-medium leading-5">
-                    {step.description}
-                  </p>
-                </div>
-              </article>
-            ))}
+            </div>
           </div>
 
-          <div className="mt-8 border-l-2 border-[var(--nirvaan-orange)] bg-[var(--nirvaan-surface-2)] px-5 py-4">
-            <p className="nirvaan-muted text-[11px] font-semibold leading-5">
-              The journey is sequential. Later stages become
-              available only after the required previous stage has
-              been completed.
-            </p>
+          {/* RIGHT INDIA ILLUSTRATION */}
+
+          <div className="relative flex min-h-[360px] items-center justify-center md:min-h-[500px]">
+
+            <div className="nirvaan-map-glow right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2" />
+
+            <img
+              src="/nirvaan-india-illustration.png"
+              alt="India map with financial network and partner locations"
+              className="nirvaan-hero-image relative z-10 h-auto w-full max-w-[700px] object-contain"
+            />
+
           </div>
+
         </div>
+
       </section>
 
-      {/* -------------------------------------------------
-          ABOUT / CONTACT
-      ------------------------------------------------- */}
+      {/* =====================================================
+          STATS
+          ===================================================== */}
 
-      <section
-        id="about"
-        className="nirvaan-about border-b"
-      >
-        <div className="mx-auto w-full max-w-[1440px] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_0.7fr] lg:gap-20">
-            <div>
-              <div className="mb-4 flex items-center gap-3">
-                <span className="h-[2px] w-8 bg-[var(--nirvaan-orange)]" />
+      <section className="mx-auto max-w-7xl px-5 py-6 sm:px-8 lg:px-10">
 
-                <span className="text-[10px] font-bold tracking-[2px] text-[var(--nirvaan-blue)]">
-                  ABOUT NIRVAAN
-                </span>
-              </div>
+        <div className="grid grid-cols-2 border border-slate-200 bg-white md:grid-cols-4 dark:border-white/10 dark:bg-[#050505]">
 
-              <h2 className="nirvaan-text-strong text-[32px] font-extrabold sm:text-[40px]">
-                Assistance that keeps
-                <br />
-                the process clear.
-              </h2>
+          {STATS.map((stat, index) => (
+            <div
+              key={index}
+              className="border-b border-slate-200 px-5 py-7 text-center md:border-b-0 md:border-r last:md:border-r-0 dark:border-white/10"
+            >
+              <p className="text-2xl font-black text-[#1769D2] sm:text-3xl">
+                {stat.value}
+              </p>
 
-              <p className="nirvaan-muted mt-6 max-w-[700px] text-[13px] font-medium leading-7">
-                NIRVAAN brings verification, financial assessment,
-                scheme recommendation, repayment planning and
-                partner discovery into one structured journey.
+              <p className="mt-2 text-xs font-semibold leading-5 text-slate-500 dark:text-slate-400">
+                {stat.label}
               </p>
             </div>
+          ))}
 
-            <div>
-              <div className="mb-4">
-                <span className="text-[10px] font-bold tracking-[2px] text-[var(--nirvaan-blue)]">
-                  HELP PORTAL
-                </span>
-              </div>
+        </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <a
-                  href="tel:+918888565758"
-                  className="nirvaan-contact-box block p-5 transition-colors hover:border-[var(--nirvaan-blue)]"
-                >
-                  <span className="nirvaan-contact-label block text-[9px] font-bold tracking-[1.5px]">
-                    PHONE
-                  </span>
+      </section>
 
-                  <span className="nirvaan-contact-value mt-2 block text-[14px] font-extrabold">
-                    +91 8888565758
-                  </span>
-                </a>
+      {/* =====================================================
+          MODULES
+          ===================================================== */}
 
-                <a
-                  href="mailto:nirvaanscheme@gmail.com"
-                  className="nirvaan-contact-box block p-5 transition-colors hover:border-[var(--nirvaan-blue)]"
-                >
-                  <span className="nirvaan-contact-label block text-[9px] font-bold tracking-[1.5px]">
-                    EMAIL
-                  </span>
+      <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
 
-                  <span className="nirvaan-contact-value mt-2 block break-all text-[14px] font-extrabold">
-                    nirvaanscheme@gmail.com
-                  </span>
-                </a>
-              </div>
-            </div>
+        <div className="border-b border-slate-200 pb-6 dark:border-white/10">
+
+          <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.15em] text-[#1769D2]">
+            <span className="h-1.5 w-8 bg-[#F97316]" />
+            {t("mod_badge")}
           </div>
-        </div>
-      </section>
 
-      {/* -------------------------------------------------
-          HOMEPAGE END
-      ------------------------------------------------- */}
+          <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
+            {t("mod_title")}
+          </h2>
 
-      <section className="border-b border-[var(--nirvaan-border)] bg-[var(--nirvaan-bg)]">
-        <div className="mx-auto w-full max-w-[1440px] px-5 py-7 sm:px-8 lg:px-10">
-          <p className="nirvaan-muted text-[10px] font-medium leading-5">
-            NIRVAAN is an India&apos;s Official platform for
-            discovering government loan schemes, understanding
-            your financial support options.
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+            {t("mod_sub")}
           </p>
+
         </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+
+          {MODULES.map((module) => (
+            <div
+              key={module.step}
+              className="group flex min-h-[250px] flex-col border border-slate-200 bg-white p-6 transition hover:border-[#1769D2] dark:border-white/10 dark:bg-[#050505]"
+            >
+
+              <div className="flex items-center justify-between">
+
+                <span className="text-sm font-black text-[#1769D2]">
+                  {module.step}
+                </span>
+
+                <span className="border border-slate-200 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:border-white/10 dark:text-slate-400">
+                  MODULE
+                </span>
+
+              </div>
+
+              <h3 className="mt-10 text-xl font-black">
+                {module.title}
+              </h3>
+
+              <p className="mt-3 flex-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                {module.desc}
+              </p>
+
+              <Link
+                href={module.href}
+                className="mt-6 inline-flex items-center text-sm font-bold text-[#1769D2] hover:text-[#1257B0]"
+              >
+                {module.cta}
+                <span className="ml-2">→</span>
+              </Link>
+
+            </div>
+          ))}
+
+        </div>
+
       </section>
+
+      {/* =====================================================
+          NIRVAAN STATEMENT
+          ONLY ONE TIME ON HOMEPAGE
+          ===================================================== */}
+
+      <section className="border-t border-slate-200 bg-slate-50 px-5 py-10 dark:border-white/10 dark:bg-[#050505]">
+
+        <div className="mx-auto max-w-5xl">
+
+          <p className="border-l-4 border-[#1769D2] pl-5 text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">
+            NIRVAAN is an India's Official platform for discovering government loan schemes, understanding your financial support options.
+          </p>
+
+        </div>
+
+      </section>
+
     </div>
   );
 }
