@@ -293,15 +293,22 @@ html[data-theme="dark"] .nirvaan-hero {
 }
 
 .nirvaan-hero-image {
-  filter: none;
+  opacity: 0.72;
+  mix-blend-mode: multiply;
+  filter: saturate(0.82);
+  transition:
+    opacity 180ms ease,
+    filter 180ms ease;
 }
 
 html[data-theme="dark"] .nirvaan-hero-image {
+  opacity: 0.42;
+  mix-blend-mode: screen;
   filter:
-    brightness(0.82)
-    contrast(1.08);
+    brightness(0.72)
+    contrast(1.05)
+    saturate(0.75);
 }
-
 /* -------------------------------------------------------
    JOURNEY
 ------------------------------------------------------- */
@@ -511,7 +518,13 @@ html[data-theme="dark"] .border-slate-200 {
   html[data-theme="dark"] .nirvaan-hero {
     background: #000000;
   }
+  .nirvaan-hero-image {
+    opacity: 0.55;
+  }
 
+  html[data-theme="dark"] .nirvaan-hero-image {
+    opacity: 0.32;
+  }
   .nirvaan-primary,
   .nirvaan-secondary {
     min-height: 44px;
