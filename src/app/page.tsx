@@ -134,22 +134,23 @@ export default function HomePage() {
       ------------------------------------------------- */}
 
       <section className="relative overflow-hidden border-b border-[var(--nirvaan-border)]">
-        <div className="nirvaan-hero absolute inset-0 z-0" />
-        <div className="nirvaan-map-background" aria-hidden="true">
-  <img
-    src="/nirvaan-india-illustration.png"
-    alt=""
-    className="nirvaan-map-light"
-  />
+  <div className="nirvaan-hero absolute inset-0 z-0" />
 
-  <img
-    src="/nirvaan-india-illustration-dark.png"
-    alt=""
-    className="nirvaan-map-dark"
-  />
-</div>
+  <div className="nirvaan-map-background" aria-hidden="true">
+    <img
+      src="/nirvaan-india-illustration.png"
+      alt=""
+      className="nirvaan-map-light"
+    />
 
-        <div className="relative z-10 mx-auto grid min-h-[620px] w-full max-w-[1440px] grid-cols-1 items-center px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-16">
+    <img
+      src="/nirvaan-india-illustration-dark.png"
+      alt=""
+      className="nirvaan-map-dark"
+    />
+  </div>
+
+  <div className="relative z-10 mx-auto grid min-h-[620px] w-full max-w-[1440px] grid-cols-1 items-center px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-16">
           <div className="relative z-20 max-w-[640px]">
             <div className="mb-6 flex items-center gap-3">
               <span className="h-[2px] w-10 bg-[var(--nirvaan-orange)]" />
@@ -184,24 +185,6 @@ export default function HomePage() {
                   <ArrowIcon />
                 </span>
               </Link>
-            </div>
-          </div>
-
-          
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(23,105,210,0.10),transparent_62%)]" />
-
-            <div className="relative w-full max-w-[760px]">
-              <img
-                src="/nirvaan-india-illustration.png"
-                alt="India map with financial network and partner locations"
-                className="nirvaan-map-light nirvaan-hero-image relative h-auto w-full object-contain"
-              />
-
-              <img
-                src="/nirvaan-india-illustration-dark.png"
-                alt="India map with financial network and partner locations"
-                className="nirvaan-map-dark nirvaan-hero-image relative h-auto w-full object-contain"
-              />
             </div>
           </div>
         </div>
