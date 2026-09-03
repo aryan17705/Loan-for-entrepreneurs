@@ -1,134 +1,163 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* =========================================================
-   NIRVAAN DESIGN SYSTEM
-   White-first government-service aesthetic
-   Raleway typography
-   Sharp rectangular UI
-   ========================================================= */
-
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
-
-  --nirvaan-navy: #002244;
-  --nirvaan-navy-dark: #001a33;
-
-  --nirvaan-blue: #0077cc;
-  --nirvaan-blue-dark: #005fa3;
-  --nirvaan-blue-light: #eaf4fb;
-
-  --nirvaan-orange: #e87512;
-  --nirvaan-orange-dark: #c85f08;
-  --nirvaan-orange-light: #fff3e8;
-
-  --nirvaan-black: #111827;
-  --nirvaan-text: #374151;
-  --nirvaan-muted: #667085;
-
-  --nirvaan-border: #d9e0e7;
-  --nirvaan-border-dark: #b8c2ce;
-
-  --nirvaan-surface: #f7f9fb;
-  --nirvaan-surface-dark: #eef2f6;
-
-  --nirvaan-success: #167a45;
-  --nirvaan-danger: #b42318;
-  --nirvaan-warning: #a15c00;
-
-  --shadow-sm: 0 1px 4px rgba(0, 34, 68, 0.08);
-  --shadow-md: 0 4px 14px rgba(0, 34, 68, 0.1);
-  --shadow-lg: 0 10px 28px rgba(0, 34, 68, 0.14);
+  --nirvaan-bg: #ffffff;
+  --nirvaan-surface: #ffffff;
+  --nirvaan-surface-2: #f6f8fb;
+  --nirvaan-text: #102a43;
+  --nirvaan-text-strong: #071a2b;
+  --nirvaan-muted: #5a6e85;
+  --nirvaan-border: #dce4ec;
+  --nirvaan-border-strong: #c8d3df;
+  --nirvaan-blue: #1769d2;
+  --nirvaan-blue-dark: #0d4fa8;
+  --nirvaan-orange: #f28c28;
+  --nirvaan-header: rgba(255, 255, 255, 0.97);
+  --nirvaan-shadow: rgba(16, 42, 67, 0.08);
 }
 
-/* =========================================================
-   GLOBAL FOUNDATION
-   ========================================================= */
+html[data-theme="dark"] {
+  --nirvaan-bg: #000000;
+  --nirvaan-surface: #050505;
+  --nirvaan-surface-2: #0a0a0a;
+  --nirvaan-text: #f5f8fc;
+  --nirvaan-text-strong: #ffffff;
+  --nirvaan-muted: #9aa9ba;
+  --nirvaan-border: #222b34;
+  --nirvaan-border-strong: #35404c;
+  --nirvaan-blue: #3d8cff;
+  --nirvaan-blue-dark: #69a5ff;
+  --nirvaan-orange: #ff9b38;
+  --nirvaan-header: rgba(0, 0, 0, 0.97);
+  --nirvaan-shadow: rgba(0, 0, 0, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
 
 html {
-  margin: 0;
-  padding: 0;
-
-  width: 100%;
-  max-width: 100vw;
   min-height: 100%;
-
-  background: #ffffff;
-
+  background: var(--nirvaan-bg);
+  color: var(--nirvaan-text);
   scroll-behavior: smooth;
 }
 
 body {
+  min-height: 100%;
   margin: 0;
-  padding: 0;
-
-  width: 100%;
-  max-width: 100vw;
-  min-height: 100vh;
-
-  background: #ffffff;
-  color: var(--nirvaan-black);
-
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif;
-
+  background: var(--nirvaan-bg);
+  color: var(--nirvaan-text);
+  font-family: "Raleway", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
   overflow-x: hidden;
-
-  text-rendering: optimizeLegibility;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
-/* =========================================================
-   UNIVERSAL BOX MODEL
-   ========================================================= */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif;
-
-  border-radius: 0 !important;
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
-/* =========================================================
-   STRICT SHARP RECTANGLE SYSTEM
-   ========================================================= */
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--nirvaan-blue);
+  color: #ffffff;
+}
+
+/* -------------------------------------------------------
+   NIRVAAN GLOBAL THEME
+------------------------------------------------------- */
+
+.nirvaan-page {
+  min-height: 100vh;
+  background: var(--nirvaan-bg);
+  color: var(--nirvaan-text);
+}
+
+.nirvaan-surface {
+  background: var(--nirvaan-surface);
+  border-color: var(--nirvaan-border);
+}
+
+.nirvaan-surface-2 {
+  background: var(--nirvaan-surface-2);
+  border-color: var(--nirvaan-border);
+}
+
+.nirvaan-text {
+  color: var(--nirvaan-text);
+}
+
+.nirvaan-text-strong {
+  color: var(--nirvaan-text-strong);
+}
+
+.nirvaan-muted {
+  color: var(--nirvaan-muted);
+}
+
+.nirvaan-border {
+  border-color: var(--nirvaan-border);
+}
+
+.nirvaan-blue {
+  color: var(--nirvaan-blue);
+}
+
+.nirvaan-orange {
+  color: var(--nirvaan-orange);
+}
+
+.nirvaan-blue-bg {
+  background: var(--nirvaan-blue);
+}
+
+.nirvaan-orange-bg {
+  background: var(--nirvaan-orange);
+}
+
+/* -------------------------------------------------------
+   SHARP RECTANGULAR UI
+------------------------------------------------------- */
 
 button,
 input,
 select,
 textarea,
-a,
-div,
-section,
-article,
-aside,
-header,
-footer,
-nav,
-main,
-form,
-fieldset,
-table,
-td,
-th {
+.card,
+.panel,
+.modal,
+.tab,
+.badge,
+.pill {
   border-radius: 0 !important;
 }
 
-/* =========================================================
-   REMOVE LEGACY ROUNDED TAILWIND CLASSES
-   ========================================================= */
+/*
+  NIRVAAN intentionally uses sharp rectangular interfaces.
+  The AI floating trigger is the only circular UI element.
+*/
 
 .rounded,
 .rounded-sm,
@@ -137,767 +166,389 @@ th {
 .rounded-xl,
 .rounded-2xl,
 .rounded-3xl,
-.rounded-full {
+.round-full {
   border-radius: 0 !important;
 }
 
-/* =========================================================
-   TYPOGRAPHY
-   ========================================================= */
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin-top: 0;
-
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif;
-
-  color: var(--nirvaan-navy);
-
-  line-height: 1.15;
+/* Restore circular shape only for the floating AI trigger. */
+.nirvaan-ai-trigger,
+.nirvaan-ai-trigger * {
+  border-radius: 9999px !important;
 }
 
-h1 {
-  font-weight: 800;
-  letter-spacing: -0.025em;
+/* -------------------------------------------------------
+   HEADER
+------------------------------------------------------- */
+
+.nirvaan-header {
+  background: var(--nirvaan-header);
+  border-color: var(--nirvaan-border);
+  color: var(--nirvaan-text);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-h2 {
-  font-weight: 800;
-  letter-spacing: -0.018em;
+.nirvaan-nav-link {
+  color: var(--nirvaan-muted);
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
 }
 
-h3 {
-  font-weight: 700;
-  letter-spacing: -0.012em;
+.nirvaan-nav-link:hover {
+  color: var(--nirvaan-blue);
 }
 
-h4,
-h5,
-h6 {
-  font-weight: 700;
+.nirvaan-nav-link-active {
+  color: var(--nirvaan-blue);
 }
 
-p {
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif;
-
-  font-weight: 400;
-  line-height: 1.65;
-}
-
-strong,
-b {
-  font-weight: 700;
-}
-
-small {
-  font-weight: 400;
-}
-
-/* =========================================================
-   NIRVAAN WORDMARK
-   ========================================================= */
+/* -------------------------------------------------------
+   LOGO
+------------------------------------------------------- */
 
 .nirvaan-wordmark {
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
-
-  font-weight: 800 !important;
-
-  letter-spacing: 0.055em;
-
-  color: var(--nirvaan-navy);
+  color: var(--nirvaan-text-strong);
+  letter-spacing: 1px;
 }
 
-/* =========================================================
-   LINKS
-   ========================================================= */
-
-a {
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif;
-
-  color: inherit;
-
-  text-decoration: none;
+.nirvaan-logo-subtitle {
+  color: var(--nirvaan-muted);
 }
 
-a:hover {
-  text-decoration: none;
-}
-
-/* =========================================================
-   NAVIGATION
-   ========================================================= */
-
-nav,
-nav a,
-nav button {
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
-
-  font-weight: 600;
-}
-
-/* =========================================================
+/* -------------------------------------------------------
    BUTTONS
-   ========================================================= */
-
-button {
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  border-radius: 0 !important;
-
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease,
-    transform 160ms ease;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-/* =========================================================
-   FORM LABELS
-   ========================================================= */
-
-label {
-  display: block;
-
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
-
-  font-weight: 600;
-
-  color: var(--nirvaan-navy);
-}
-
-/* =========================================================
-   FORM ELEMENTS
-   ========================================================= */
-
-input,
-select,
-textarea {
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
-
-  font-weight: 400;
-
-  background: #ffffff;
-  color: var(--nirvaan-black);
-
-  border: 1px solid var(--nirvaan-border-dark);
-
-  border-radius: 0 !important;
-
-  box-shadow: none;
-
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-input:not([type="range"]),
-select,
-textarea {
-  min-height: 44px;
-}
-
-textarea {
-  resize: vertical;
-}
-
-input:not([type="range"]):focus,
-select:focus,
-textarea:focus {
-  outline: none;
-
-  border-color: var(--nirvaan-blue);
-
-  box-shadow:
-    0 0 0 2px rgba(0, 119, 204, 0.14);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #7a8795;
-
-  opacity: 1;
-}
-
-/* =========================================================
-   SELECT
-   ========================================================= */
-
-select {
-  appearance: auto;
-  -webkit-appearance: auto;
-
-  background-color: #ffffff;
-}
-
-/* =========================================================
-   RANGE INPUT
-   ========================================================= */
-
-input[type="range"] {
-  width: 100%;
-
-  accent-color: var(--nirvaan-blue);
-
-  cursor: pointer;
-
-  touch-action: pan-y;
-}
-
-/* =========================================================
-   CHECKBOX / RADIO
-   ========================================================= */
-
-input[type="checkbox"],
-input[type="radio"] {
-  accent-color: var(--nirvaan-blue);
-}
-
-/* =========================================================
-   TEXT SELECTION
-   ========================================================= */
-
-::selection {
-  background: var(--nirvaan-blue);
-  color: #ffffff;
-}
-
-/* =========================================================
-   FOCUS ACCESSIBILITY
-   ========================================================= */
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--nirvaan-blue);
-
-  outline-offset: 2px;
-}
-
-/* =========================================================
-   SCROLLING
-   ========================================================= */
-
-.scrollable-touch {
-  -webkit-overflow-scrolling: touch;
-
-  overscroll-behavior: contain;
-}
-
-/* =========================================================
-   STANDARD NIRVAAN SURFACES
-   ========================================================= */
-
-.nirvaan-surface {
-  background: #ffffff;
-
-  border: 1px solid var(--nirvaan-border);
-
-  box-shadow: var(--shadow-sm);
-}
-
-.nirvaan-section {
-  background: #ffffff;
-}
-
-.nirvaan-muted-surface {
-  background: var(--nirvaan-surface);
-
-  border: 1px solid var(--nirvaan-border);
-}
-
-/* =========================================================
-   BLUE ACTION SURFACES
-   ========================================================= */
+------------------------------------------------------- */
 
 .nirvaan-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 22px;
   background: var(--nirvaan-blue);
-
   color: #ffffff;
-
   border: 1px solid var(--nirvaan-blue);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
 }
 
 .nirvaan-primary:hover {
   background: var(--nirvaan-blue-dark);
-
   border-color: var(--nirvaan-blue-dark);
 }
 
+.nirvaan-primary:active {
+  transform: translateY(1px);
+}
+
 .nirvaan-secondary {
-  background: #ffffff;
-
-  color: var(--nirvaan-blue);
-
-  border: 1px solid var(--nirvaan-blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 22px;
+  background: transparent;
+  color: var(--nirvaan-text);
+  border: 1px solid var(--nirvaan-border-strong);
+  font-weight: 700;
+  letter-spacing: 0.4px;
 }
 
 .nirvaan-secondary:hover {
-  background: var(--nirvaan-blue-light);
+  border-color: var(--nirvaan-blue);
+  color: var(--nirvaan-blue);
 }
 
-/* =========================================================
-   ORANGE ACCENT
-   ========================================================= */
+/* -------------------------------------------------------
+   HERO
+------------------------------------------------------- */
 
-.nirvaan-accent {
-  color: var(--nirvaan-orange);
+.nirvaan-hero {
+  background:
+    linear-gradient(
+      90deg,
+      var(--nirvaan-bg) 0%,
+      var(--nirvaan-bg) 46%,
+      transparent 100%
+    );
 }
 
-.nirvaan-accent-border {
-  border-color: var(--nirvaan-orange);
+html[data-theme="dark"] .nirvaan-hero {
+  background:
+    linear-gradient(
+      90deg,
+      #000000 0%,
+      #000000 42%,
+      rgba(0, 0, 0, 0.92) 62%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
 }
 
-.nirvaan-accent-surface {
-  background: var(--nirvaan-orange-light);
-
-  border: 1px solid #f0c49f;
+.nirvaan-hero-image {
+  filter: none;
 }
 
-/* =========================================================
-   LEGACY GLASSMORPHISM RESET
-   ========================================================= */
-
-.liquid-glass,
-.liquid-glass-inner,
-.liquid-glass-active {
-  background: #ffffff !important;
-
-  backdrop-filter: none !important;
-
-  -webkit-backdrop-filter: none !important;
-
-  border: 1px solid var(--nirvaan-border) !important;
-
-  box-shadow: var(--shadow-sm) !important;
-
-  transform: none !important;
-
-  border-radius: 0 !important;
+html[data-theme="dark"] .nirvaan-hero-image {
+  filter:
+    brightness(0.82)
+    contrast(1.08);
 }
 
-.liquid-glass-active {
-  border-color: var(--nirvaan-blue) !important;
+/* -------------------------------------------------------
+   JOURNEY
+------------------------------------------------------- */
 
-  box-shadow:
-    inset 4px 0 0 var(--nirvaan-blue),
-    var(--shadow-sm) !important;
+.nirvaan-step {
+  background: var(--nirvaan-surface);
+  border: 1px solid var(--nirvaan-border);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
 }
 
-/* =========================================================
-   LEGACY DARK BACKGROUND RESET
-   ========================================================= */
-
-[class*="bg-[#0B0F19]"],
-[class*="bg-[#131B2E]"],
-[class*="bg-[#1E3A5F]"],
-[class*="bg-[#0B0F19]/"],
-[class*="bg-[#131B2E]/"],
-[class*="bg-[#1E3A5F]/"] {
-  background-color: #ffffff !important;
+.nirvaan-step:hover {
+  border-color: var(--nirvaan-blue);
+  background: var(--nirvaan-surface-2);
 }
 
-/* =========================================================
-   LEGACY GRADIENT RESET
-   ========================================================= */
-
-[class*="bg-gradient-"] {
-  background-image: none !important;
-}
-/* =========================================================
-   WHITE TEXT NORMALIZATION
-   ========================================================= */
-
-[class*="text-white"] {
-  color: var(--nirvaan-black);
+.nirvaan-step-number {
+  color: var(--nirvaan-blue);
 }
 
-/*
-   Preserve white text on explicit blue/orange
-   action surfaces.
-*/
+.nirvaan-step-line {
+  background: var(--nirvaan-border);
+}
 
-[class*="bg-[#0077CC]"],
-[class*="bg-[#0077CC] *"],
-[class*="bg-[#0F5FC5]"],
-[class*="bg-[#0F5FC5] *"],
-[class*="bg-[#E87512]"],
-[class*="bg-[#E87512] *"],
-[class*="bg-[#F97316]"],
-[class*="bg-[#F97316] *"],
-[class*="bg-[#EA580C]"],
-[class*="bg-[#EA580C] *"] {
+.nirvaan-step-icon {
+  color: var(--nirvaan-blue);
+}
+
+/* -------------------------------------------------------
+   ABOUT / CONTACT
+------------------------------------------------------- */
+
+.nirvaan-about {
+  background: var(--nirvaan-surface-2);
+  border-color: var(--nirvaan-border);
+}
+
+.nirvaan-contact-box {
+  background: var(--nirvaan-surface);
+  border: 1px solid var(--nirvaan-border);
+}
+
+.nirvaan-contact-label {
+  color: var(--nirvaan-muted);
+}
+
+.nirvaan-contact-value {
+  color: var(--nirvaan-text-strong);
+}
+
+/* -------------------------------------------------------
+   FOOTER
+------------------------------------------------------- */
+
+.nirvaan-footer {
+  background: var(--nirvaan-surface);
+  border-color: var(--nirvaan-border);
+  color: var(--nirvaan-text);
+}
+
+/* -------------------------------------------------------
+   FORM CONTROLS
+------------------------------------------------------- */
+
+input,
+select,
+textarea {
+  background: var(--nirvaan-surface);
+  color: var(--nirvaan-text);
+  border-color: var(--nirvaan-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--nirvaan-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--nirvaan-blue);
+  box-shadow: 0 0 0 1px var(--nirvaan-blue);
+}
+
+/* -------------------------------------------------------
+   COMMON DARK-MODE OVERRIDES
+------------------------------------------------------- */
+
+html[data-theme="dark"] .bg-white {
+  background-color: #000000 !important;
+}
+
+html[data-theme="dark"] .bg-gray-50 {
+  background-color: #050505 !important;
+}
+
+html[data-theme="dark"] .bg-gray-100 {
+  background-color: #0a0a0a !important;
+}
+
+html[data-theme="dark"] .bg-slate-50 {
+  background-color: #050505 !important;
+}
+
+html[data-theme="dark"] .bg-slate-100 {
+  background-color: #0a0a0a !important;
+}
+
+html[data-theme="dark"] .text-black {
   color: #ffffff !important;
 }
 
-/* =========================================================
-   BLUE LEGACY CLASS SUPPORT
-   ========================================================= */
-
-[class*="text-[#0077CC]"],
-[class*="text-[#0F5FC5]"] {
-  color: var(--nirvaan-blue) !important;
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-slate-900 {
+  color: #ffffff !important;
 }
 
-[class*="border-[#0077CC]"],
-[class*="border-[#0F5FC5]"] {
-  border-color: var(--nirvaan-blue) !important;
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-slate-800 {
+  color: #f5f8fc !important;
 }
 
-[class*="bg-[#0077CC]"] {
-  background-color: var(--nirvaan-blue) !important;
+html[data-theme="dark"] .text-gray-700,
+html[data-theme="dark"] .text-slate-700 {
+  color: #d5dee8 !important;
 }
 
-[class*="bg-[#0F5FC5]"] {
-  background-color: var(--nirvaan-blue) !important;
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-slate-600 {
+  color: #aab7c5 !important;
 }
 
-/* =========================================================
-   ORANGE LEGACY CLASS SUPPORT
-   ========================================================= */
-
-[class*="text-[#E87512]"],
-[class*="text-[#F97316]"],
-[class*="text-[#EA580C]"],
-[class*="text-[#FED7AA]"],
-[class*="text-orange-"] {
-  color: var(--nirvaan-orange-dark) !important;
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-slate-500 {
+  color: #92a0af !important;
 }
 
-[class*="bg-[#E87512]"],
-[class*="bg-[#F97316]"],
-[class*="bg-[#EA580C]"] {
-  background-color: var(--nirvaan-orange) !important;
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-slate-100,
+html[data-theme="dark"] .border-slate-200 {
+  border-color: #222b34 !important;
 }
 
-[class*="border-[#E87512]"],
-[class*="border-[#F97316]"],
-[class*="border-[#EA580C]"] {
-  border-color: var(--nirvaan-orange) !important;
-}
-
-/* =========================================================
-   RECHARTS
-   ========================================================= */
-
-.recharts-tooltip-wrapper {
-  z-index: 1000 !important;
-
-  pointer-events: none !important;
-}
-
-.recharts-default-tooltip {
-  background: #ffffff !important;
-
-  border: 1px solid var(--nirvaan-border-dark) !important;
-
-  border-radius: 0 !important;
-
-  color: var(--nirvaan-black) !important;
-
-  padding: 8px 12px !important;
-
-  box-shadow: var(--shadow-md) !important;
-
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
-}
-
-.recharts-default-tooltip * {
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
-
-  color: var(--nirvaan-black) !important;
-}
-
-.recharts-tooltip-item-name {
-  color: var(--nirvaan-blue) !important;
-
-  font-weight: 600 !important;
-}
-
-.recharts-tooltip-item-value {
-  color: var(--nirvaan-navy) !important;
-
-  font-weight: 800 !important;
-}
-
-/* =========================================================
+/* -------------------------------------------------------
    MAPBOX
-   ========================================================= */
+------------------------------------------------------- */
 
-.map-isolate-box {
-  isolation: isolate !important;
-
-  position: relative !important;
-
-  z-index: 0 !important;
-
-  overflow: hidden;
+.mapboxgl-map {
+  font-family: "Raleway", system-ui, sans-serif;
 }
 
-.mapboxgl-map,
-.mapboxgl-canvas-container,
-.mapboxgl-canvas {
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
+.mapboxgl-popup-content {
+  border-radius: 0 !important;
+  background: var(--nirvaan-surface);
+  color: var(--nirvaan-text);
+  border: 1px solid var(--nirvaan-border);
 }
 
-.mapboxgl-control-container {
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
+.mapboxgl-popup-tip {
+  border-radius: 0 !important;
 }
 
 .mapboxgl-ctrl-group {
   border-radius: 0 !important;
-
-  border: 1px solid var(--nirvaan-border-dark) !important;
-
-  box-shadow: var(--shadow-md) !important;
-
   overflow: hidden;
+  background: var(--nirvaan-surface);
+  border: 1px solid var(--nirvaan-border);
 }
 
 .mapboxgl-ctrl-group button {
-  background: #ffffff !important;
-
   border-radius: 0 !important;
 }
 
-.mapboxgl-ctrl-group button:hover {
-  background: var(--nirvaan-blue-light) !important;
+/* -------------------------------------------------------
+   SCROLLBAR
+------------------------------------------------------- */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-/* =========================================================
-   MAPBOX POPUP
-   ========================================================= */
-
-.mapboxgl-popup-content {
-  padding: 0 !important;
-
-  background: #ffffff !important;
-
-  border: 1px solid var(--nirvaan-border-dark) !important;
-
-  border-radius: 0 !important;
-
-  box-shadow: var(--shadow-lg) !important;
-
-  font-family:
-    var(--font-raleway),
-    "Raleway",
-    sans-serif !important;
+::-webkit-scrollbar-track {
+  background: var(--nirvaan-bg);
 }
 
-.mapboxgl-popup-tip {
-  display: none !important;
+::-webkit-scrollbar-thumb {
+  background: var(--nirvaan-border-strong);
 }
 
-.mapboxgl-popup-close-button {
-  width: 32px;
-  height: 32px;
-
-  right: 0;
-  top: 0;
-
-  color: var(--nirvaan-muted);
-
-  font-size: 20px;
-
-  font-weight: 700;
-
-  background: #ffffff;
-
-  border-left: 1px solid var(--nirvaan-border);
-
-  border-bottom: 1px solid var(--nirvaan-border);
-
-  border-radius: 0 !important;
-}
-
-.mapboxgl-popup-close-button:hover {
-  background: var(--nirvaan-blue-light);
-
-  color: var(--nirvaan-blue);
-}
-
-/* =========================================================
-   MAP MARKERS
-   ========================================================= */
-
-.nirvaan-map-marker {
-  width: 16px;
-  height: 16px;
-
-  border-radius: 50% !important;
-
-  border: 3px solid #ffffff;
-
+::-webkit-scrollbar-thumb:hover {
   background: var(--nirvaan-blue);
-
-  box-shadow:
-    0 2px 8px rgba(0, 34, 68, 0.35);
 }
 
-.nirvaan-map-marker.selected {
-  width: 20px;
-  height: 20px;
-
-  border-width: 3px;
-
-  background: var(--nirvaan-orange);
-}
-
-/* =========================================================
-   TABLES
-   ========================================================= */
-
-table {
-  width: 100%;
-
-  border-collapse: collapse;
-
-  background: #ffffff;
-}
-
-th {
-  background: var(--nirvaan-surface);
-
-  color: var(--nirvaan-navy);
-
-  font-weight: 700;
-
-  text-align: left;
-
-  border: 1px solid var(--nirvaan-border);
-}
-
-td {
-  border: 1px solid var(--nirvaan-border);
-
-  color: var(--nirvaan-text);
-}
-
-/* =========================================================
-   STATUS HELPERS
-   ========================================================= */
-
-.nirvaan-status-success {
-  color: var(--nirvaan-success);
-}
-
-.nirvaan-status-warning {
-  color: var(--nirvaan-warning);
-}
-
-.nirvaan-status-danger {
-  color: var(--nirvaan-danger);
-}
-/* =========================================================
-   RESPONSIVE HELPERS
-   ========================================================= */
+/* -------------------------------------------------------
+   MOBILE
+------------------------------------------------------- */
 
 @media (max-width: 768px) {
+  .nirvaan-hero {
+    background: var(--nirvaan-bg);
+  }
+
+  html[data-theme="dark"] .nirvaan-hero {
+    background: #000000;
+  }
+
+  .nirvaan-primary,
+  .nirvaan-secondary {
+    min-height: 44px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* -------------------------------------------------------
+   REDUCED MOTION
+------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
-  body {
-    font-size: 15px;
-  }
-
-  h1 {
-    letter-spacing: -0.02em;
-  }
-
-  h2 {
-    letter-spacing: -0.015em;
-  }
-}
-
-/* =========================================================
-   REDUCED MOTION
-   ========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-
-    animation-iteration-count: 1 !important;
-
     transition-duration: 0.01ms !important;
-
-    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
-/* =========================================================
+/* -------------------------------------------------------
    PRINT
-   ========================================================= */
+------------------------------------------------------- */
 
 @media print {
-  html,
-  body {
-    background: #ffffff !important;
-
-    color: var(--nirvaan-black) !important;
-
-    font-family:
-      var(--font-raleway),
-      "Raleway",
-      sans-serif !important;
+  .nirvaan-header,
+  .nirvaan-footer,
+  .nirvaan-ai-trigger {
+    display: none !important;
   }
 
-  * {
-    box-shadow: none !important;
+  body,
+  html {
+    background: #ffffff !important;
+    color: #000000 !important;
   }
 }
