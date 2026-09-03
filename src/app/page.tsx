@@ -241,7 +241,7 @@ export default function Home() {
         <div className="mx-auto max-w-5xl">
 
           <p className="border-l-4 border-[#1769D2] pl-5 text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">
-            NIRVAAN is an India's Official platform for discovering government loan schemes, understanding your financial support options.
+            NIRVAAN is an India&apos;s Official platform for discovering government loan schemes, understanding your financial support options.
           </p>
 
         </div>
