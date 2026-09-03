@@ -175,13 +175,21 @@ export default function HomePage() {
           </div>
 
           <div className="relative mt-10 flex min-h-[330px] items-center justify-center lg:mt-0 lg:min-h-[500px]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(23,105,210,0.10),transparent_62%)] dark:bg-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(23,105,210,0.10),transparent_62%)]" />
 
-            <img
-              src="/nirvaan-india-illustration.png"
-              alt="India map with financial network and partner locations"
-              className="nirvaan-hero-image relative block h-auto w-full max-w-[760px] object-contain"
-            />
+            <div className="relative w-full max-w-[760px]">
+              <img
+                src="/nirvaan-india-illustration.png"
+                alt="India map with financial network and partner locations"
+                className="nirvaan-map-light nirvaan-hero-image relative h-auto w-full object-contain"
+              />
+
+              <img
+                src="/nirvaan-india-illustration-dark.png"
+                alt="India map with financial network and partner locations"
+                className="nirvaan-map-dark nirvaan-hero-image relative h-auto w-full object-contain"
+              />
+            </div>
           </div>
         </div>
       </section>
