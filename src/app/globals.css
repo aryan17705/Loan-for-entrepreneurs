@@ -212,10 +212,13 @@ textarea,
   letter-spacing: 1px;
 }
 
+.nirvaan-logo-i {
+  color: var(--nirvaan-blue);
+}
+
 .nirvaan-logo-subtitle {
   color: var(--nirvaan-muted);
 }
-
 /* -------------------------------------------------------
    BUTTONS
 ------------------------------------------------------- */
