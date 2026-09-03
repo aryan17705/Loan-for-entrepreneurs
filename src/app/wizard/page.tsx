@@ -555,8 +555,7 @@ activityType: data.activityType,
         data.earningStatus === "earning"
           ? Number(data.annualIncome)
           : 0,
-      educationLevel:
-        data.educationLevel || undefined,
+      educationLevel: data.educationLevel as Profile["educationLevel"],
       courseLocation:
         data.assessmentPurpose === "education"
           ? data.courseLocation || undefined
