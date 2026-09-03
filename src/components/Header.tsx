@@ -15,9 +15,10 @@ const LINKS = [
 
 function NirvaanBrand() {
   return (
-    <span className="nirvaan-wordmark text-[27px] font-extrabold tracking-[1px] sm:text-[31px]">
-  N<span className="nirvaan-logo-i">I</span>RVAAN
-</span>
+    <span className="inline-flex flex-col leading-none">
+      <span className="nirvaan-wordmark text-[27px] font-extrabold tracking-[1px] sm:text-[31px]">
+        N<span className="nirvaan-logo-i">I</span>RVAAN
+      </span>
 
       <span className="nirvaan-logo-subtitle mt-1 text-[8px] font-semibold tracking-[0.55px] sm:text-[9px]">
         India&apos;s Official Loan Assistance Portal
