@@ -176,7 +176,7 @@ function formatINR(value: number) {
 
 function getPurposeFromAssessment(
   purpose: AssessmentPurpose
-): Profile["purpose"] {
+): Profile["purpose"] | undefined {
   if (purpose === "education") {
     return "education";
   }
