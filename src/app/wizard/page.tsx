@@ -1066,9 +1066,9 @@ activityType: data.activityType,
                             value={data.category}
                             onChange={(event) =>
                               update(
-                                "category",
-                                event.target.value
-                              )
+  "category",
+  event.target.value as FormData["category"]
+)
                             }
                             className="min-h-12 w-full border border-[#C8D4E1] bg-white px-3 text-sm text-[#1F2937] outline-none focus:border-[#1769D2]"
                           >
