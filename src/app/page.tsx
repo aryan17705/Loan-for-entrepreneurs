@@ -135,6 +135,19 @@ export default function HomePage() {
 
       <section className="relative overflow-hidden border-b border-[var(--nirvaan-border)]">
         <div className="nirvaan-hero absolute inset-0 z-0" />
+        <div className="nirvaan-map-background" aria-hidden="true">
+  <img
+    src="/nirvaan-india-illustration.png"
+    alt=""
+    className="nirvaan-map-light"
+  />
+
+  <img
+    src="/nirvaan-india-illustration-dark.png"
+    alt=""
+    className="nirvaan-map-dark"
+  />
+</div>
 
         <div className="relative z-10 mx-auto grid min-h-[620px] w-full max-w-[1440px] grid-cols-1 items-center px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-16">
           <div className="relative z-20 max-w-[640px]">
@@ -174,7 +187,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="relative mt-10 flex min-h-[330px] items-center justify-center lg:mt-0 lg:min-h-[500px]">
+          
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(23,105,210,0.10),transparent_62%)]" />
 
             <div className="relative w-full max-w-[760px]">
