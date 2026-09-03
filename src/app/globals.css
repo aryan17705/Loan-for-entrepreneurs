@@ -571,3 +571,18 @@ html[data-theme="dark"] .nirvaan-map-light {
 html[data-theme="dark"] .nirvaan-map-dark {
   display: block;
 }
+.nirvaan-map-light {
+  display: block;
+}
+
+.nirvaan-map-dark {
+  display: none;
+}
+
+html[data-theme="dark"] .nirvaan-map-light {
+  display: none;
+}
+
+html[data-theme="dark"] .nirvaan-map-dark {
+  display: block;
+}
