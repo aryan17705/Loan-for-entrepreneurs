@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const LINKS = [
   { href: "/", label: "Home" },
@@ -13,171 +13,144 @@ const LINKS = [
   { href: "/#about", label: "About Us" },
 ];
 
-function NirvaanLogo() {
+function NirvaanBrand() {
   return (
-    <span className="relative inline-flex items-center">
-      <span className="nirvaan-wordmark text-[28px] leading-none text-[#102A43] sm:text-[32px]">
+    <span className="inline-flex flex-col leading-none">
+      <span className="nirvaan-wordmark text-[28px] font-extrabold tracking-[1px] text-[#102A43] sm:text-[31px]">
         NIRVAAN
       </span>
 
-      <span
-        aria-hidden="true"
-        className="absolute -right-2.5 -top-1 h-2.5 w-2.5 bg-[#F47B20]"
-      />
+      <span className="mt-1 text-[8px] font-semibold tracking-[0.55px] text-[#5A6E85] sm:text-[9px]">
+        India&apos;s Official Loan Assistance Portal
+      </span>
     </span>
   );
 }
 
-function isActiveLink(
-  pathname: string,
-  href: string
-) {
-  if (href === "/") {
-    return pathname === "/";
-  }
-
-  if (href === "/#about") {
-    return pathname === "/";
-  }
-
-  return pathname.startsWith(href);
-}
-
 export default function Header() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+
+    if (href.startsWith("/#")) {
+      return pathname === "/";
+    }
+
+    return pathname.startsWith(href);
+  };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#DCE4EC] bg-white print:hidden">
-      <div className="mx-auto flex min-h-[78px] max-w-7xl items-center justify-between gap-6 px-5 sm:px-8 lg:px-10">
-        {/* Logo */}
+    <header className="sticky top-0 z-50 w-full border-b border-[#DCE4EC] bg-white">
+      <div className="mx-auto flex min-h-[76px] w-full max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-10">
         <Link
           href="/"
-          aria-label="NIRVAAN Home"
-          className="flex flex-none items-center"
+          aria-label="NIRVAAN home"
+          className="shrink-0"
+          onClick={() => setMenuOpen(false)}
         >
-          <NirvaanLogo />
+          <NirvaanBrand />
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-7 xl:flex">
-          {LINKS.map((link) => {
-            const active = isActiveLink(
-              pathname,
-              link.href
-            );
+        <nav
+          aria-label="Main navigation"
+          className="hidden items-center gap-7 lg:flex"
+        >
+          {LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`relative py-2 text-[13px] font-semibold transition-colors ${
+                isActive(link.href)
+                  ? "text-[#1769D2]"
+                  : "text-[#243B53] hover:text-[#1769D2]"
+              }`}
+            >
+              {link.label}
 
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`relative flex min-h-[78px] items-center px-1 text-[13px] font-semibold transition-colors ${
-                  active
-                    ? "text-[#102A43]"
-                    : "text-[#526579] hover:text-[#1769D2]"
-                }`}
-              >
-                {link.label}
-
-                {active ? (
-                  <span
-                    aria-hidden="true"
-                    className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1769D2]"
-                  />
-                ) : null}
-              </Link>
-            );
-          })}
+              {isActive(link.href) ? (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#1769D2]" />
+              ) : null}
+            </Link>
+          ))}
         </nav>
 
-        {/* Right Controls */}
-        <div className="flex items-center gap-2">
-          {/* Application Assistance */}
-          <a
-            href="#help"
-            className="hidden min-h-11 items-center justify-center border border-[#1769D2] bg-white px-4 text-[12px] font-extrabold text-[#1769D2] transition-colors hover:bg-[#EFF6FF] sm:inline-flex"
-          >
-            <span aria-hidden="true" className="mr-2 text-base">
-              +
-            </span>
-            Application Assistance
-          </a>
-
-          {/* Tablet Get Started */}
+        <div className="hidden items-center lg:flex">
           <Link
             href="/wizard"
-            className="hidden min-h-11 items-center justify-center border border-[#0758C7] bg-[#0758C7] px-5 text-[12px] font-extrabold text-white transition-colors hover:bg-[#064CA9] lg:inline-flex xl:hidden"
+            className="border border-[#1769D2] bg-[#1769D2] px-5 py-3 text-[12px] font-extrabold tracking-[0.3px] text-white transition-colors hover:bg-[#0F56B2]"
           >
-            Get Started
+            APPLICATION ASSISTANCE
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-3 lg:hidden">
+          <Link
+            href="/#help"
+            className="flex h-[52px] min-w-[68px] flex-col items-center justify-center border border-[#B9C9D8] bg-white px-3 text-[#102A43]"
+            onClick={() => setMenuOpen(false)}
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="mb-0.5 h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path d="M8 10a4 4 0 1 1 8 0" />
+              <path d="M5 19v-3a7 7 0 0 1 14 0v3" />
+              <path d="M3.5 19h4v-3.5h-4zM16.5 15.5h4V19h-4z" />
+            </svg>
+            <span className="text-[10px] font-bold">Help</span>
           </Link>
 
-          {/* Mobile Menu */}
           <button
             type="button"
-            onClick={() =>
-              setMobileOpen((current) => !current)
-            }
-            aria-label={
-              mobileOpen
-                ? "Close navigation"
-                : "Open navigation"
-            }
-            aria-expanded={mobileOpen}
-            className="flex h-11 w-11 items-center justify-center border border-[#C8D4E1] bg-white text-[#17324F] transition-colors hover:bg-[#F7F9FC] xl:hidden"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((value) => !value)}
+            className="flex h-[52px] w-[48px] items-center justify-center border border-transparent bg-white text-[#102A43]"
           >
-            <span
-              aria-hidden="true"
-              className="text-xl leading-none"
-            >
-              {mobileOpen ? "×" : "☰"}
+            <span className="flex w-7 flex-col gap-[5px]">
+              <span className="block h-[2px] w-full bg-current" />
+              <span className="block h-[2px] w-full bg-current" />
+              <span className="block h-[2px] w-full bg-current" />
             </span>
           </button>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
-      {mobileOpen ? (
-        <div className="border-t border-[#DCE4EC] bg-white xl:hidden">
-          <nav className="mx-auto max-w-7xl px-5 py-2 sm:px-8">
-            {LINKS.map((link) => {
-              const active = isActiveLink(
-                pathname,
-                link.href
-              );
+      {menuOpen ? (
+        <div className="border-t border-[#DCE4EC] bg-white lg:hidden">
+          <nav
+            aria-label="Mobile navigation"
+            className="mx-auto flex w-full max-w-[1440px] flex-col px-5 pb-5 pt-2 sm:px-8"
+          >
+            {LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className={`border-b border-[#E4EAF0] py-4 text-sm font-bold ${
+                  isActive(link.href)
+                    ? "text-[#1769D2]"
+                    : "text-[#243B53]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
 
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex min-h-12 items-center border-b border-[#E5EBF1] px-2 text-sm font-semibold last:border-b-0 ${
-                    active
-                      ? "text-[#1769D2]"
-                      : "text-[#3F5368]"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-
-            {/* Mobile Application Assistance */}
-            <a
-              href="#help"
-              className="mb-3 mt-3 flex min-h-12 items-center justify-center border border-[#1769D2] bg-white px-4 text-xs font-extrabold text-[#1769D2] transition-colors hover:bg-[#EFF6FF]"
-            >
-              Application Assistance
-            </a>
-
-            {/* Mobile Start Button */}
             <Link
               href="/wizard"
-              className="mb-3 flex min-h-12 items-center justify-center border border-[#0758C7] bg-[#0758C7] px-4 text-xs font-extrabold text-white transition-colors hover:bg-[#064CA9]"
+              onClick={() => setMenuOpen(false)}
+              className="mt-4 border border-[#1769D2] bg-[#1769D2] px-5 py-3.5 text-center text-xs font-extrabold tracking-[0.4px] text-white"
             >
-              Start My Journey
+              APPLICATION ASSISTANCE
             </Link>
           </nav>
         </div>
