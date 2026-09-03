@@ -1,39 +1,82 @@
-@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================
+   NIRVAAN DESIGN SYSTEM
+   AMOLED + LIGHT MODE
+   ========================================================= */
+
 :root {
-  --nirvaan-bg: #ffffff;
-  --nirvaan-surface: #ffffff;
-  --nirvaan-surface-2: #f6f8fb;
-  --nirvaan-text: #102a43;
-  --nirvaan-text-strong: #071a2b;
-  --nirvaan-muted: #5a6e85;
-  --nirvaan-border: #dce4ec;
-  --nirvaan-border-strong: #c8d3df;
-  --nirvaan-blue: #1769d2;
-  --nirvaan-blue-dark: #0d4fa8;
-  --nirvaan-orange: #f28c28;
-  --nirvaan-header: rgba(255, 255, 255, 0.97);
-  --nirvaan-shadow: rgba(16, 42, 67, 0.08);
+  --background: #ffffff;
+  --foreground: #111827;
+
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+
+  --text: #111827;
+  --muted: #64748b;
+
+  --border: #dbe2ea;
+
+  --blue: #1769d2;
+  --blue-dark: #1257b0;
+
+  --orange: #f97316;
 }
 
-html[data-theme="dark"] {
-  --nirvaan-bg: #000000;
-  --nirvaan-surface: #050505;
-  --nirvaan-surface-2: #0a0a0a;
-  --nirvaan-text: #f5f8fc;
-  --nirvaan-text-strong: #ffffff;
-  --nirvaan-muted: #9aa9ba;
-  --nirvaan-border: #222b34;
-  --nirvaan-border-strong: #35404c;
-  --nirvaan-blue: #3d8cff;
-  --nirvaan-blue-dark: #69a5ff;
-  --nirvaan-orange: #ff9b38;
-  --nirvaan-header: rgba(0, 0, 0, 0.97);
-  --nirvaan-shadow: rgba(0, 0, 0, 0.55);
+/* =========================================================
+   DARK AMOLED
+   ========================================================= */
+
+html.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+
+  --surface: #050505;
+  --surface-2: #090909;
+
+  --text: #ffffff;
+  --muted: #94a3b8;
+
+  --border: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  max-width: 100vw;
+
+  background: var(--background);
+  color: var(--foreground);
+
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  overflow-x: hidden;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  text-rendering: optimizeLegibility;
+
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 * {
@@ -41,123 +84,19 @@ html[data-theme="dark"] {
 }
 
 html {
-  min-height: 100%;
-  background: var(--nirvaan-bg);
-  color: var(--nirvaan-text);
-  scroll-behavior: smooth;
+  background: var(--background);
 }
 
-body {
-  min-height: 100%;
-  margin: 0;
-  background: var(--nirvaan-bg);
-  color: var(--nirvaan-text);
-  font-family: "Raleway", system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  overflow-x: hidden;
-  transition:
-    background-color 180ms ease,
-    color 180ms ease;
-}
+/* =========================================================
+   SHARP RECTANGULAR DESIGN
+   ========================================================= */
 
 button,
 input,
 select,
 textarea {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-img {
-  max-width: 100%;
-}
-
-::selection {
-  background: var(--nirvaan-blue);
-  color: #ffffff;
-}
-
-/* -------------------------------------------------------
-   NIRVAAN GLOBAL THEME
-------------------------------------------------------- */
-
-.nirvaan-page {
-  min-height: 100vh;
-  background: var(--nirvaan-bg);
-  color: var(--nirvaan-text);
-}
-
-.nirvaan-surface {
-  background: var(--nirvaan-surface);
-  border-color: var(--nirvaan-border);
-}
-
-.nirvaan-surface-2 {
-  background: var(--nirvaan-surface-2);
-  border-color: var(--nirvaan-border);
-}
-
-.nirvaan-text {
-  color: var(--nirvaan-text);
-}
-
-.nirvaan-text-strong {
-  color: var(--nirvaan-text-strong);
-}
-
-.nirvaan-muted {
-  color: var(--nirvaan-muted);
-}
-
-.nirvaan-border {
-  border-color: var(--nirvaan-border);
-}
-
-.nirvaan-blue {
-  color: var(--nirvaan-blue);
-}
-
-.nirvaan-orange {
-  color: var(--nirvaan-orange);
-}
-
-.nirvaan-blue-bg {
-  background: var(--nirvaan-blue);
-}
-
-.nirvaan-orange-bg {
-  background: var(--nirvaan-orange);
-}
-
-/* -------------------------------------------------------
-   SHARP RECTANGULAR UI
-------------------------------------------------------- */
-
-button,
-input,
-select,
-textarea,
-.card,
-.panel,
-.modal,
-.tab,
-.badge,
-.pill {
   border-radius: 0 !important;
 }
-
-/*
-  NIRVAAN intentionally uses sharp rectangular interfaces.
-  The AI floating trigger is the only circular UI element.
-*/
 
 .rounded,
 .rounded-sm,
@@ -166,408 +105,234 @@ textarea,
 .rounded-xl,
 .rounded-2xl,
 .rounded-3xl,
-.round-full {
+.rounded-full {
   border-radius: 0 !important;
 }
 
-/* Restore circular shape only for the floating AI trigger. */
-.nirvaan-ai-trigger,
-.nirvaan-ai-trigger * {
-  border-radius: 9999px !important;
+/* =========================================================
+   DARK MODE OVERRIDES
+   ========================================================= */
+
+html.dark .bg-white {
+  background-color: #050505 !important;
 }
 
-/* -------------------------------------------------------
-   HEADER
-------------------------------------------------------- */
-
-.nirvaan-header {
-  background: var(--nirvaan-header);
-  border-color: var(--nirvaan-border);
-  color: var(--nirvaan-text);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+html.dark .bg-slate-50 {
+  background-color: #050505 !important;
 }
 
-.nirvaan-nav-link {
-  color: var(--nirvaan-muted);
-  transition:
-    color 150ms ease,
-    background-color 150ms ease;
+html.dark .bg-slate-100 {
+  background-color: #090909 !important;
 }
 
-.nirvaan-nav-link:hover {
-  color: var(--nirvaan-blue);
+html.dark .bg-slate-200 {
+  background-color: #111111 !important;
 }
 
-.nirvaan-nav-link-active {
-  color: var(--nirvaan-blue);
-}
-
-/* -------------------------------------------------------
-   LOGO
-------------------------------------------------------- */
-
-.nirvaan-wordmark {
-  color: var(--nirvaan-text-strong);
-  letter-spacing: 1px;
-}
-
-.nirvaan-logo-subtitle {
-  color: var(--nirvaan-muted);
-}
-
-/* -------------------------------------------------------
-   BUTTONS
-------------------------------------------------------- */
-
-.nirvaan-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px;
-  padding: 0 22px;
-  background: var(--nirvaan-blue);
-  color: #ffffff;
-  border: 1px solid var(--nirvaan-blue);
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    transform 150ms ease;
-}
-
-.nirvaan-primary:hover {
-  background: var(--nirvaan-blue-dark);
-  border-color: var(--nirvaan-blue-dark);
-}
-
-.nirvaan-primary:active {
-  transform: translateY(1px);
-}
-
-.nirvaan-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px;
-  padding: 0 22px;
-  background: transparent;
-  color: var(--nirvaan-text);
-  border: 1px solid var(--nirvaan-border-strong);
-  font-weight: 700;
-  letter-spacing: 0.4px;
-}
-
-.nirvaan-secondary:hover {
-  border-color: var(--nirvaan-blue);
-  color: var(--nirvaan-blue);
-}
-
-/* -------------------------------------------------------
-   HERO
-------------------------------------------------------- */
-
-.nirvaan-hero {
-  background:
-    linear-gradient(
-      90deg,
-      var(--nirvaan-bg) 0%,
-      var(--nirvaan-bg) 46%,
-      transparent 100%
-    );
-}
-
-html[data-theme="dark"] .nirvaan-hero {
-  background:
-    linear-gradient(
-      90deg,
-      #000000 0%,
-      #000000 42%,
-      rgba(0, 0, 0, 0.92) 62%,
-      rgba(0, 0, 0, 0.4) 100%
-    );
-}
-
-.nirvaan-hero-image {
-  filter: none;
-}
-
-html[data-theme="dark"] .nirvaan-hero-image {
-  filter:
-    brightness(0.82)
-    contrast(1.08);
-}
-
-/* -------------------------------------------------------
-   JOURNEY
-------------------------------------------------------- */
-
-.nirvaan-step {
-  background: var(--nirvaan-surface);
-  border: 1px solid var(--nirvaan-border);
-  transition:
-    border-color 150ms ease,
-    background-color 150ms ease;
-}
-
-.nirvaan-step:hover {
-  border-color: var(--nirvaan-blue);
-  background: var(--nirvaan-surface-2);
-}
-
-.nirvaan-step-number {
-  color: var(--nirvaan-blue);
-}
-
-.nirvaan-step-line {
-  background: var(--nirvaan-border);
-}
-
-.nirvaan-step-icon {
-  color: var(--nirvaan-blue);
-}
-
-/* -------------------------------------------------------
-   ABOUT / CONTACT
-------------------------------------------------------- */
-
-.nirvaan-about {
-  background: var(--nirvaan-surface-2);
-  border-color: var(--nirvaan-border);
-}
-
-.nirvaan-contact-box {
-  background: var(--nirvaan-surface);
-  border: 1px solid var(--nirvaan-border);
-}
-
-.nirvaan-contact-label {
-  color: var(--nirvaan-muted);
-}
-
-.nirvaan-contact-value {
-  color: var(--nirvaan-text-strong);
-}
-
-/* -------------------------------------------------------
-   FOOTER
-------------------------------------------------------- */
-
-.nirvaan-footer {
-  background: var(--nirvaan-surface);
-  border-color: var(--nirvaan-border);
-  color: var(--nirvaan-text);
-}
-
-/* -------------------------------------------------------
-   FORM CONTROLS
-------------------------------------------------------- */
-
-input,
-select,
-textarea {
-  background: var(--nirvaan-surface);
-  color: var(--nirvaan-text);
-  border-color: var(--nirvaan-border);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--nirvaan-muted);
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--nirvaan-blue);
-  box-shadow: 0 0 0 1px var(--nirvaan-blue);
-}
-
-/* -------------------------------------------------------
-   COMMON DARK-MODE OVERRIDES
-------------------------------------------------------- */
-
-html[data-theme="dark"] .bg-white {
+html.dark .bg-\[\#F8FAFC\] {
   background-color: #000000 !important;
 }
 
-html[data-theme="dark"] .bg-gray-50 {
-  background-color: #050505 !important;
-}
-
-html[data-theme="dark"] .bg-gray-100 {
-  background-color: #0a0a0a !important;
-}
-
-html[data-theme="dark"] .bg-slate-50 {
-  background-color: #050505 !important;
-}
-
-html[data-theme="dark"] .bg-slate-100 {
-  background-color: #0a0a0a !important;
-}
-
-html[data-theme="dark"] .text-black {
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700 {
   color: #ffffff !important;
 }
 
-html[data-theme="dark"] .text-gray-900,
-html[data-theme="dark"] .text-slate-900 {
+html.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* =========================================================
+   NIRVAAN GLASS
+   ========================================================= */
+
+.nirvaan-glass {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+html.dark .nirvaan-glass {
+  background: rgba(5, 5, 5, 0.82);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+/* =========================================================
+   INDIA HERO ILLUSTRATION
+   ========================================================= */
+
+.nirvaan-hero-image {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  object-fit: contain;
+
+  mix-blend-mode: multiply;
+
+  opacity: 0.92;
+
+  transition:
+    filter 300ms ease,
+    opacity 300ms ease,
+    mix-blend-mode 300ms ease;
+}
+
+/*
+   The supplied artwork has a light background.
+   In AMOLED mode we invert the background while keeping
+   the artwork visually blue.
+*/
+
+html.dark .nirvaan-hero-image {
+  mix-blend-mode: screen;
+
+  filter:
+    invert(1)
+    hue-rotate(180deg)
+    saturate(1.45)
+    brightness(0.78)
+    contrast(1.12);
+
+  opacity: 0.90;
+}
+
+/* =========================================================
+   HERO GLOW
+   ========================================================= */
+
+.nirvaan-map-glow {
+  position: absolute;
+  pointer-events: none;
+
+  width: 520px;
+  height: 520px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(23, 105, 210, 0.16) 0%,
+      rgba(23, 105, 210, 0.05) 35%,
+      transparent 70%
+    );
+
+  filter: blur(20px);
+}
+
+html.dark .nirvaan-map-glow {
+  background:
+    radial-gradient(
+      circle,
+      rgba(23, 105, 210, 0.22) 0%,
+      rgba(23, 105, 210, 0.07) 38%,
+      transparent 72%
+    );
+}
+
+/* =========================================================
+   BLUE I IN LOGO
+   ========================================================= */
+
+.nirvaan-logo-i {
+  color: #1769d2;
+}
+
+/* =========================================================
+   RANGE INPUT
+   ========================================================= */
+
+input[type="range"] {
+  accent-color: #1769d2;
+  width: 100%;
+}
+
+/* =========================================================
+   SCROLLING
+   ========================================================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* =========================================================
+   LEAFLET DARK MODE
+   ========================================================= */
+
+html.dark .leaflet-container {
+  background: #000000 !important;
+}
+
+html.dark .leaflet-popup-content-wrapper,
+html.dark .leaflet-popup-tip {
+  background: #050505 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html.dark .leaflet-bar a {
+  background: #090909 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* =========================================================
+   RECHARTS
+   ========================================================= */
+
+html.dark .recharts-default-tooltip {
+  background: #050505 !important;
+  border: 1px solid rgba(23, 105, 210, 0.55) !important;
   color: #ffffff !important;
 }
 
-html[data-theme="dark"] .text-gray-800,
-html[data-theme="dark"] .text-slate-800 {
-  color: #f5f8fc !important;
+html.dark .recharts-default-tooltip * {
+  color: #ffffff !important;
 }
 
-html[data-theme="dark"] .text-gray-700,
-html[data-theme="dark"] .text-slate-700 {
-  color: #d5dee8 !important;
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
-html[data-theme="dark"] .text-gray-600,
-html[data-theme="dark"] .text-slate-600 {
-  color: #aab7c5 !important;
+:focus-visible {
+  outline: 2px solid #1769d2;
+  outline-offset: 2px;
 }
 
-html[data-theme="dark"] .text-gray-500,
-html[data-theme="dark"] .text-slate-500 {
-  color: #92a0af !important;
-}
-
-html[data-theme="dark"] .border-gray-100,
-html[data-theme="dark"] .border-gray-200,
-html[data-theme="dark"] .border-slate-100,
-html[data-theme="dark"] .border-slate-200 {
-  border-color: #222b34 !important;
-}
-
-/* -------------------------------------------------------
-   MAPBOX
-------------------------------------------------------- */
-
-.mapboxgl-map {
-  font-family: "Raleway", system-ui, sans-serif;
-}
-
-.mapboxgl-popup-content {
-  border-radius: 0 !important;
-  background: var(--nirvaan-surface);
-  color: var(--nirvaan-text);
-  border: 1px solid var(--nirvaan-border);
-}
-
-.mapboxgl-popup-tip {
-  border-radius: 0 !important;
-}
-
-.mapboxgl-ctrl-group {
-  border-radius: 0 !important;
-  overflow: hidden;
-  background: var(--nirvaan-surface);
-  border: 1px solid var(--nirvaan-border);
-}
-
-.mapboxgl-ctrl-group button {
-  border-radius: 0 !important;
-}
-
-/* -------------------------------------------------------
-   SCROLLBAR
-------------------------------------------------------- */
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--nirvaan-bg);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--nirvaan-border-strong);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--nirvaan-blue);
-}
-
-/* -------------------------------------------------------
-   MOBILE
-------------------------------------------------------- */
-
-@media (max-width: 768px) {
-  .nirvaan-hero {
-    background: var(--nirvaan-bg);
-  }
-
-  html[data-theme="dark"] .nirvaan-hero {
-    background: #000000;
-  }
-
-  .nirvaan-primary,
-  .nirvaan-secondary {
-    min-height: 44px;
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-}
-
-/* -------------------------------------------------------
+/* =========================================================
    REDUCED MOTION
-------------------------------------------------------- */
+   ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {
-    transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-}
-
-/* -------------------------------------------------------
-   PRINT
-------------------------------------------------------- */
-
-@media print {
-  .nirvaan-header,
-  .nirvaan-footer,
-  .nirvaan-ai-trigger {
-    display: none !important;
-  }
-
-  body,
-  html {
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
-}
-/* -------------------------------------------------------
-   INDIA HERO IMAGE THEME SWITCH
-------------------------------------------------------- */
-
-.nirvaan-map-light {
-  display: block;
-}
-
-.nirvaan-map-dark {
-  display: none;
-}
-
-html[data-theme="dark"] .nirvaan-map-light {
-  display: none;
-}
-
-html[data-theme="dark"] .nirvaan-map-dark {
-  display: block;
 }
