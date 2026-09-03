@@ -2,168 +2,122 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-
-const LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/#journey", label: "Schemes" },
-  { href: "/#journey", label: "Partners" },
-  { href: "/#about", label: "Resources" },
-  { href: "/#journey", label: "How It Works" },
-  { href: "/#about", label: "About Us" },
-];
-
-function NirvaanBrand() {
-  return (
-    <span className="inline-flex flex-col leading-none">
-      <span className="nirvaan-wordmark text-[27px] font-extrabold tracking-[1px] sm:text-[31px]">
-        NIRVAAN
-      </span>
-
-      <span className="nirvaan-logo-subtitle mt-1 text-[8px] font-semibold tracking-[0.55px] sm:text-[9px]">
-        India&apos;s Official Loan Assistance Portal
-      </span>
-    </span>
-  );
-}
-
-function SunIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="h-4 w-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2" />
-      <path d="M12 20v2" />
-      <path d="m4.93 4.93 1.41 1.41" />
-      <path d="m17.66 17.66 1.41 1.41" />
-      <path d="M2 12h2" />
-      <path d="M20 12h2" />
-      <path d="m6.34 17.66-1.41 1.41" />
-      <path d="m19.07 4.93-1.41 1.41" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="h-4 w-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.7 6.7 0 0 0 21 12.8Z" />
-    </svg>
-  );
-}
-
-function MenuIcon({ open }: { open: boolean }) {
-  if (open) {
-    return (
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        className="h-5 w-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      >
-        <path d="m6 6 12 12" />
-        <path d="M18 6 6 18" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    >
-      <path d="M4 7h16" />
-      <path d="M4 12h16" />
-      <path d="M4 17h16" />
-    </svg>
-  );
-}
+import { useEffect, useRef, useState } from "react";
+import {
+  useTranslation,
+  LANGUAGES,
+} from "@/context/LanguageContext";
 
 export default function Header() {
   const pathname = usePathname();
+  const { lang, setLang, t } = useTranslation();
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [dark, setDark] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
 
+  const langRef = useRef<HTMLDivElement>(null);
+
+  const links = [
+    { href: "/", label: t("nav_home"), icon: "⌂" },
+    { href: "/wizard", label: t("nav_wizard"), icon: "01" },
+    { href: "/calculator", label: t("nav_calculator"), icon: "02" },
+    { href: "/locator", label: t("nav_locator"), icon: "03" },
+  ];
+
+  /*
+   * Load saved theme
+   */
   useEffect(() => {
-    const saved = localStorage.getItem("nirvaan-theme");
+    const savedTheme = localStorage.getItem("nirvaan-theme");
 
-    if (saved === "dark") {
-      setDark(true);
-      document.documentElement.dataset.theme = "dark";
+    if (savedTheme === "light") {
+      document.documentElement.classList.remove("dark");
+      setDarkMode(false);
     } else {
-      setDark(false);
-      document.documentElement.dataset.theme = "light";
+      document.documentElement.classList.add("dark");
+      setDarkMode(true);
     }
   }, []);
 
+  /*
+   * Theme switch
+   */
   const toggleTheme = () => {
-    const next = !dark;
+    const nextDark = !darkMode;
 
-    setDark(next);
+    setDarkMode(nextDark);
 
-    document.documentElement.dataset.theme = next
-      ? "dark"
-      : "light";
-
-    localStorage.setItem(
-      "nirvaan-theme",
-      next ? "dark" : "light"
-    );
+    if (nextDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("nirvaan-theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("nirvaan-theme", "light");
+    }
   };
 
-  const isActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/";
+  /*
+   * Close menus when route changes
+   */
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setLangMenuOpen(false);
+  }, [pathname]);
+
+  /*
+   * Close language menu when clicking outside
+   */
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        langRef.current &&
+        !langRef.current.contains(e.target as Node)
+      ) {
+        setLangMenuOpen(false);
+      }
     }
 
-    return false;
-  };
+    document.addEventListener("mousedown", handleClickOutside);
 
-  const closeMenu = () => {
-    setMenuOpen(false);
-  };
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+    };
+  }, []);
+
+  const currentLang =
+    LANGUAGES.find((l) => l.code === lang) || LANGUAGES[0];
 
   return (
-    <header className="nirvaan-header sticky top-0 z-50 w-full border-b">
-      <div className="mx-auto flex min-h-[78px] w-full max-w-[1440px] items-center justify-between gap-5 px-5 sm:px-8 lg:px-10">
+    <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#000000]/90 print:hidden">
+
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:h-20">
+
+        {/* ================= LOGO ================= */}
+
         <Link
           href="/"
-          aria-label="NIRVAAN Home"
-          className="shrink-0"
-          onClick={closeMenu}
+          className="group flex flex-none items-center"
         >
-          <NirvaanBrand />
+          <span className="text-[22px] font-black tracking-[-0.04em] text-[#111827] dark:text-white sm:text-[27px]">
+            N<span className="text-[#1769D2]">I</span>RVAAN
+          </span>
         </Link>
 
-        <nav className="hidden items-center gap-5 xl:flex">
-          {LINKS.map((link) => (
+        {/* ================= DESKTOP NAV ================= */}
+
+        <nav className="hidden items-center gap-1 md:flex">
+          {links.map((link) => (
             <Link
-              key={`${link.label}-${link.href}`}
+              key={link.href}
               href={link.href}
-              className={`nirvaan-nav-link whitespace-nowrap text-[12px] font-semibold tracking-[0.15px] ${
-                isActive(link.href)
-                  ? "nirvaan-nav-link-active"
-                  : ""
+              className={`px-4 py-2 text-sm font-semibold transition-colors ${
+                pathname === link.href
+                  ? "text-[#1769D2]"
+                  : "text-slate-600 hover:text-[#1769D2] dark:text-slate-300 dark:hover:text-white"
               }`}
             >
               {link.label}
@@ -171,79 +125,122 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
+        {/* ================= RIGHT TOOLBAR ================= */}
+
+        <div className="flex items-center gap-2">
+
+          {/* THEME SWITCH */}
+
           <button
             type="button"
             onClick={toggleTheme}
-            aria-label={
-              dark
-                ? "Switch to light theme"
-                : "Switch to dark theme"
-            }
-            className="nirvaan-secondary min-h-[40px] w-[40px] p-0"
+            aria-label="Toggle dark mode"
+            title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            className="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-lg text-slate-700 transition hover:border-[#1769D2] hover:text-[#1769D2] dark:border-white/15 dark:bg-[#090909] dark:text-white dark:hover:border-[#1769D2]"
           >
-            {dark ? <SunIcon /> : <MoonIcon />}
+            {darkMode ? "☀" : "☾"}
           </button>
+
+          {/* LANGUAGE */}
+
+          <div
+            ref={langRef}
+            className="relative z-50 hidden sm:block"
+          >
+            <button
+              type="button"
+              onClick={() =>
+                setLangMenuOpen((open) => !open)
+              }
+              className="flex h-10 items-center gap-2 border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-[#1769D2] dark:border-white/15 dark:bg-[#090909] dark:text-white"
+            >
+              <span>{currentLang.flag}</span>
+              <span>{currentLang.native}</span>
+              <span className="text-[#1769D2]">
+                {langMenuOpen ? "▲" : "▼"}
+              </span>
+            </button>
+
+            {langMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-52 border border-slate-200 bg-white p-1 shadow-xl dark:border-white/15 dark:bg-[#080808]">
+                {LANGUAGES.map((language) => (
+                  <button
+                    key={language.code}
+                    type="button"
+                    onClick={() => {
+                      setLang(language.code);
+                      setLangMenuOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-xs font-bold transition ${
+                      lang === language.code
+                        ? "bg-[#1769D2] text-white"
+                        : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>{language.flag}</span>
+                      <span>{language.native}</span>
+                    </span>
+
+                    <span className="text-[10px] opacity-60">
+                      {language.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* START JOURNEY */}
 
           <Link
             href="/wizard"
-            className="nirvaan-primary min-h-[40px] px-4 text-[11px]"
+            className="hidden h-10 items-center bg-[#1769D2] px-4 text-xs font-bold text-white transition hover:bg-[#1257B0] sm:flex"
           >
-            APPLICATION ASSISTANCE
+            START YOUR JOURNEY
           </Link>
-        </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={
-              dark
-                ? "Switch to light theme"
-                : "Switch to dark theme"
-            }
-            className="nirvaan-secondary flex h-[40px] w-[40px] items-center justify-center p-0"
-          >
-            {dark ? <SunIcon /> : <MoonIcon />}
-          </button>
+          {/* MOBILE */}
 
           <button
             type="button"
-            onClick={() => setMenuOpen((value) => !value)}
-            aria-label={
-              menuOpen ? "Close navigation" : "Open navigation"
+            onClick={() =>
+              setMobileMenuOpen((open) => !open)
             }
-            aria-expanded={menuOpen}
-            className="nirvaan-secondary flex h-[40px] w-[40px] items-center justify-center p-0"
+            aria-label="Toggle navigation"
+            className="flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-lg text-slate-800 dark:border-white/15 dark:bg-[#090909] dark:text-white md:hidden"
           >
-            <MenuIcon open={menuOpen} />
+            {mobileMenuOpen ? "×" : "☰"}
           </button>
         </div>
       </div>
 
-      {menuOpen && (
-        <div className="border-t xl:hidden">
-          <div className="mx-auto w-full max-w-[1440px] px-5 py-4 sm:px-8">
-            <nav className="flex flex-col">
-              {LINKS.map((link) => (
-                <Link
-                  key={`mobile-${link.label}-${link.href}`}
-                  href={link.href}
-                  onClick={closeMenu}
-                  className="nirvaan-nav-link border-b py-4 text-[12px] font-semibold last:border-b-0"
-                >
-                  {link.label}
-                </Link>
-              ))}
+      {/* ================= MOBILE MENU ================= */}
 
+      {mobileMenuOpen && (
+        <div className="border-t border-slate-200 bg-white px-4 py-4 dark:border-white/10 dark:bg-black md:hidden">
+          <div className="flex flex-col">
+
+            {links.map((link) => (
               <Link
-                href="/wizard"
-                onClick={closeMenu}
-                className="nirvaan-primary mt-4 w-full text-[11px]"
+                key={link.href}
+                href={link.href}
+                className={`border-b border-slate-100 px-2 py-4 text-sm font-bold dark:border-white/10 ${
+                  pathname === link.href
+                    ? "text-[#1769D2]"
+                    : "text-slate-700 dark:text-white"
+                }`}
               >
-                APPLICATION ASSISTANCE
+                {link.label}
               </Link>
-            </nav>
+            ))}
+
+            <Link
+              href="/wizard"
+              className="mt-4 bg-[#1769D2] px-4 py-3 text-center text-sm font-bold text-white"
+            >
+              START YOUR JOURNEY
+            </Link>
           </div>
         </div>
       )}
