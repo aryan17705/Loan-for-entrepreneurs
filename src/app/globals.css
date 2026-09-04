@@ -850,13 +850,14 @@ html[data-theme="dark"] .nirvaan-fabric-background img {
       );
   }
 
-  html[data-theme="dark"] .nirvaan-fabric-background img {
+    html[data-theme="dark"] .nirvaan-fabric-background img {
     opacity: 0.55;
   }
+}
+
 /* -------------------------------------------------------
    NIRVAAN AI FLOATING ASSISTANT
 ------------------------------------------------------- */
-
 .nirvaan-ai {
   position: fixed;
   right: 18px;
