@@ -579,7 +579,7 @@ html[data-theme="dark"] .border-slate-200 {
   }
 
   .nirvaan-hero-image {
-    opacity: 0.48;
+    opacity: 1;
     filter:
       saturate(0.68)
       contrast(0.90);
@@ -602,7 +602,7 @@ html[data-theme="dark"] .border-slate-200 {
   }
 
   html[data-theme="dark"] .nirvaan-hero-image {
-    opacity: 0.34;
+    opacity: 1;
   }
 
   .nirvaan-primary,
@@ -647,19 +647,7 @@ html[data-theme="dark"] .border-slate-200 {
     color: #000000 !important;
   }
 }
-/* -------------------------------------------------------
 
-
-  mask-image:
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(0, 0, 0, 0.15) 15%,
-      rgba(0, 0, 0, 0.55) 32%,
-      #000 48%,
-      #000 100%
-    );
-}
 /* -------------------------------------------------------
    INDIA HERO IMAGE THEME SWITCH
 ------------------------------------------------------- */
