@@ -203,6 +203,7 @@ export default function Header() {
                 : "Switch to dark theme"
             }
             className="flex h-12 w-12 items-center justify-center border-0 bg-transparent p-0 text-[var(--nirvaan-text-strong)] transition-colors hover:text-[var(--nirvaan-blue)]"
+          >
             {dark ? <SunIcon /> : <MoonIcon />}
           </button>
 
