@@ -858,95 +858,33 @@ html[data-theme="dark"] .nirvaan-fabric-background img {
 /* -------------------------------------------------------
    NIRVAAN AI FLOATING ASSISTANT
 ------------------------------------------------------- */
+
 .nirvaan-ai {
   position: fixed;
-  right: 18px;
+  right: 20px;
   bottom: 20px;
   z-index: 60;
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
   pointer-events: none;
-}
-
-.nirvaan-ai-bubble {
-  position: relative;
-  width: 190px;
-  padding: 14px 16px;
-  border: 1px solid #2f80ff;
-  background: rgba(5, 10, 18, 0.97);
-  box-shadow: 0 0 18px rgba(47, 128, 255, 0.18);
-  color: #fff;
-}
-
-.nirvaan-ai-bubble::after {
-  content: "";
-  position: absolute;
-  right: -8px;
-  bottom: 22px;
-  width: 15px;
-  height: 15px;
-  background: rgba(5, 10, 18, 0.97);
-  border-top: 1px solid #2f80ff;
-  border-right: 1px solid #2f80ff;
-  transform: rotate(45deg);
-}
-
-.nirvaan-ai-hi {
-  font-size: 17px;
-  font-weight: 800;
-}
-
-.nirvaan-ai-name {
-  margin-top: 4px;
-  font-size: 13px;
-}
-
-.nirvaan-ai-name span {
-  color: #2f80ff;
-  font-weight: 800;
-}
-
-.nirvaan-ai-question {
-  margin-top: 6px;
-  font-size: 12px;
-  color: #b7c2d3;
 }
 
 .nirvaan-ai-image {
   display: block;
-  width: 145px;
-  height: 145px;
+  width: 360px;
+  height: auto;
+  max-width: 42vw;
   object-fit: contain;
 }
 
-/* Mobile */
+/* MOBILE */
 @media (max-width: 640px) {
   .nirvaan-ai {
     right: 8px;
-    bottom: 14px;
-    gap: 4px;
-  }
-
-  .nirvaan-ai-bubble {
-    width: 170px;
-    padding: 12px 14px;
-  }
-
-  .nirvaan-ai-hi {
-    font-size: 16px;
-  }
-
-  .nirvaan-ai-name {
-    font-size: 12px;
-  }
-
-  .nirvaan-ai-question {
-    font-size: 11px;
+    bottom: 12px;
   }
 
   .nirvaan-ai-image {
-    width: 105px;
-    height: 105px;
+    width: 310px;
+    max-width: 78vw;
+    height: auto;
   }
 }
