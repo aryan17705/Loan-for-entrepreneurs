@@ -32,7 +32,7 @@ function SunIcon() {
     <svg
       aria-hidden="true"
       viewBox="0 0 24 24"
-      className="h-4 w-4"
+      className="h-7 w-7"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
@@ -55,7 +55,7 @@ function MoonIcon() {
     <svg
       aria-hidden="true"
       viewBox="0 0 24 24"
-      className="h-4 w-4"
+      className="h-7 w-7"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
@@ -71,7 +71,7 @@ function MenuIcon({ open }: { open: boolean }) {
       <svg
         aria-hidden="true"
         viewBox="0 0 24 24"
-        className="h-5 w-5"
+        className="h-8 w-8"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -86,7 +86,7 @@ function MenuIcon({ open }: { open: boolean }) {
     <svg
       aria-hidden="true"
       viewBox="0 0 24 24"
-      className="h-5 w-5"
+      className="h-8 w-8"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
@@ -180,7 +180,7 @@ export default function Header() {
                 ? "Switch to light theme"
                 : "Switch to dark theme"
             }
-            className="nirvaan-secondary min-h-[40px] w-[40px] p-0"
+            className="flex h-12 w-12 items-center justify-center border-0 bg-transparent p-0 text-[var(--nirvaan-text-strong)] transition-colors hover:text-[var(--nirvaan-blue)]"
           >
             {dark ? <SunIcon /> : <MoonIcon />}
           </button>
@@ -202,8 +202,7 @@ export default function Header() {
                 ? "Switch to light theme"
                 : "Switch to dark theme"
             }
-            className="nirvaan-secondary flex h-[40px] w-[40px] items-center justify-center p-0"
-          >
+            className="flex h-12 w-12 items-center justify-center border-0 bg-transparent p-0 text-[var(--nirvaan-text-strong)] transition-colors hover:text-[var(--nirvaan-blue)]"
             {dark ? <SunIcon /> : <MoonIcon />}
           </button>
 
@@ -214,7 +213,7 @@ export default function Header() {
               menuOpen ? "Close navigation" : "Open navigation"
             }
             aria-expanded={menuOpen}
-            className="nirvaan-secondary flex h-[40px] w-[40px] items-center justify-center p-0"
+            className="flex h-12 w-12 items-center justify-center border-0 bg-transparent p-0 text-[var(--nirvaan-text-strong)] transition-colors hover:text-[var(--nirvaan-blue)]"
           >
             <MenuIcon open={menuOpen} />
           </button>
