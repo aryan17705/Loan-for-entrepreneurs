@@ -10,7 +10,7 @@ const LINKS = [
   { href: "/#journey", label: "Partners" },
   { href: "/#about", label: "Resources" },
   { href: "/#journey", label: "How It Works" },
-  { href: "/#about", label: "About Us" },
+  { href: "/about", label: "About Us" },
 ];
 
 function NirvaanBrand() {
