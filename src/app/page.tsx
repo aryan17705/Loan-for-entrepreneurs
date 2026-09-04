@@ -254,7 +254,42 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+{/* -------------------------------------------------
+    CONTACT
+------------------------------------------------- */}
 
+<section
+  id="contact"
+  className="border-b border-[var(--nirvaan-border)]"
+>
+  <div className="mx-auto w-full max-w-[1440px] px-5 py-7 sm:px-8 lg:px-10">
+    <span className="text-[9px] font-bold tracking-[2px] text-[var(--nirvaan-blue)]">
+      CONTACT US
+    </span>
+
+    <div className="mt-3 flex flex-col gap-2 text-[11px] font-medium sm:flex-row sm:gap-8">
+      <span className="nirvaan-muted">
+        Phone no -{" "}
+        <a
+          href="tel:+919373542405"
+          className="nirvaan-text-strong hover:text-[var(--nirvaan-blue)]"
+        >
+          +91 9373542405
+        </a>
+      </span>
+
+      <span className="nirvaan-muted">
+        Email -{" "}
+        <a
+          href="mailto:nirvaanscheme@gmail.com"
+          className="nirvaan-text-strong hover:text-[var(--nirvaan-blue)]"
+        >
+          nirvaanscheme@gmail.com
+        </a>
+      </span>
+    </div>
+  </div>
+</section>
       {/* -------------------------------------------------
           HOMEPAGE END
       ------------------------------------------------- */}
