@@ -262,7 +262,7 @@ export default function HomePage() {
   id="contact"
   className="border-b border-[var(--nirvaan-border)]"
 >
-  <div className="mx-auto w-full max-w-[1440px] px-5 py-7 sm:px-8 lg:px-10">
+  <div className="mx-auto w-full max-w-[1440px] px-5 py-3 sm:px-8 lg:px-10">
     <span className="text-[9px] font-bold tracking-[2px] text-[var(--nirvaan-blue)]">
       CONTACT US
     </span>
