@@ -648,140 +648,101 @@ html[data-theme="dark"] .border-slate-200 {
   }
 }
 /* -------------------------------------------------------
+
+
+  mask-image:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.15) 15%,
+      rgba(0, 0, 0, 0.55) 32%,
+      #000 48%,
+      #000 100%
+    );
+}
+/* -------------------------------------------------------
    INDIA HERO IMAGE THEME SWITCH
 ------------------------------------------------------- */
 
-.nirvaan-map-light {
-  display: block;
+/* LIGHT THEME */
+html:not([data-theme="dark"]) .nirvaan-map-background .nirvaan-map-light {
+  display: block !important;
 }
 
-.nirvaan-map-dark {
-  display: none;
+html:not([data-theme="dark"]) .nirvaan-map-background .nirvaan-map-dark {
+  display: none !important;
 }
 
-html[data-theme="dark"] .nirvaan-map-light {
-  display: none;
+/* DARK THEME */
+html[data-theme="dark"] .nirvaan-map-background .nirvaan-map-light {
+  display: none !important;
 }
 
-html[data-theme="dark"] .nirvaan-map-dark {
-  display: block;
-}
-.nirvaan-map-light {
-  display: block;
+html[data-theme="dark"] .nirvaan-map-background .nirvaan-map-dark {
+  display: block !important;
 }
 
-.nirvaan-map-dark {
-  display: none;
-}
 
-html[data-theme="dark"] .nirvaan-map-light {
-  display: none;
-}
-
-html[data-theme="dark"] .nirvaan-map-dark {
-  display: block;
-}
 /* -------------------------------------------------------
-   INDIA HERO BACKGROUND
+   LIGHT THEME MAP BLENDING
 ------------------------------------------------------- */
 
-.nirvaan-map-background {
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  right: -5%;
-  width: min(68vw, 900px);
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.nirvaan-map-background img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-/* Light mode: artwork blends into white background */
-.nirvaan-map-background .nirvaan-map-light {
+html:not([data-theme="dark"]) .nirvaan-map-background .nirvaan-map-light {
   mix-blend-mode: multiply;
+  opacity: 1;
 
   -webkit-mask-image:
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(0, 0, 0, 0.15) 15%,
-      rgba(0, 0, 0, 0.55) 32%,
-      #000 48%,
-      #000 100%
+    radial-gradient(
+      ellipse 78% 92% at 58% 50%,
+      #000000 0%,
+      #000000 52%,
+      rgba(0, 0, 0, 0.92) 65%,
+      rgba(0, 0, 0, 0.55) 78%,
+      transparent 100%
     );
 
   mask-image:
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(0, 0, 0, 0.15) 15%,
-      rgba(0, 0, 0, 0.55) 32%,
-      #000 48%,
-      #000 100%
+    radial-gradient(
+      ellipse 78% 92% at 58% 50%,
+      #000000 0%,
+      #000000 52%,
+      rgba(0, 0, 0, 0.92) 65%,
+      rgba(0, 0, 0, 0.55) 78%,
+      transparent 100%
     );
 }
 
-/* Dark mode: black background disappears into page */
+
+/* -------------------------------------------------------
+   DARK THEME MAP BLENDING
+------------------------------------------------------- */
+
 html[data-theme="dark"] .nirvaan-map-background .nirvaan-map-dark {
   mix-blend-mode: screen;
+  opacity: 1;
+
+  filter:
+    brightness(0.88)
+    contrast(1.08)
+    saturate(1.05);
 
   -webkit-mask-image:
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(0, 0, 0, 0.15) 15%,
-      rgba(0, 0, 0, 0.55) 32%,
-      #000 48%,
-      #000 100%
+    radial-gradient(
+      ellipse 78% 92% at 58% 50%,
+      #000000 0%,
+      #000000 52%,
+      rgba(0, 0, 0, 0.92) 65%,
+      rgba(0, 0, 0, 0.55) 78%,
+      transparent 100%
     );
 
   mask-image:
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(0, 0, 0, 0.15) 15%,
-      rgba(0, 0, 0, 0.55) 32%,
-      #000 48%,
-      #000 100%
+    radial-gradient(
+      ellipse 78% 92% at 58% 50%,
+      #000000 0%,
+      #000000 52%,
+      rgba(0, 0, 0, 0.92) 65%,
+      rgba(0, 0, 0, 0.55) 78%,
+      transparent 100%
     );
-}
-
-/* Keep hero text above the artwork */
-.nirvaan-page section > .nirvaan-map-background + div {
-  position: relative;
-  z-index: 10;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .nirvaan-map-background {
-    top: 38%;
-    right: -32%;
-    width: 145%;
-    transform: translateY(-50%);
-  }
-
-  .nirvaan-map-background .nirvaan-map-light,
-  html[data-theme="dark"] .nirvaan-map-background .nirvaan-map-dark {
-    -webkit-mask-image:
-      radial-gradient(
-        ellipse 75% 70% at 55% 50%,
-        #000 45%,
-        rgba(0, 0, 0, 0.7) 68%,
-        transparent 100%
-      );
-
-    mask-image:
-      radial-gradient(
-        ellipse 75% 70% at 55% 50%,
-        #000 45%,
-        rgba(0, 0, 0, 0.7) 68%,
-        transparent 100%
-      );
-  }
 }
