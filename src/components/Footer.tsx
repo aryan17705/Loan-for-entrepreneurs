@@ -11,11 +11,6 @@ export default function Footer() {
             India&apos;s Official Loan Assistance Portal
           </span>
         </div>
-
-        <p className="nirvaan-muted max-w-[720px] text-[10px] font-medium leading-5 lg:text-right">
-          Government loan scheme discovery, financial assistance
-          guidance and application preparation.
-        </p>
       </div>
     </footer>
   );
