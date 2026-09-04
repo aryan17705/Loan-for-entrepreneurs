@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import NirvaanAI from "@/components/NirvaanAI";
 
 const JOURNEY_STEPS = [
   {
@@ -290,6 +291,7 @@ export default function HomePage() {
     </div>
   </div>
 </section>
+      <NirvaanAI />
     </div>
   );
 }
