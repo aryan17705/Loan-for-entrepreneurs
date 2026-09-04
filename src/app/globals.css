@@ -279,47 +279,68 @@ textarea,
   opacity: 1;
   filter: none;
 
+  /* Make the white background of the light artwork disappear */
+  mix-blend-mode: multiply;
+
+  /*
+    Fade the outer edges of the artwork into the hero.
+    The actual India/network artwork remains fully visible.
+  */
   -webkit-mask-image:
     radial-gradient(
-      ellipse 78% 88% at 58% 50%,
-      #000000 48%,
-      rgba(0, 0, 0, 0.92) 60%,
-      rgba(0, 0, 0, 0.55) 74%,
+      ellipse 82% 90% at 58% 50%,
+      #000 0%,
+      #000 55%,
+      rgba(0, 0, 0, 0.9) 68%,
+      rgba(0, 0, 0, 0.55) 80%,
       transparent 100%
     );
 
   mask-image:
     radial-gradient(
-      ellipse 78% 88% at 58% 50%,
-      #000000 48%,
-      rgba(0, 0, 0, 0.92) 60%,
-      rgba(0, 0, 0, 0.55) 74%,
+      ellipse 82% 90% at 58% 50%,
+      #000 0%,
+      #000 55%,
+      rgba(0, 0, 0, 0.9) 68%,
+      rgba(0, 0, 0, 0.55) 80%,
       transparent 100%
     );
 }
 
+/* DARK MODE */
 html[data-theme="dark"] .nirvaan-hero-image {
   opacity: 1;
 
+  /*
+    IMPORTANT:
+    The dark PNG has a black background.
+    SCREEN removes that black visually while preserving
+    the blue India/network artwork.
+  */
+  mix-blend-mode: screen;
+
   filter:
-    brightness(0.82)
-    contrast(1.08);
+    brightness(0.9)
+    contrast(1.05)
+    saturate(1.05);
 
   -webkit-mask-image:
     radial-gradient(
-      ellipse 78% 88% at 58% 50%,
-      #000000 48%,
-      rgba(0, 0, 0, 0.92) 60%,
-      rgba(0, 0, 0, 0.55) 74%,
+      ellipse 82% 90% at 58% 50%,
+      #000 0%,
+      #000 55%,
+      rgba(0, 0, 0, 0.9) 68%,
+      rgba(0, 0, 0, 0.55) 80%,
       transparent 100%
     );
 
   mask-image:
     radial-gradient(
-      ellipse 78% 88% at 58% 50%,
-      #000000 48%,
-      rgba(0, 0, 0, 0.92) 60%,
-      rgba(0, 0, 0, 0.55) 74%,
+      ellipse 82% 90% at 58% 50%,
+      #000 0%,
+      #000 55%,
+      rgba(0, 0, 0, 0.9) 68%,
+      rgba(0, 0, 0, 0.55) 80%,
       transparent 100%
     );
 }
