@@ -31,20 +31,7 @@ function NirvaanMark() {
   );
 }
 
-function FloatingLogo() {
-  return (
-    <span className="relative inline-flex items-center">
-      <span className="nirvaan-wordmark text-[13px] font-extrabold tracking-[0.08em] text-white">
-        NIRVAAN
-      </span>
 
-      <span
-        aria-hidden="true"
-        className="absolute -right-1 -top-1 h-1.5 w-1.5 bg-[#F47B20]"
-      />
-    </span>
-  );
-}
 
 export default function ChatAssistant() {
   const { profile, recommendation } = useJourney();
@@ -164,22 +151,19 @@ export default function ChatAssistant() {
         className="fixed bottom-5 right-5 z-[80] flex h-[62px] w-[62px] items-center justify-center rounded-full border-2 border-[#FFFFFF] bg-[#0E2A4A] shadow-[0_8px_28px_rgba(14,42,74,0.28)] transition-transform hover:scale-[1.04] focus:outline-none focus:ring-2 focus:ring-[#1769D2] focus:ring-offset-2 sm:bottom-7 sm:right-7"
       >
         {open ? (
-          <span
-            aria-hidden="true"
-            className="text-2xl font-light text-white"
-          >
-            ×
-          </span>
-        ) : (
-          <FloatingLogo />
-        )}
-
-        {!open ? (
-          <span
-            aria-hidden="true"
-            className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 bg-[#F47B20]"
-          />
-        ) : null}
+  <span
+    aria-hidden="true"
+    className="text-2xl font-light text-white"
+  >
+    ×
+  </span>
+) : (
+  <img
+    src="/nirvaan-ai-robot.png"
+    alt="NIRVAAN AI"
+    className="h-[58px] w-[58px] object-contain"
+  />
+)}
       </button>
 
       {/* =====================================================
