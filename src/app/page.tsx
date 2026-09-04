@@ -220,7 +220,7 @@ export default function HomePage() {
             {JOURNEY_STEPS.map((step) => (
               <article
                 key={step.number}
-                className="nirvaan-step flex min-h-[275px] flex-col p-6"
+                className="nirvaan-step flex min-h-[190px] flex-col p-5 sm:min-h-[220px] sm:p-6"
               >
                 <div className="flex items-start justify-between">
                   <span className="nirvaan-step-number text-[25px] font-extrabold tracking-[-0.5px]">
@@ -232,7 +232,7 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <div className="mt-12">
+                <div className="mt-7 sm:mt-10">
                   <h3 className="nirvaan-text-strong text-[17px] font-extrabold leading-6">
                     {step.title}
                   </h3>
