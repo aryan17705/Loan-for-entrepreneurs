@@ -268,7 +268,7 @@ textarea,
 }
 
 /* -------------------------------------------------------
-   HERO
+   INDIA HERO ARTWORK
 ------------------------------------------------------- */
 
 .nirvaan-hero-image {
@@ -279,31 +279,38 @@ textarea,
   opacity: 1;
   filter: none;
 
-  /* Make the white background of the light artwork disappear */
+  /*
+    The artwork sits naturally over the hero background.
+    White parts of the light PNG disappear into white.
+  */
   mix-blend-mode: multiply;
 
   /*
-    Fade the outer edges of the artwork into the hero.
-    The actual India/network artwork remains fully visible.
+    Strong fade on the LEFT side.
+    The centre/right artwork stays crisp.
   */
   -webkit-mask-image:
-    radial-gradient(
-      ellipse 82% 90% at 58% 50%,
-      #000 0%,
-      #000 55%,
-      rgba(0, 0, 0, 0.9) 68%,
-      rgba(0, 0, 0, 0.55) 80%,
-      transparent 100%
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 8%,
+      rgba(0, 0, 0, 0.18) 18%,
+      rgba(0, 0, 0, 0.55) 30%,
+      rgba(0, 0, 0, 0.88) 42%,
+      #000000 52%,
+      #000000 100%
     );
 
   mask-image:
-    radial-gradient(
-      ellipse 82% 90% at 58% 50%,
-      #000 0%,
-      #000 55%,
-      rgba(0, 0, 0, 0.9) 68%,
-      rgba(0, 0, 0, 0.55) 80%,
-      transparent 100%
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 8%,
+      rgba(0, 0, 0, 0.18) 18%,
+      rgba(0, 0, 0, 0.55) 30%,
+      rgba(0, 0, 0, 0.88) 42%,
+      #000000 52%,
+      #000000 100%
     );
 }
 
@@ -312,36 +319,38 @@ html[data-theme="dark"] .nirvaan-hero-image {
   opacity: 1;
 
   /*
-    IMPORTANT:
-    The dark PNG has a black background.
-    SCREEN removes that black visually while preserving
-    the blue India/network artwork.
+    Black in the dark PNG disappears into the black page.
+    Blue artwork remains visible.
   */
   mix-blend-mode: screen;
 
   filter:
-    brightness(0.9)
-    contrast(1.05)
-    saturate(1.05);
+    brightness(0.88)
+    contrast(1.08)
+    saturate(1.08);
 
   -webkit-mask-image:
-    radial-gradient(
-      ellipse 82% 90% at 58% 50%,
-      #000 0%,
-      #000 55%,
-      rgba(0, 0, 0, 0.9) 68%,
-      rgba(0, 0, 0, 0.55) 80%,
-      transparent 100%
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 8%,
+      rgba(0, 0, 0, 0.18) 18%,
+      rgba(0, 0, 0, 0.55) 30%,
+      rgba(0, 0, 0, 0.88) 42%,
+      #000000 52%,
+      #000000 100%
     );
 
   mask-image:
-    radial-gradient(
-      ellipse 82% 90% at 58% 50%,
-      #000 0%,
-      #000 55%,
-      rgba(0, 0, 0, 0.9) 68%,
-      rgba(0, 0, 0, 0.55) 80%,
-      transparent 100%
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 8%,
+      rgba(0, 0, 0, 0.18) 18%,
+      rgba(0, 0, 0, 0.55) 30%,
+      rgba(0, 0, 0, 0.88) 42%,
+      #000000 52%,
+      #000000 100%
     );
 }
 
