@@ -294,14 +294,7 @@ export default function HomePage() {
           HOMEPAGE END
       ------------------------------------------------- */}
 
-      <section className="border-b border-[var(--nirvaan-border)] bg-[var(--nirvaan-bg)]">
-        <div className="mx-auto w-full max-w-[1440px] px-5 py-7 sm:px-8 lg:px-10">
-          <p className="nirvaan-muted text-[10px] font-medium leading-5">
-            NIRVAAN is an India&apos;s Official platform for
-            discovering government loan schemes, understanding
-            your financial support options.
-          </p>
-        </div>
+      
       </section>
     </div>
   );
