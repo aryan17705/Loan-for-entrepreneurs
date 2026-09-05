@@ -14,7 +14,7 @@ export default function AboutPage() {
             </p>
 
             <h1 className="text-4xl font-extrabold tracking-tight text-[#071a2b] sm:text-5xl lg:text-6xl">
-              India's Official{" "}
+              India&apos;s Official{" "}
               <span className="text-[#1769d2]">
                 Loan Assistance Platform
               </span>
