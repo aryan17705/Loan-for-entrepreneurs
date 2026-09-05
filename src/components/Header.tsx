@@ -6,9 +6,7 @@ import { useEffect, useState } from "react";
 
 const LINKS = [
   { href: "/", label: "Home" },
-  { href: "/#journey", label: "Schemes" },
-  { href: "/#journey", label: "Partners" },
-  { href: "/#about", label: "Resources" },
+  { href: "/partner-location", label: "Partner Location & Route" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/about", label: "About Us" },
 ];
@@ -136,6 +134,10 @@ export default function Header() {
       return pathname === "/";
     }
 
+    if (href === "/partner-location") {
+      return pathname === "/partner-location";
+    }
+
     if (href === "/how-it-works") {
       return pathname === "/how-it-works";
     }
@@ -192,13 +194,6 @@ export default function Header() {
           >
             {dark ? <SunIcon /> : <MoonIcon />}
           </button>
-
-          <Link
-            href="/wizard"
-            className="nirvaan-primary min-h-[40px] px-4 text-[11px]"
-          >
-            APPLICATION ASSISTANCE
-          </Link>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -243,14 +238,6 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
-
-              <Link
-                href="/wizard"
-                onClick={closeMenu}
-                className="nirvaan-primary mt-4 w-full text-[11px]"
-              >
-                APPLICATION ASSISTANCE
-              </Link>
             </nav>
           </div>
         </div>
