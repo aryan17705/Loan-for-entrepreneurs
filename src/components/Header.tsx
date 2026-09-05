@@ -9,7 +9,7 @@ const LINKS = [
   { href: "/#journey", label: "Schemes" },
   { href: "/#journey", label: "Partners" },
   { href: "/#about", label: "Resources" },
-  { href: "/#journey", label: "How It Works" },
+  { href: "/how-it-works", label: "How It Works" },
   { href: "/about", label: "About Us" },
 ];
 
@@ -134,6 +134,14 @@ export default function Header() {
   const isActive = (href: string) => {
     if (href === "/") {
       return pathname === "/";
+    }
+
+    if (href === "/how-it-works") {
+      return pathname === "/how-it-works";
+    }
+
+    if (href === "/about") {
+      return pathname === "/about";
     }
 
     return false;
