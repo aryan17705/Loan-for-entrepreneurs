@@ -158,10 +158,10 @@ export default function ChatAssistant() {
     ×
   </span>
 ) : (
-  <img
+<img
   src="/nirvaan-ai-robot.png"
   alt="NIRVAAN AI"
-  className="h-[58px] w-[58px] object-contain"
+  className="h-[58px] w-[58px] object-contain border-0 outline-none bg-transparent"
   onError={(e) => {
     e.currentTarget.style.display = "none";
   }}
