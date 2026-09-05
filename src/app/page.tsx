@@ -280,7 +280,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* -------------------------------------------------
+      
+                        {/* -------------------------------------------------
           FIVE STEP JOURNEY
       ------------------------------------------------- */}
 
@@ -288,7 +289,8 @@ export default function HomePage() {
         id="journey"
         className="border-b border-[var(--nirvaan-border)]"
       >
-        <div className="mx-auto w-full max-w-[1440px] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
+        <div className="mx-auto w-full max-w-[1100px] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
+          {/* Section Heading */}
           <div className="max-w-[760px]">
             <div className="mb-4 flex items-center gap-3">
               <span className="h-[2px] w-8 bg-[var(--nirvaan-orange)]" />
@@ -307,41 +309,51 @@ export default function HomePage() {
             </h2>
 
             <p className="nirvaan-muted mt-5 max-w-[700px] text-[13px] font-medium leading-6">
-              Your assistance journey follows a fixed sequence.
-              Each stage builds on the information completed in
-              the previous stage.
+              Your assistance journey follows a fixed sequence. Each stage
+              builds on the information completed in the previous stage.
             </p>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-            {JOURNEY_STEPS.map((step) => (
-              <article
-                key={step.number}
-                className="nirvaan-step flex min-h-[190px] flex-col p-5 sm:min-h-[220px] sm:p-6"
-              >
-                <div className="flex items-start justify-between">
-                  <span className="nirvaan-step-number text-[25px] font-extrabold tracking-[-0.5px]">
-                    {step.number}
-                  </span>
+          {/* Vertical Journey */}
+          <div className="relative mt-12">
+            {/* Connecting Line */}
+            <div className="absolute bottom-8 left-[24px] top-8 w-px bg-[var(--nirvaan-border)] sm:left-[30px]" />
 
-                  <span className="nirvaan-step-icon">
-                    {step.icon}
-                  </span>
-                </div>
+            <div className="space-y-5 sm:space-y-6">
+              {JOURNEY_STEPS.map((step) => (
+                <article
+                  key={step.number}
+                  className="relative flex items-stretch gap-4 sm:gap-6"
+                >
+                  {/* Number */}
+                  <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--nirvaan-blue)] bg-white sm:h-[60px] sm:w-[60px]">
+                    <span className="text-[17px] font-extrabold tracking-[-0.5px] text-[var(--nirvaan-blue)] sm:text-[20px]">
+                      {step.number}
+                    </span>
+                  </div>
 
-                <div className="mt-7 sm:mt-10">
-                  <h3 className="nirvaan-text-strong text-[17px] font-extrabold leading-6">
-                    {step.title}
-                  </h3>
+                  {/* Step Card */}
+                  <div className="nirvaan-step flex min-w-0 flex-1 items-start justify-between gap-4 p-5 sm:p-6">
+                    <div className="min-w-0">
+                      <h3 className="nirvaan-text-strong text-[16px] font-extrabold leading-6 sm:text-[18px]">
+                        {step.title}
+                      </h3>
 
-                  <p className="nirvaan-muted mt-4 text-[11px] font-medium leading-5">
-                    {step.description}
-                  </p>
-                </div>
-              </article>
-            ))}
+                      <p className="nirvaan-muted mt-3 max-w-[720px] text-[11px] font-medium leading-5 sm:text-[12px] sm:leading-6">
+                        {step.description}
+                      </p>
+                    </div>
+
+                    <span className="nirvaan-step-icon shrink-0">
+                      {step.icon}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
 
+          {/* Sequential Notice */}
           <div className="mt-8 border-l-2 border-[var(--nirvaan-orange)] bg-[var(--nirvaan-surface-2)] px-5 py-4">
             <p className="nirvaan-muted text-[11px] font-semibold leading-5">
               <span className="nirvaan-text-strong">
