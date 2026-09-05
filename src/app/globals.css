@@ -894,13 +894,13 @@ html[data-theme="dark"] .nirvaan-ai-image {
 /* MOBILE */
 @media (max-width: 640px) {
   .nirvaan-ai {
-    right: 6px;
-    bottom: 12px;
+    right: 4px;
+    bottom: 10px;
   }
 
   .nirvaan-ai-image {
-    width: 270px;
-    max-width: 72vw;
+    width: 210px;
+    max-width: 58vw;
     height: auto;
   }
 }
