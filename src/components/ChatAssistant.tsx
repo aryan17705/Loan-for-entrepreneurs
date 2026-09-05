@@ -148,25 +148,15 @@ export default function ChatAssistant() {
             : "Open NIRVAAN AI"
         }
         aria-expanded={open}
-        className="fixed bottom-5 right-5 z-[80] flex h-[62px] w-[62px] items-center justify-center rounded-full border-2 border-[#FFFFFF] bg-[#0E2A4A] shadow-[0_8px_28px_rgba(14,42,74,0.28)] transition-transform hover:scale-[1.04] focus:outline-none focus:ring-2 focus:ring-[#1769D2] focus:ring-offset-2 sm:bottom-7 sm:right-7"
-      >
+        className="fixed bottom-5 right-5 z-[80] h-[62px] w-[62px] bg-transparent border-0 p-0 shadow-none outline-none sm:bottom-7 sm:right-7"
         {open ? (
   <span
     aria-hidden="true"
-    className="text-2xl font-light text-white"
+    className="absolute inset-0 flex items-center justify-center bg-[#0E2A4A] text-2xl font-light text-white"
   >
     ×
   </span>
-) : (
-<img
-  src="/nirvaan-ai-robot.png"
-  alt="NIRVAAN AI"
-  className="h-[58px] w-[58px] object-contain border-0 outline-none bg-transparent"
-  onError={(e) => {
-    e.currentTarget.style.display = "none";
-  }}
-/>
-)}
+) : null}
       </button>
 
       {/* =====================================================
