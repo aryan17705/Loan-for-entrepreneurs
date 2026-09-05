@@ -127,6 +127,22 @@ function ArrowIcon() {
   );
 }
 
+function LocationIcon() {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      className="h-8 w-8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      aria-hidden="true"
+    >
+      <path d="M16 27s8-8.2 8-14a8 8 0 1 0-16 0c0 5.8 8 14 8 14Z" />
+      <circle cx="16" cy="13" r="2.5" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   return (
     <div className="nirvaan-page">
@@ -182,6 +198,69 @@ export default function HomePage() {
       </section>
 
       {/* -------------------------------------------------
+          PARTNER LOCATIONS & ROUTES
+      ------------------------------------------------- */}
+
+      <section className="border-b border-[var(--nirvaan-border)]">
+        <div className="mx-auto w-full max-w-[1440px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+          <div className="border border-[var(--nirvaan-border)] bg-[var(--nirvaan-surface-2)]">
+            <div className="grid grid-cols-1 items-center lg:grid-cols-[auto_1fr_auto]">
+              <div className="flex items-center gap-4 border-b border-[var(--nirvaan-border)] px-5 py-5 lg:border-b-0 lg:border-r lg:px-6">
+                <span className="text-[var(--nirvaan-blue)]">
+                  <LocationIcon />
+                </span>
+
+                <div>
+                  <p className="text-[9px] font-bold tracking-[2px] text-[var(--nirvaan-orange)]">
+                    FIND NEARBY SUPPORT
+                  </p>
+
+                  <h2 className="nirvaan-text-strong mt-1 text-[18px] font-extrabold leading-5 sm:text-[20px]">
+                    OUR PARTNERS&apos;
+                    <br className="sm:hidden" /> LOCATIONS &amp; ROUTES
+                  </h2>
+                </div>
+              </div>
+
+              <div className="px-5 py-5 lg:px-7">
+                <p className="nirvaan-text-strong text-[12px] font-bold leading-5 sm:text-[13px]">
+                  Find our partner institutions across India, explore nearby
+                  partners, and view routes.
+                </p>
+
+                <p className="nirvaan-muted mt-2 text-[10px] font-medium leading-5">
+                  Partner locations can be explored independently for
+                  information purposes.
+                </p>
+              </div>
+
+              <div className="px-5 pb-5 lg:px-6 lg:pb-0">
+                <Link
+                  href="/partner-location"
+                  className="nirvaan-primary w-full justify-center text-[10px] sm:w-auto"
+                >
+                  EXPLORE PARTNERS
+                  <span className="ml-3">
+                    <ArrowIcon />
+                  </span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="border-t border-[var(--nirvaan-border)] px-5 py-3 sm:px-6">
+              <p className="nirvaan-muted text-[9px] font-semibold leading-5">
+                <span className="nirvaan-text-strong">
+                  INFORMATION ONLY:
+                </span>{" "}
+                To proceed with loan assistance, you must complete the
+                required stages of the NIRVAAN journey.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* -------------------------------------------------
           FIVE STEP JOURNEY
       ------------------------------------------------- */}
 
@@ -189,7 +268,7 @@ export default function HomePage() {
         id="journey"
         className="border-b border-[var(--nirvaan-border)]"
       >
-        <div className="mx-auto w-full max-w-[1100px] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
+        <div className="mx-auto w-full max-w-[1440px] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
           <div className="max-w-[760px]">
             <div className="mb-4 flex items-center gap-3">
               <span className="h-[2px] w-8 bg-[var(--nirvaan-orange)]" />
@@ -214,81 +293,45 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="relative mt-14">
-            <div className="absolute left-[23px] top-8 bottom-8 w-px bg-[var(--nirvaan-border)] sm:left-[31px]" />
+          <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+            {JOURNEY_STEPS.map((step) => (
+              <article
+                key={step.number}
+                className="nirvaan-step flex min-h-[190px] flex-col p-5 sm:min-h-[220px] sm:p-6"
+              >
+                <div className="flex items-start justify-between">
+                  <span className="nirvaan-step-number text-[25px] font-extrabold tracking-[-0.5px]">
+                    {step.number}
+                  </span>
 
-            <div className="space-y-7">
-              {JOURNEY_STEPS.map((step, index) => (
-                <article
-                  key={step.number}
-                  className="relative grid grid-cols-[48px_1fr] gap-5 sm:grid-cols-[64px_1fr] sm:gap-6"
-                >
-                  <div className="relative z-10 flex items-start justify-center">
-                    <div
-                      className={`flex h-12 w-12 items-center justify-center border-2 bg-white text-[12px] font-extrabold sm:h-16 sm:w-16 sm:text-[14px] ${
-                        index % 2 === 0
-                          ? "border-[var(--nirvaan-blue)] text-[var(--nirvaan-blue)]"
-                          : "border-[var(--nirvaan-orange)] text-[var(--nirvaan-orange)]"
-                      }`}
-                    >
-                      {step.number}
-                    </div>
-                  </div>
+                  <span className="nirvaan-step-icon">
+                    {step.icon}
+                  </span>
+                </div>
 
-                  <div
-                    className={`border bg-[var(--nirvaan-surface-2)] p-5 sm:p-7 ${
-                      index % 2 === 0
-                        ? "border-[var(--nirvaan-border)]"
-                        : "border-[var(--nirvaan-border)]"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-5">
-                      <div>
-                        <div
-                          className={`mb-2 text-[9px] font-bold tracking-[2px] ${
-                            index % 2 === 0
-                              ? "text-[var(--nirvaan-blue)]"
-                              : "text-[var(--nirvaan-orange)]"
-                          }`}
-                        >
-                          STEP {step.number}
-                        </div>
+                <div className="mt-7 sm:mt-10">
+                  <h3 className="nirvaan-text-strong text-[17px] font-extrabold leading-6">
+                    {step.title}
+                  </h3>
 
-                        <h3 className="nirvaan-text-strong text-[19px] font-extrabold leading-6 sm:text-[22px]">
-                          {step.title}
-                        </h3>
-                      </div>
-
-                      <span
-                        className={`shrink-0 ${
-                          index % 2 === 0
-                            ? "text-[var(--nirvaan-blue)]"
-                            : "text-[var(--nirvaan-orange)]"
-                        }`}
-                      >
-                        {step.icon}
-                      </span>
-                    </div>
-
-                    <p className="nirvaan-muted mt-4 max-w-[760px] text-[12px] font-medium leading-6 sm:text-[13px]">
-                      {step.description}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
+                  <p className="nirvaan-muted mt-4 text-[11px] font-medium leading-5">
+                    {step.description}
+                  </p>
+                </div>
+              </article>
+            ))}
           </div>
 
-          <div className="mt-10 border-l-2 border-[var(--nirvaan-orange)] bg-[var(--nirvaan-surface-2)] px-5 py-4">
+          <div className="mt-8 border-l-2 border-[var(--nirvaan-orange)] bg-[var(--nirvaan-surface-2)] px-5 py-4">
             <p className="nirvaan-muted text-[11px] font-semibold leading-5">
               <span className="nirvaan-text-strong">
                 The journey is sequential.
               </span>{" "}
-              Later stages become available only after the required
-              previous stage has been completed.{" "}
+              Later stages become available only after the required previous
+              stage has been completed.{" "}
               <span className="nirvaan-blue">
-                Partner locations and routes can be accessed independently
-                at any time.
+                Partner locations and routes can be accessed independently at
+                any time.
               </span>
             </p>
           </div>
@@ -335,4 +378,4 @@ export default function HomePage() {
       <NirvaanAI />
     </div>
   );
-}
+        }
