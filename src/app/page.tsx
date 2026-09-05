@@ -135,16 +135,13 @@ export default function HomePage() {
       ------------------------------------------------- */}
 
       <section className="relative overflow-hidden border-b border-[var(--nirvaan-border)]">
-  <div className="nirvaan-hero absolute inset-0 z-0" />
+        <div className="nirvaan-hero absolute inset-0 z-0" />
 
-  <div className="nirvaan-fabric-background" aria-hidden="true">
-  <img
-    src="/nirvaan-fabric.jpg"
-    alt=""
-  />
-</div>
-        
-  <div className="relative z-10 mx-auto grid min-h-[620px] w-full max-w-[1440px] grid-cols-1 items-center px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-16">
+        <div className="nirvaan-fabric-background" aria-hidden="true">
+          <img src="/nirvaan-fabric.jpg" alt="" />
+        </div>
+
+        <div className="relative z-10 mx-auto grid min-h-[620px] w-full max-w-[1440px] grid-cols-1 items-center px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-16">
           <div className="relative z-20 max-w-[640px]">
             <div className="mb-6 flex items-center gap-3">
               <span className="h-[2px] w-10 bg-[var(--nirvaan-orange)]" />
@@ -192,7 +189,7 @@ export default function HomePage() {
         id="journey"
         className="border-b border-[var(--nirvaan-border)]"
       >
-        <div className="mx-auto w-full max-w-[1440px] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
+        <div className="mx-auto w-full max-w-[1100px] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
           <div className="max-w-[760px]">
             <div className="mb-4 flex items-center gap-3">
               <span className="h-[2px] w-8 bg-[var(--nirvaan-orange)]" />
@@ -217,80 +214,124 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-            {JOURNEY_STEPS.map((step) => (
-              <article
-                key={step.number}
-                className="nirvaan-step flex min-h-[190px] flex-col p-5 sm:min-h-[220px] sm:p-6"
-              >
-                <div className="flex items-start justify-between">
-                  <span className="nirvaan-step-number text-[25px] font-extrabold tracking-[-0.5px]">
-                    {step.number}
-                  </span>
+          <div className="relative mt-14">
+            <div className="absolute left-[23px] top-8 bottom-8 w-px bg-[var(--nirvaan-border)] sm:left-[31px]" />
 
-                  <span className="nirvaan-step-icon">
-                    {step.icon}
-                  </span>
-                </div>
+            <div className="space-y-7">
+              {JOURNEY_STEPS.map((step, index) => (
+                <article
+                  key={step.number}
+                  className="relative grid grid-cols-[48px_1fr] gap-5 sm:grid-cols-[64px_1fr] sm:gap-6"
+                >
+                  <div className="relative z-10 flex items-start justify-center">
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center border-2 bg-white text-[12px] font-extrabold sm:h-16 sm:w-16 sm:text-[14px] ${
+                        index % 2 === 0
+                          ? "border-[var(--nirvaan-blue)] text-[var(--nirvaan-blue)]"
+                          : "border-[var(--nirvaan-orange)] text-[var(--nirvaan-orange)]"
+                      }`}
+                    >
+                      {step.number}
+                    </div>
+                  </div>
 
-                <div className="mt-7 sm:mt-10">
-                  <h3 className="nirvaan-text-strong text-[17px] font-extrabold leading-6">
-                    {step.title}
-                  </h3>
+                  <div
+                    className={`border bg-[var(--nirvaan-surface-2)] p-5 sm:p-7 ${
+                      index % 2 === 0
+                        ? "border-[var(--nirvaan-border)]"
+                        : "border-[var(--nirvaan-border)]"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-5">
+                      <div>
+                        <div
+                          className={`mb-2 text-[9px] font-bold tracking-[2px] ${
+                            index % 2 === 0
+                              ? "text-[var(--nirvaan-blue)]"
+                              : "text-[var(--nirvaan-orange)]"
+                          }`}
+                        >
+                          STEP {step.number}
+                        </div>
 
-                  <p className="nirvaan-muted mt-4 text-[11px] font-medium leading-5">
-                    {step.description}
-                  </p>
-                </div>
-              </article>
-            ))}
+                        <h3 className="nirvaan-text-strong text-[19px] font-extrabold leading-6 sm:text-[22px]">
+                          {step.title}
+                        </h3>
+                      </div>
+
+                      <span
+                        className={`shrink-0 ${
+                          index % 2 === 0
+                            ? "text-[var(--nirvaan-blue)]"
+                            : "text-[var(--nirvaan-orange)]"
+                        }`}
+                      >
+                        {step.icon}
+                      </span>
+                    </div>
+
+                    <p className="nirvaan-muted mt-4 max-w-[760px] text-[12px] font-medium leading-6 sm:text-[13px]">
+                      {step.description}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
 
-          <div className="mt-8 border-l-2 border-[var(--nirvaan-orange)] bg-[var(--nirvaan-surface-2)] px-5 py-4">
+          <div className="mt-10 border-l-2 border-[var(--nirvaan-orange)] bg-[var(--nirvaan-surface-2)] px-5 py-4">
             <p className="nirvaan-muted text-[11px] font-semibold leading-5">
-              The journey is sequential. Later stages become
-              available only after the required previous stage has
-              been completed.
+              <span className="nirvaan-text-strong">
+                The journey is sequential.
+              </span>{" "}
+              Later stages become available only after the required
+              previous stage has been completed.{" "}
+              <span className="nirvaan-blue">
+                Partner locations and routes can be accessed independently
+                at any time.
+              </span>
             </p>
           </div>
         </div>
       </section>
-{/* -------------------------------------------------
-    CONTACT
-------------------------------------------------- */}
 
-<section
-  id="contact"
-  className="border-b border-[var(--nirvaan-border)]"
->
-  <div className="mx-auto w-full max-w-[1440px] px-5 py-3 sm:px-8 lg:px-10">
-    <span className="text-[9px] font-bold tracking-[2px] text-[var(--nirvaan-blue)]">
-      CONTACT US
-    </span>
+      {/* -------------------------------------------------
+          CONTACT
+      ------------------------------------------------- */}
 
-    <div className="mt-3 flex flex-col gap-2 text-[11px] font-medium sm:flex-row sm:gap-8">
-      <span className="nirvaan-muted">
-        Phone no -{" "}
-        <a
-          href="tel:+919373542405"
-          className="nirvaan-text-strong hover:text-[var(--nirvaan-blue)]"
-        >
-          +91 9373542405
-        </a>
-      </span>
+      <section
+        id="contact"
+        className="border-b border-[var(--nirvaan-border)]"
+      >
+        <div className="mx-auto w-full max-w-[1440px] px-5 py-3 sm:px-8 lg:px-10">
+          <span className="text-[9px] font-bold tracking-[2px] text-[var(--nirvaan-blue)]">
+            CONTACT US
+          </span>
 
-      <span className="nirvaan-muted">
-        Email -{" "}
-        <a
-          href="mailto:nirvaanscheme@gmail.com"
-          className="nirvaan-text-strong hover:text-[var(--nirvaan-blue)]"
-        >
-          nirvaanscheme@gmail.com
-        </a>
-      </span>
-    </div>
-  </div>
-</section>
+          <div className="mt-3 flex flex-col gap-2 text-[11px] font-medium sm:flex-row sm:gap-8">
+            <span className="nirvaan-muted">
+              Phone no -{" "}
+              <a
+                href="tel:+919373542405"
+                className="nirvaan-text-strong hover:text-[var(--nirvaan-blue)]"
+              >
+                +91 9373542405
+              </a>
+            </span>
+
+            <span className="nirvaan-muted">
+              Email -{" "}
+              <a
+                href="mailto:nirvaanscheme@gmail.com"
+                className="nirvaan-text-strong hover:text-[var(--nirvaan-blue)]"
+              >
+                nirvaanscheme@gmail.com
+              </a>
+            </span>
+          </div>
+        </div>
+      </section>
+
       <NirvaanAI />
     </div>
   );
