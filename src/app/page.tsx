@@ -176,10 +176,10 @@ export default function HomePage() {
             </h1>
 
             <p className="nirvaan-muted mt-7 max-w-[560px] text-[14px] font-medium leading-7 sm:text-[15px]">
-              Follow a structured assistance journey designed to
-              help you verify your information, understand your
-              eligibility, identify suitable loan schemes, plan
-              repayment and reach the appropriate partner.
+              Follow a structured assistance journey designed to help you
+              verify your information, understand your eligibility, identify
+              suitable loan schemes, plan repayment and reach the appropriate
+              partner.
             </p>
 
             <div className="mt-9">
@@ -196,7 +196,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-            {/* -------------------------------------------------
+
+      {/* -------------------------------------------------
           PARTNER LOCATIONS & ROUTES
       ------------------------------------------------- */}
 
@@ -252,8 +253,8 @@ export default function HomePage() {
               </div>
 
               {/* LOCATION PANEL */}
-              <div className="flex min-h-full flex-col items-center justify-center border-l border-[var(--nirvaan-border)] bg-[#eef6ff] px-2">
-                <div className="flex h-12 w-12 items-center justify-center border border-[var(--nirvaan-blue)] bg-white text-[var(--nirvaan-blue)] sm:h-16 sm:w-16">
+              <div className="flex min-h-full flex-col items-center justify-center border-l border-[var(--nirvaan-border)] bg-[var(--nirvaan-surface-2)] px-2">
+                <div className="flex h-12 w-12 items-center justify-center border border-[var(--nirvaan-blue)] bg-[var(--nirvaan-surface)] text-[var(--nirvaan-blue)] sm:h-16 sm:w-16">
                   <LocationIcon />
                 </div>
 
@@ -280,8 +281,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      
-                        {/* -------------------------------------------------
+      {/* -------------------------------------------------
           FIVE STEP JOURNEY
       ------------------------------------------------- */}
 
@@ -317,7 +317,7 @@ export default function HomePage() {
           {/* Vertical Journey */}
           <div className="relative mt-12">
             {/* Connecting Line */}
-            <div className="absolute bottom-8 left-[24px] top-8 w-px bg-[var(--nirvaan-border)] sm:left-[30px]" />
+            <div className="absolute bottom-8 left-[24px] top-8 w-px bg-[var(--nirvaan-blue)] opacity-30 sm:left-[30px]" />
 
             <div className="space-y-5 sm:space-y-6">
               {JOURNEY_STEPS.map((step) => (
@@ -326,7 +326,7 @@ export default function HomePage() {
                   className="relative flex items-stretch gap-4 sm:gap-6"
                 >
                   {/* Number */}
-                  <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--nirvaan-blue)] bg-white sm:h-[60px] sm:w-[60px]">
+                  <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--nirvaan-blue)] bg-[var(--nirvaan-surface)] sm:h-[60px] sm:w-[60px]">
                     <span className="text-[17px] font-extrabold tracking-[-0.5px] text-[var(--nirvaan-blue)] sm:text-[20px]">
                       {step.number}
                     </span>
@@ -410,4 +410,4 @@ export default function HomePage() {
       <NirvaanAI />
     </div>
   );
-        }
+}
