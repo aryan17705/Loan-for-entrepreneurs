@@ -31,8 +31,6 @@ function NirvaanMark() {
   );
 }
 
-
-
 export default function ChatAssistant() {
   const { profile, recommendation } = useJourney();
 
@@ -50,9 +48,7 @@ export default function ChatAssistant() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
 
-  const messagesEndRef = useRef<HTMLDivElement | null>(
-    null
-  );
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -148,15 +144,16 @@ export default function ChatAssistant() {
             : "Open NIRVAAN AI"
         }
         aria-expanded={open}
-        className="fixed bottom-5 right-5 z-[80] h-[62px] w-[62px] bg-transparent border-0 p-0 shadow-none outline-none sm:bottom-7 sm:right-7"
+        className="fixed bottom-5 right-5 z-[80] h-[62px] w-[62px] border-0 bg-transparent p-0 shadow-none outline-none sm:bottom-7 sm:right-7"
+      >
         {open ? (
-  <span
-    aria-hidden="true"
-    className="absolute inset-0 flex items-center justify-center bg-[#0E2A4A] text-2xl font-light text-white"
-  >
-    ×
-  </span>
-) : null}
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 flex items-center justify-center bg-[#0E2A4A] text-2xl font-light text-white"
+          >
+            ×
+          </span>
+        ) : null}
       </button>
 
       {/* =====================================================
@@ -297,4 +294,4 @@ export default function ChatAssistant() {
       ) : null}
     </>
   );
-}
+              }
