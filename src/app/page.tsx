@@ -198,67 +198,187 @@ export default function HomePage() {
       </section>
 
       {/* -------------------------------------------------
-          PARTNER LOCATIONS & ROUTES
-      ------------------------------------------------- */}
+    PARTNER LOCATIONS & ROUTES
+------------------------------------------------- */}
 
-      <section className="border-b border-[var(--nirvaan-border)]">
-        <div className="mx-auto w-full max-w-[1440px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
-          <div className="border border-[var(--nirvaan-border)] bg-[var(--nirvaan-surface-2)]">
-            <div className="grid grid-cols-1 items-center lg:grid-cols-[auto_1fr_auto]">
-              <div className="flex items-center gap-4 border-b border-[var(--nirvaan-border)] px-5 py-5 lg:border-b-0 lg:border-r lg:px-6">
-                <span className="text-[var(--nirvaan-blue)]">
-                  <LocationIcon />
-                </span>
+<section className="border-b border-[var(--nirvaan-border)]">
+  <div className="mx-auto w-full max-w-[1440px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+    <div className="relative overflow-hidden border border-[var(--nirvaan-border)] bg-[var(--nirvaan-surface-2)]">
+      <div className="grid min-h-[190px] grid-cols-1 items-center lg:grid-cols-[230px_1fr_auto]">
+        
+        {/* MAP AREA */}
+        <div className="relative flex min-h-[170px] items-center justify-center overflow-hidden border-b border-[var(--nirvaan-border)] lg:min-h-[190px] lg:border-b-0 lg:border-r">
+          <svg
+            viewBox="0 0 220 230"
+            className="h-[155px] w-[155px] sm:h-[170px] sm:w-[170px]"
+            fill="none"
+            aria-hidden="true"
+          >
+            {/* Stylized India map */}
+            <path
+              d="M91 16
+                L112 23
+                L119 39
+                L137 43
+                L143 58
+                L160 66
+                L157 82
+                L174 91
+                L166 106
+                L171 119
+                L158 129
+                L155 148
+                L143 157
+                L137 176
+                L126 188
+                L119 207
+                L108 216
+                L101 201
+                L92 191
+                L88 174
+                L77 161
+                L70 143
+                L58 134
+                L62 119
+                L50 108
+                L55 94
+                L45 82
+                L58 72
+                L56 58
+                L70 53
+                L72 38
+                L86 34
+                Z"
+              fill="rgba(23, 105, 210, 0.06)"
+              stroke="var(--nirvaan-blue)"
+              strokeWidth="1.4"
+            />
 
-                <div>
-                  <p className="text-[9px] font-bold tracking-[2px] text-[var(--nirvaan-orange)]">
-                    FIND NEARBY SUPPORT
-                  </p>
+            {/* Route */}
+            <path
+              d="M82 70 C112 83 130 103 118 126 C110 142 111 163 124 183"
+              stroke="var(--nirvaan-blue)"
+              strokeWidth="1.2"
+              strokeDasharray="4 4"
+              opacity="0.7"
+            />
 
-                  <h2 className="nirvaan-text-strong mt-1 text-[18px] font-extrabold leading-5 sm:text-[20px]">
-                    OUR PARTNERS&apos;
-                    <br className="sm:hidden" /> LOCATIONS &amp; ROUTES
-                  </h2>
-                </div>
-              </div>
+            {/* Location pins */}
+            <g transform="translate(82 70)">
+              <circle
+                cx="0"
+                cy="0"
+                r="7"
+                fill="white"
+                stroke="var(--nirvaan-blue)"
+                strokeWidth="2"
+              />
+              <circle
+                cx="0"
+                cy="0"
+                r="2.5"
+                fill="var(--nirvaan-blue)"
+              />
+            </g>
 
-              <div className="px-5 py-5 lg:px-7">
-                <p className="nirvaan-text-strong text-[12px] font-bold leading-5 sm:text-[13px]">
-                  Find our partner institutions across India, explore nearby
-                  partners, and view routes.
-                </p>
+            <g transform="translate(118 126)">
+              <circle
+                cx="0"
+                cy="0"
+                r="7"
+                fill="white"
+                stroke="var(--nirvaan-blue)"
+                strokeWidth="2"
+              />
+              <circle
+                cx="0"
+                cy="0"
+                r="2.5"
+                fill="var(--nirvaan-blue)"
+              />
+            </g>
 
-                <p className="nirvaan-muted mt-2 text-[10px] font-medium leading-5">
-                  Partner locations can be explored independently for
-                  information purposes.
-                </p>
-              </div>
+            <g transform="translate(124 183)">
+              <circle
+                cx="0"
+                cy="0"
+                r="7"
+                fill="white"
+                stroke="var(--nirvaan-orange)"
+                strokeWidth="2"
+              />
+              <circle
+                cx="0"
+                cy="0"
+                r="2.5"
+                fill="var(--nirvaan-orange)"
+              />
+            </g>
+          </svg>
+        </div>
 
-              <div className="px-5 pb-5 lg:px-6 lg:pb-0">
-                <Link
-                  href="/partner-location"
-                  className="nirvaan-primary w-full justify-center text-[10px] sm:w-auto"
-                >
-                  EXPLORE PARTNERS
-                  <span className="ml-3">
-                    <ArrowIcon />
-                  </span>
-                </Link>
-              </div>
-            </div>
+        {/* TITLE */}
+        <div className="px-6 py-7 sm:px-8 lg:px-9">
+          <p className="text-[9px] font-bold tracking-[2px] text-[var(--nirvaan-orange)]">
+            EXPLORE NEARBY SUPPORT
+          </p>
 
-            <div className="border-t border-[var(--nirvaan-border)] px-5 py-3 sm:px-6">
-              <p className="nirvaan-muted text-[9px] font-semibold leading-5">
-                <span className="nirvaan-text-strong">
-                  INFORMATION ONLY:
-                </span>{" "}
-                To proceed with loan assistance, you must complete the
-                required stages of the NIRVAAN journey.
-              </p>
-            </div>
+          <h2 className="nirvaan-text-strong mt-2 max-w-[420px] text-[22px] font-extrabold leading-[1.08] sm:text-[26px]">
+            OUR PARTNERS&apos;
+            <br />
+            <span className="nirvaan-blue">
+              LOCATIONS &amp; ROUTES
+            </span>
+          </h2>
+
+          <p className="nirvaan-muted mt-4 max-w-[560px] text-[12px] font-medium leading-6 sm:text-[13px]">
+            Find our partner institutions across India, explore nearby
+            partners, and view routes.
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+            <span className="nirvaan-muted text-[10px] font-semibold">
+              Partner institutions across India
+            </span>
+
+            <span className="nirvaan-muted text-[10px] font-semibold">
+              Explore nearby partners
+            </span>
+
+            <span className="nirvaan-muted text-[10px] font-semibold">
+              View routes
+            </span>
           </div>
         </div>
-      </section>
+
+        {/* CTA */}
+        <div className="px-6 pb-7 sm:px-8 lg:px-7 lg:pb-0">
+          <Link
+            href="/partner-location"
+            className="nirvaan-primary w-full justify-center text-[10px] sm:w-auto"
+          >
+            EXPLORE PARTNERS
+            <span className="ml-3">
+              <ArrowIcon />
+            </span>
+          </Link>
+        </div>
+      </div>
+
+      {/* INFORMATION NOTE */}
+      <div className="border-t border-[var(--nirvaan-border)] px-5 py-3 sm:px-6">
+        <p className="nirvaan-muted text-[9px] font-semibold leading-5">
+          <span className="text-[var(--nirvaan-orange)]">
+            INFORMATION ONLY:
+          </span>{" "}
+          Partner locations and routes can be explored independently. To
+          proceed with loan assistance, you must complete the required stages
+          of the NIRVAAN journey.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* -------------------------------------------------
           FIVE STEP JOURNEY
