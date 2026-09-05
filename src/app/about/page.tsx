@@ -255,20 +255,28 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Disclaimer */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
-          <p className="text-xs leading-6 text-[#5a6e85]">
-            <strong className="text-[#102a43]">Important Note:</strong>{" "}
-            NIRVAAN is intended to assist with scheme discovery, information,
-            and application preparation. Scheme availability, eligibility,
-            benefits, documentation, and final approval are determined by the
-            respective government authority. Users should verify the latest
-            information and complete applications through the appropriate
-            official government channels.
-          </p>
-        </div>
-      </section>
+      {/* Trust */}
+<section className="bg-white">
+  <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
+    <div className="border border-[#dce4ec] bg-[#f6f8fb] p-6 sm:p-8">
+      <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#1769d2]">
+        Government Backed
+      </p>
+
+      <h2 className="mt-3 text-2xl font-extrabold text-[#071a2b] sm:text-3xl">
+        A platform you can trust.
+      </h2>
+
+      <p className="mt-4 max-w-4xl text-sm leading-7 text-[#5a6e85] sm:text-base">
+        NIRVAAN is India&apos;s Official Loan Assistance Platform, backed by
+        the vision of making government financial assistance easier to discover
+        and access. Built with trust, transparency, and accessibility at its
+        core, NIRVAAN helps individuals find and understand financial support
+        opportunities available to them.
+      </p>
+    </div>
+  </div>
+</section>
     </main>
   );
 }
