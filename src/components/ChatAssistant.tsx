@@ -133,8 +133,9 @@ export default function ChatAssistant() {
   return (
     <>
       {/* =====================================================
-          FLOATING NIRVAAN AI BUTTON
+          INVISIBLE ROBOT FACE CHAT TRIGGER
           ===================================================== */}
+
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
@@ -144,30 +145,34 @@ export default function ChatAssistant() {
             : "Open NIRVAAN AI"
         }
         aria-expanded={open}
-        className="fixed bottom-5 right-5 z-[80] h-[62px] w-[62px] border-0 bg-transparent p-0 shadow-none outline-none sm:bottom-7 sm:right-7"
+        className="fixed bottom-[42px] right-[42px] z-[80] h-[105px] w-[105px] rounded-full border-0 bg-transparent p-0 outline-none shadow-none focus:outline-none"
       >
-        {open ? (
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 flex items-center justify-center bg-[#0E2A4A] text-2xl font-light text-white"
-          >
-            ×
-          </span>
-        ) : null}
+        <span className="sr-only">
+          {open
+            ? "Close NIRVAAN AI"
+            : "Open NIRVAAN AI"}
+        </span>
       </button>
+
 
       {/* =====================================================
           CHAT PANEL
           ===================================================== */}
+
       {open ? (
         <section
           aria-label="NIRVAAN AI Assistant"
           className="fixed bottom-[94px] right-5 z-[79] flex w-[calc(100vw-40px)] max-w-[390px] flex-col overflow-hidden border border-[#C9D5E1] bg-white shadow-[0_18px_55px_rgba(14,42,74,0.2)] sm:bottom-[101px] sm:right-7"
         >
+
           {/* Header */}
+
           <div className="flex items-center justify-between border-b border-[#28445F] bg-[#0E2A4A] px-5 py-4">
+
             <div>
+
               <div className="flex items-center gap-3">
+
                 <NirvaanMark />
 
                 <span className="h-4 w-px bg-[#627A92]" />
@@ -175,12 +180,15 @@ export default function ChatAssistant() {
                 <span className="text-sm font-extrabold text-white">
                   NIRVAAN AI
                 </span>
+
               </div>
 
               <p className="mt-1 text-[10px] font-medium text-[#B9CDE1]">
-                Scheme & loan assistance
+                Scheme &amp; loan assistance
               </p>
+
             </div>
+
 
             <button
               type="button"
@@ -190,12 +198,18 @@ export default function ChatAssistant() {
             >
               ×
             </button>
+
           </div>
 
+
           {/* Messages */}
+
           <div className="max-h-[390px] min-h-[260px] overflow-y-auto bg-[#F7F9FC] px-4 py-4 sm:px-5">
+
             <div className="space-y-4">
+
               {messages.map((message) => {
+
                 const isUser =
                   message.role === "user";
 
@@ -208,6 +222,7 @@ export default function ChatAssistant() {
                         : "justify-start"
                     }`}
                   >
+
                     <div
                       className={`max-w-[88%] border px-4 py-3 text-xs font-medium leading-5 ${
                         isUser
@@ -217,30 +232,42 @@ export default function ChatAssistant() {
                     >
                       {message.content}
                     </div>
+
                   </div>
                 );
               })}
 
+
               {sending ? (
                 <div className="flex justify-start">
+
                   <div className="border border-[#D4DEE8] bg-white px-4 py-3 text-xs font-semibold text-[#64748B]">
                     NIRVAAN AI is thinking...
                   </div>
+
                 </div>
               ) : null}
 
+
               <div ref={messagesEndRef} />
+
             </div>
+
           </div>
 
+
           {/* Quick Actions */}
+
           <div className="border-t border-[#DCE4EC] bg-white px-4 py-3 sm:px-5">
+
             <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#718096]">
               Quick questions
             </p>
 
             <div className="grid gap-2">
+
               {QUICK_ACTIONS.map((action) => (
+
                 <button
                   key={action}
                   type="button"
@@ -250,12 +277,18 @@ export default function ChatAssistant() {
                 >
                   {action}
                 </button>
+
               ))}
+
             </div>
+
           </div>
 
+
           {/* Input */}
+
           <div className="border-t border-[#DCE4EC] bg-white p-4">
+
             <form
               onSubmit={(event) => {
                 event.preventDefault();
@@ -263,6 +296,7 @@ export default function ChatAssistant() {
               }}
               className="flex gap-2"
             >
+
               <input
                 type="text"
                 value={input}
@@ -282,16 +316,20 @@ export default function ChatAssistant() {
               >
                 Send
               </button>
+
             </form>
+
 
             <p className="mt-2 text-[9px] font-medium leading-4 text-[#8A98A8]">
               NIRVAAN AI provides general assistance.
               Final eligibility, approval and loan decisions
               are made by the relevant institutions.
             </p>
+
           </div>
+
         </section>
       ) : null}
     </>
   );
-              }
+}
